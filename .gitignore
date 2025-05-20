@@ -278,3 +278,7 @@ dkms.conf
 *.hex
 *.map
 *.srec
+
+# Eclipse
+*/.project
+*/.settings
