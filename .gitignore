@@ -281,4 +281,5 @@ dkms.conf
 
 # Eclipse
 */.project
-*/.settings
+*/.settings/
+
