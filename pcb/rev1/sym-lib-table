@@ -1,0 +1,4 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "lib mouser")(type "KiCad")(uri "C:/KICAD LIB PLEASE/SamacSys_Parts.kicad_sym")(options "")(descr ""))
+)
