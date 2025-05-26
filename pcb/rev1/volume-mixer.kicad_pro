@@ -37,9 +37,9 @@
         "other_text_thickness": 0.15,
         "other_text_upright": false,
         "pads": {
-          "drill": 1.9,
-          "height": 2.9,
-          "width": 2.9
+          "drill": 0.0,
+          "height": 0.95,
+          "width": 0.8
         },
         "silk_line_width": 0.1,
         "silk_text_italic": false,
@@ -51,13 +51,7 @@
           "min_clearance": 0.0
         }
       },
-      "diff_pair_dimensions": [
-        {
-          "gap": 0.0,
-          "via_gap": 0.0,
-          "width": 0.0
-        }
-      ],
+      "diff_pair_dimensions": [],
       "drc_exclusions": [],
       "meta": {
         "version": 2
@@ -107,6 +101,7 @@
         "solder_mask_bridge": "error",
         "starved_thermal": "error",
         "text_height": "warning",
+        "text_on_edge_cuts": "error",
         "text_thickness": "warning",
         "through_hole_pad_without_hole": "error",
         "too_many_vias": "error",
@@ -185,19 +180,7 @@
           "td_width_to_size_filter_ratio": 0.9
         }
       ],
-      "track_widths": [
-        0.0,
-        0.127,
-        0.1778,
-        0.2032,
-        0.254,
-        0.381,
-        0.508,
-        0.635,
-        0.762,
-        0.889,
-        1.016
-      ],
+      "track_widths": [],
       "tuning_pattern_settings": {
         "diff_pair_defaults": {
           "corner_radius_percentage": 80,
@@ -224,12 +207,7 @@
           "spacing": 0.6
         }
       },
-      "via_dimensions": [
-        {
-          "diameter": 0.0,
-          "drill": 0.0
-        }
-      ],
+      "via_dimensions": [],
       "zones_allow_external_fillets": false
     },
     "ipc2581": {
@@ -469,10 +447,7 @@
   },
   "libraries": {
     "pinned_footprint_libs": [],
-    "pinned_symbol_libs": [
-      "A TYPE C",
-      "Please"
-    ]
+    "pinned_symbol_libs": []
   },
   "meta": {
     "filename": "volume-mixer.kicad_pro",
@@ -482,7 +457,7 @@
     "classes": [
       {
         "bus_width": 12,
-        "clearance": 0.1,
+        "clearance": 0.2,
         "diff_pair_gap": 0.25,
         "diff_pair_via_gap": 0.25,
         "diff_pair_width": 0.2,
@@ -499,13 +474,10 @@
         "wire_width": 6
       },
       {
-        "clearance": 1.0,
-        "line_style": 0,
-        "name": "Net_Isolé",
+        "name": "Capacitive",
         "pcb_color": "rgba(0, 0, 0, 0.000)",
         "priority": 0,
-        "schematic_color": "rgba(0, 0, 0, 0.000)",
-        "wire_width": 8
+        "schematic_color": "rgba(0, 0, 0, 0.000)"
       }
     ],
     "meta": {
@@ -513,52 +485,61 @@
     },
     "net_colors": null,
     "netclass_assignments": {
-      "Net-(R10-Pad1)": [
+      "/SliderSense0": [
         "Net_Isolé"
       ],
-      "Net-(R6-Pad1)": [
-        "Net_Isolé"
-      ],
-      "Net-(R7-Pad1)": [
-        "Net_Isolé"
-      ],
-      "Net-(R8-Pad1)": [
-        "Net_Isolé"
-      ],
-      "Net-(R9-Pad1)": [
-        "Net_Isolé"
-      ],
-      "SLIDER 0 mute ": [
-        "Net_Isolé"
-      ],
-      "SLIDER 4 mute ": [
+      "SLIDER_0_mute ": [
         "Net_Isolé"
       ]
     },
     "netclass_patterns": [
       {
-        "netclass": "Default",
-        "pattern": ""
+        "netclass": "Capacitive",
+        "pattern": "/SliderSense0"
       },
       {
-        "netclass": "Default",
-        "pattern": "SLIDER 0 mute "
+        "netclass": "Capacitive",
+        "pattern": "/SliderSense1"
       },
       {
-        "netclass": "Default",
-        "pattern": "SLIDER 1 mute "
+        "netclass": "Capacitive",
+        "pattern": "/SliderSense2"
       },
       {
-        "netclass": "Default",
-        "pattern": "SLIDER 2 mute "
+        "netclass": "Capacitive",
+        "pattern": "SLIDER_1_mute "
       },
       {
-        "netclass": "Default",
-        "pattern": "SLIDER 3 mute "
+        "netclass": "Capacitive",
+        "pattern": "SLIDER_0_mute "
       },
       {
-        "netclass": "Default",
-        "pattern": "SLIDER 4 mute "
+        "netclass": "Capacitive",
+        "pattern": "/CapSense0"
+      },
+      {
+        "netclass": "Capacitive",
+        "pattern": "SLIDER_2_mute "
+      },
+      {
+        "netclass": "Capacitive",
+        "pattern": "SLIDER_4_mute "
+      },
+      {
+        "netclass": "Capacitive",
+        "pattern": "SLIDER_3_mute "
+      },
+      {
+        "netclass": "Capacitive",
+        "pattern": "/CapSense1"
+      },
+      {
+        "netclass": "Capacitive",
+        "pattern": "/SliderSense4"
+      },
+      {
+        "netclass": "Capacitive",
+        "pattern": "/SliderSense5"
       }
     ]
   },

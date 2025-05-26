@@ -1,0 +1,8 @@
+(version 1)
+
+(rule Cap
+    (condition "A.hasNetclass('Capacitive')")
+    (constraint clearance (min 1mm))
+    (constraint track_width(min 0.127mm))
+    (constraint creepage(min 1mm))
+) 
