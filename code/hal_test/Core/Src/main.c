@@ -21,7 +21,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include <unistd.h>
+#include "hal/leds.hpp"
 
 /* USER CODE END Includes */
 
@@ -121,7 +121,7 @@ int main(void)
     /* USER CODE BEGIN 3 */
 
 	  HAL_UART_Transmit(&huart2, data, 15, 100);
-	  HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_13);
+	  debug_Toggle_Led();
 	  HAL_Delay(1000);
   }
   /* USER CODE END 3 */
