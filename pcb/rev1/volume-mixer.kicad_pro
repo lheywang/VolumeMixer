@@ -497,6 +497,7 @@
         "wire_width": 6
       },
       {
+        "clearance": 1.0,
         "name": "Capacitive",
         "pcb_color": "rgba(0, 0, 0, 0.000)",
         "priority": 0,
@@ -556,6 +557,10 @@
       {
         "netclass": "Capacitive",
         "pattern": "/SliderSense5"
+      },
+      {
+        "netclass": "Capacitive",
+        "pattern": "/SliderSense3"
       }
     ]
   },
