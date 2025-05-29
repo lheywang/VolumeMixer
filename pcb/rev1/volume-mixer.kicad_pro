@@ -469,7 +469,9 @@
     }
   },
   "libraries": {
-    "pinned_footprint_libs": [],
+    "pinned_footprint_libs": [
+      "A_Please"
+    ],
     "pinned_symbol_libs": []
   },
   "meta": {
@@ -521,34 +523,6 @@
       {
         "netclass": "Capacitive",
         "pattern": "/SliderSense2"
-      },
-      {
-        "netclass": "Capacitive",
-        "pattern": "SLIDER_1_mute "
-      },
-      {
-        "netclass": "Capacitive",
-        "pattern": "SLIDER_0_mute "
-      },
-      {
-        "netclass": "Capacitive",
-        "pattern": "/CapSense0"
-      },
-      {
-        "netclass": "Capacitive",
-        "pattern": "SLIDER_2_mute "
-      },
-      {
-        "netclass": "Capacitive",
-        "pattern": "SLIDER_4_mute "
-      },
-      {
-        "netclass": "Capacitive",
-        "pattern": "SLIDER_3_mute "
-      },
-      {
-        "netclass": "Capacitive",
-        "pattern": "/CapSense1"
       },
       {
         "netclass": "Capacitive",
