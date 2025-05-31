@@ -24,6 +24,7 @@
 #include "parser/commands.h"
 
 // STD
+#include <stdlib.h>
 #include <stddef.h>
 #include <string.h>
 
@@ -42,12 +43,11 @@ int parser(char *buf, struct CMD *const command)
 
     // Create a working buffer
     uint8_t work[16] = {0};
-    uint8_t ref[16] = {0};
 
     // Search for "START;" token.
     memset((void *)work, 0x00, 16);
     memcpy((void *)work, (void *)buf, (size_t)6);
-    *ref = (uint8_t *)"START;";
+    char *ref = "START;";
     if (strcmp((char *)work, (char *)ref) != 0)
     {
         return -10; // START token not found
@@ -55,15 +55,15 @@ int parser(char *buf, struct CMD *const command)
 
     // Search for the command name
     memset((void *)work, 0x00, 16);
-    memcpy((void *)work, (void *)buf[6], (size_t)6);
-    uint8_t refcmd[7][6] = {
-        {(uint8_t *)"SHUTD;"},
-        {(uint8_t *)"RESET;"},
-        {(uint8_t *)"DCONF;"},
-        {(uint8_t *)"CONNC;"},
-        {(uint8_t *)"ASYNC;"},
-        {(uint8_t *)"UICON;"},
-        {(uint8_t *)"SLPOS;"},
+    memcpy((void *)work, (void *)&buf[6], (size_t)6);
+    char *refcmd[] = {
+        "SHUTD;",
+        "RESET;",
+        "DCONF;",
+        "CONNC;",
+        "ASYNC;",
+        "UICON;",
+        "SLPOS;",
     };
     uint32_t cmd_id = -1;
     for (uint8_t k = 0; k < 7; k++)
@@ -102,34 +102,41 @@ int parser(char *buf, struct CMD *const command)
 
     // Fetch the payload lenght and the data by itself
     memset((void *)work, 0x00, 16);
-    memcpy((void *)work, (void *)buf[12], (size_t)4);
-    if (work[3] != ";")
+    memcpy((void *)work, (void *)&buf[12], (size_t)4);
+    if (work[3] != ';')
     {
         return -12; // Malformed command
     }
     work[3] = '\0';
-    command->len = atoi(work);
-    memcpy((void *)command->payload, (void *)buf[16], (size_t)command->len);
+    command->len = atoi((char *)work);
+    memcpy((void *)command->payload, (void *)&buf[16], (size_t)command->len);
 
-    // Check the CRC32 of the whole message
+    // Fetch the CRC32 of the whole message
     memset((void *)work, 0x00, 16);
-    memcpy((void *)work, (void *)buf[16 + command->len + 1], (size_t)5);
-    if (work[4] != ";")
+    memcpy((void *)work, (void *)&buf[16 + command->len + 1], (size_t)5);
+    if (work[4] != ';')
     {
         return -12; // Malformed command
     }
     work[3] = '\0';
-    uint32_t crc = atoi(work);
+    uint32_t readCRC = atoi((char *)work);
 
-    // TODO Get the CRC32 of the payload up to now (another buf ??)
-    // Compare CRC32
+    // Calculate CRC for the whole received message
+    uint8_t crc_buf[1024] = {0};
+    memcpy((void *)crc_buf, (void *)buf, (size_t)(16 + command->len + 1));
+    uint32_t calcCRC = HAL_CRC_Calculate(&CrcHandle, (uint32_t *)crc_buf, (((16 + command->len + 1) * sizeof(uint8_t)) / sizeof(uint32_t)));
+
+    // Compare CRC
+    if (calcCRC != readCRC)
+    {
+        return -13; // Invalid CRC.
+    }
 
     // Search for "END" token.
     memset((void *)work, 0x00, 16);
-    memset((void *)ref, 0x00, 16);
-    memcpy((void *)work, (void *)buf[21 + command->len + 1], (size_t)3);
-    *ref = (uint8_t *)"END";
-    if (strcmp((char *)work, (char *)ref) != 0)
+    memcpy((void *)work, (void *)&buf[21 + command->len + 1], (size_t)3);
+    char *ref2 = "END";
+    if (strcmp((char *)work, (char *)ref2) != 0)
     {
         return -14; // END token not found
     }

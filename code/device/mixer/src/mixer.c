@@ -61,7 +61,7 @@ int mixer()
         int len = sizeof(buf);
 
         // parse commands
-        parser(buf, &actual);
+        // parser(buf);
         break;
     }
 
