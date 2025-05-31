@@ -19,3 +19,5 @@ The layout is the following :
 | 80-91 px   | BLANK          |                                                               |
 | 92-121 px  | App Icon       | 30 x 30 px icon (image treatement is done on the host device) |
 | 122-128 px | BLANK          |                                                               |
+
+[Font source](https://lexus2k.github.io/ssd1306/ssd1306__fonts_8c_source.html)

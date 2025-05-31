@@ -18,6 +18,82 @@
  * -----------------------------------------------------------------
  */
 
+// Other headers
+#include "parser/commands.h"
+
+// STD
+#include <stdint.h>
+
+/* -----------------------------------------------------------------
+ * ENUMS
+ * -----------------------------------------------------------------
+ */
+enum COMMAND_TYPE
+{
+    // System management
+    SHUTD,
+    RESET,
+
+    // Connect requirement
+    CONNC,
+
+    // Usual commands
+    ASYNC,
+    UICON,
+    SLPOS,
+    DCONF,
+
+};
+
+enum COMMAND_DIR
+{
+    RX,
+    TX
+};
+
+enum COMMAND_RES
+{
+    OK,
+    NACK
+};
+
+/* -----------------------------------------------------------------
+ * UNIONS
+ * -----------------------------------------------------------------
+ */
+/**
+ * Using an union enable memory space saving, since all members are
+ * stored into a single base address.
+ *
+ * This is even more easier since we're able to handle a single command
+ * at a time.
+ */
+struct CMD
+{
+    enum COMMAND_TYPE type;
+    enum COMMAND_DIR direction;
+    enum COMMAND_RES result;
+
+    union
+    {
+        // Async command
+        struct CMD_ASYNC_RX ASYNC_RX;
+        struct CMD_ASYNC_TX ASYNC_TX;
+
+        // UICON
+        struct CMD_UICON_RX UICON_RX;
+
+        // SLPOS
+        struct CMD_SLPOS_TX SLPOS_TX;
+
+        // DCONF
+        struct CMD_DCONF_RX DCONF_RX;
+    };
+
+    uint32_t len;
+    uint8_t payload[1000];
+};
+
 /* -----------------------------------------------------------------
  * PARSER
  * -----------------------------------------------------------------
@@ -47,14 +123,15 @@
  *          considered as invalid.
  *
  * @param   buf     (char *)    The buffer that store the command buffer.
- * @param   len     (int )      The length in byte of the buffer.
  * @param   command (int *)     A pointer to the storage of the command. Return the value.
  *
  * @return  int
  * @retval   0 :    Command sucessfully parsed.
- * @retval  -1 :    Unknown command name.
- * @retval  -2 :    Invalid CRC32.
- * @retval  -3 :    END token not found.
- * @retval  -4 :    Command too long.
+ * @retval  -1 :    Invalid pointer passed
+ * @retval -10 :    START token not found
+ * @retval -11 :    Unknown command name.
+ * @retval -12 :    Malformed command.
+ * @retval -13 :    Invalid CRC32.
+ * @retval -14 :    END token not found.
  */
-int parser(char *buf, const int len, int const *command);
+int parser(char *buf, struct CMD *const command);

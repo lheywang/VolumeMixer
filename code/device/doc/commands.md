@@ -189,7 +189,7 @@ It take some data in input :
     ],
     "gain" : "1.09",
     "offset": "0.012",
-    "device": "TEST01",
+    "device": "2025118H1D9",
 }
 ```
 
