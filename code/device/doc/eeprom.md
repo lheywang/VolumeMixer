@@ -62,17 +62,26 @@ This data is stored on page 0, with the following placement :
 ### Address reference
 
 This data refer to the EEPROM addresses used to store each image. Each line refer to an HASH (HASH of the APP Name) and an ADDRESS on 12 bits.
+This is stored on 2 pages (2 and 3).
 
-| Byte  | Variable | Description           |
-| ----- | -------- | --------------------- |
-| 0-3   | IMG1     | HASH:ADDR for image 1 |
-| 4-7   | IMG2     | HASH:ADDR for image 2 |
-| 8-11  | IMG3     | HASH:ADDR for image 3 |
-| 12-15 | IMG4     | HASH:ADDR for image 4 |
-| 16-19 | IMG5     | HASH:ADDR for image 5 |
-| 20-23 | IMG6     | HASH:ADDR for image 6 |
-| 24-27 | IMG7     | HASH:ADDR for image 7 |
-| 28-31 | IMG8     | HASH:ADDR for image 8 |
+| Byte  | Variable | Description                    |
+| ----- | -------- | ------------------------------ |
+| 0-3   | IMG1     | HASH:ADDR for image 1          |
+| 4-7   | IMG2     | HASH:ADDR for image 2          |
+| 8-11  | IMG3     | HASH:ADDR for image 3          |
+| 12-15 | IMG4     | HASH:ADDR for image 4          |
+| 16-19 | IMG5     | HASH:ADDR for image 5          |
+| 20-23 | IMG6     | HASH:ADDR for image 6          |
+| 24-27 | IMG7     | HASH:ADDR for image 7          |
+| 28-31 | IMG8     | HASH:ADDR for image 8          |
+| 32-35 | IMG9     | HASH:ADDR for image 9          |
+| 36-39 | IMG10    | HASH:ADDR for image 10         |
+| 40-43 | IMG11    | HASH:ADDR for image 11         |
+| 44-47 | IMG12    | HASH:ADDR for image 12         |
+| 48-51 | IMG13    | HASH:ADDR for image 13         |
+| 52-55 | IMG14    | HASH:ADDR for image 14         |
+| 56-59 | IMG15    | HASH:ADDR for image 15         |
+| 60-63 | CHKSM    | CRC32 for the addresses config |
 
 ### Images
 
@@ -80,6 +89,8 @@ Then, we found images, splitted on four pages each.
 Images are written randomly on the EEPROM address space to get a near constant wear levelling of the cells. Thus, addresses are always multiple
 of 128 (size of an image).
 First image start on byte 64, then 192, then 320...
+
+There is about 63 possibles icons on the EEPROM, but only 15 are used, leaving 75% of the chip for wear levelling usage.
 
 ---
 
