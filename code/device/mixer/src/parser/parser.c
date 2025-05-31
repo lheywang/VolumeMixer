@@ -22,11 +22,19 @@
 
 // locals libs
 #include "parser/commands.h"
+#include "main.h"
 
 // STD
 #include <stdlib.h>
 #include <stddef.h>
 #include <string.h>
+
+/* -----------------------------------------------------------------
+ * EXTERN VARIABLES
+ * -----------------------------------------------------------------
+ */
+
+extern CRC_HandleTypeDef hcrc;
 
 /* -----------------------------------------------------------------
  * FUNCTIONS
@@ -124,7 +132,7 @@ int parser(char *buf, struct CMD *const command)
     // Calculate CRC for the whole received message
     uint8_t crc_buf[1024] = {0};
     memcpy((void *)crc_buf, (void *)buf, (size_t)(16 + command->len + 1));
-    uint32_t calcCRC = HAL_CRC_Calculate(&CrcHandle, (uint32_t *)crc_buf, (((16 + command->len + 1) * sizeof(uint8_t)) / sizeof(uint32_t)));
+    uint32_t calcCRC = HAL_CRC_Calculate(&hcrc, (uint32_t *)crc_buf, (((16 + command->len + 1) * sizeof(uint8_t)) / sizeof(uint32_t)));
 
     // Compare CRC
     if (calcCRC != readCRC)

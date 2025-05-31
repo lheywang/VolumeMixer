@@ -57,8 +57,8 @@ int mixer()
     case WAIT_FOR_COMMAND:
     {
         // Command received, lets's continue !
-        char *buf = "TEST";
-        int len = sizeof(buf);
+        // char *buf = "TEST";
+        // int len = sizeof(buf);
 
         // parse commands
         // parser(buf);
