@@ -33,7 +33,7 @@ enum COMMAND_TYPE
 {
     // System management
     SHUTD,
-    RESET,
+    RST,
 
     // Connect requirement
     CONNC,
