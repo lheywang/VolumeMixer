@@ -7,6 +7,9 @@ There is five known commands :
 
 - SHUTD : Shut down the device. Require to press the button to start it.
 - RESET : Reset the device to the base state.
+- DCONF : Set calibration data of the device.
+- CONNC : Connect the host to the device (and thus, block any further connections).
+
 - ASYNC : Sync applications that are known to the device with the apps that are currently in use.
 - UICON : Update icons. This commands is generally sent after an ASYNC command that may returned wrong apps.
 - SLPOS : Return the position of the sliders, in %.
@@ -15,7 +18,9 @@ Internally, theses commands are executed as a state machine, that execute the co
 
 ## Protocol
 
-"START;<CMD_NAME>;<LEN>;<DATA>;<CRC32>;END"
+```
+START;<CMD_NAME>;<LEN>;<DATA>;<CRC32>;END
+```
 
 With :
 
@@ -37,11 +42,16 @@ For each command, this is the field you may find :
 
 ### SHUTD
 
-No data field (thus LEN = 0).
+This command does not send or receive additionnal data.
 
 ### RESET
 
-No data field (thus LEN = 0).
+This command does not send or receive additionnal data.
+
+### CONNC
+
+This command is used to start a communication with an host and a device.
+The device answer OOK or NOK depending on it's previous state.
 
 ### ASYNC
 
@@ -111,7 +121,7 @@ This command is used to uptate an icon (generally, this command follow an ASYNC 
 }
 ```
 
-The device respond with the same header, and data as OK to acknowledge the data, or not.
+The device respond with the same header, and data as OOK to acknowledge the data, or not (NOK).
 
 ### SLPOS
 
@@ -146,3 +156,41 @@ of the command, but the device respond with the following data structure :
 ```
 
 For each slider, there's two field : n and nM. n refer to the slider, and it's value to the value of the volume (in %). nM refer to a boolean, which is mute or not.
+
+### DCONF
+
+This command configure the device. It shall not be run continuously by the host (but once at the manufacturing step).
+
+It take some data in input :
+
+```javascript
+{
+    "cal" : [
+        {
+            "1OFF"  : "+0.082",
+            "1G"    : "1.01"
+        },
+                {
+            "2OFF"  : "+0.029",
+            "2G"    : "1.09"
+        },
+                {
+            "3OFF"  : "+0.050",
+            "3G"    : "1.00"
+        },
+                {
+            "4OFF"  : "+0.000",
+            "4G"    : "1.12"
+        },
+                {
+            "5OFF"  : "-0.012",
+            "5G"    : "0.98"
+        }
+    ],
+    "gain" : "1.09",
+    "offset": "0.012",
+    "device": "TEST01",
+}
+```
+
+The device respond with an OOK or NOK.
