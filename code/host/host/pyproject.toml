@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "host"
+version = "0.1.0"
+description = ""
+authors = ["lheywang <leonard.heywang@proton.me>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.13"
+pycaw = "^20240210"
+pulsectl = "^24.12.0"
+pillow = "^11.2.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
