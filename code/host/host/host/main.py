@@ -7,7 +7,8 @@
 # ==============================================================================
 
 # Add selective import for Windows / Linux agnostic code
-import pulsectl
+# import pulsectl
+from pycaw.pycaw import AudioUtilities
 
 
 def main():
@@ -25,7 +26,15 @@ def main():
 
     # This works fine for now !
     # To do : Add a small abstraction class !
+    return
+
+
+def main2():
+    sessions = AudioUtilities.GetAllSessions()
+    for session in sessions:
+        print(session.Process)
+    return
 
 
 if __name__ == "__main__":
-    main()
+    main2()
