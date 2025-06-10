@@ -1,9 +1,5 @@
-images: svg
+images: 
+	@cd builder/ && poetry run python builder/main.py
 	@echo "=============================================="
-	@echo " Converted all images !"
+	@echo " Converted all images to .bin format !"
 	@echo "=============================================="
-
-svg:
-	MYDIR=icons_raw/
-	ls $(MYDIR)/*
-	@echo $^
