@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "builder"
+version = "0.1.0"
+description = ""
+authors = ["lheywang <leonard.heywang@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+pillow = "^11.2.1"
+cairosvg = "^2.8.2"
+tqdm = "^4.67.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
