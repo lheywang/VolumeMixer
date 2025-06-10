@@ -115,7 +115,7 @@ This command is used to uptate an icon (generally, this command follow an ASYNC 
     "icon" : {
         "slider"    : "1",
         "app"       : "world-of-tank.exe",
-        "icon"      : "IMGBEGINxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxIMGEND!",
+        "icon"      : "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
         "store"     : true
     }
 }
