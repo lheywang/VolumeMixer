@@ -62,13 +62,7 @@ class AudioController:
         match (self.OS):
             case "linux":
                 with pulsectl.Pulse() as pulse:
-                    for sink in pulse.sink_list():
-                        print(sink)
-
-                    volumes = [0.25, 0.75]
-
                     for index, sink in enumerate(pulse.sink_input_list()):
-
                         self.sources.append(
                             AudioSource(
                                 name=sink.name,
