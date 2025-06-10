@@ -7,7 +7,7 @@
 # ==============================================================================
 
 # Add selective import for Windows / Linux agnostic code
-# import pulsectl
+import pulsectl
 from pycaw.pycaw import AudioUtilities
 
 
