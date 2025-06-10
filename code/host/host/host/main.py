@@ -6,8 +6,15 @@
 #
 # ==============================================================================
 
-from audio.audio import AudioController
+from audio import AudioController
+from dev import MixerDevice
 
 if __name__ == "__main__":
+    # First, initialize the pure software part
     controller = AudioController()
     print(controller.sources)
+
+    # Then, seek for the device and connect to it
+    device = MixerDevice()
+
+    # Todo : Add global algorithm !
