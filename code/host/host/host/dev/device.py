@@ -7,6 +7,9 @@
 #
 # ==============================================================================
 
+# Importing modules
+import zlib
+
 
 class MixerDevice:
     def __init__(self) -> None:

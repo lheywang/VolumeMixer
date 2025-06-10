@@ -98,7 +98,7 @@ def main():
 
         # Save image to file
         name = f"{config[icon]}".lower()
-        with open(f"icons/{name}.bin", "wb+") as f:
+        with open(f"../host/icons/{name}.bin", "wb+") as f:
             f.write(bytes(dat))
 
 

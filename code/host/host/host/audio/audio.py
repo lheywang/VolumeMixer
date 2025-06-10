@@ -10,6 +10,9 @@
 import sys
 from dataclasses import dataclass
 
+# Custom imports
+from . import AudioSource, AudioActiveApp, GetdB
+
 
 # Import the appropriate audio libraries based on the operating system
 match (sys.platform):
@@ -21,31 +24,13 @@ match (sys.platform):
 
     case "win32":
         # Windows
-        from pycaw.pycaw import AudioUtilities
+        from comtypes import CLSCTX_ALL
+        from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 
         OS = "windows"
 
     case _:
         raise NotImplementedError(f"Platform {sys.platform} is not supported.")
-
-
-# Define a dataclass for audio sources
-@dataclass
-class AudioSource:
-    name: str
-    id: int
-    volume: float
-    muted: bool
-    handle: None  # Depending on the OS, this could be a PulseAudio source or a Windows audio session handle
-
-
-# Define a dataclass for apps
-@dataclass
-class AudioActiveApp:
-    source: AudioSource
-    name: str
-    position: int
-    icon: bytes | None = None
 
 
 class AudioController:
@@ -106,6 +91,15 @@ class AudioController:
                             )
                         )
 
+                master = AudioUtilities.GetSpeakers()
+                interface = master.Activate(
+                    IAudioEndpointVolume._iid_, CLSCTX_ALL, None
+                )
+                volume = interface.QueryInterface(IAudioEndpointVolume)
+                self.master.volume = volume.GetMasterVolumeLevel()
+                self.master.muted = volume.GetMute()
+                volume.SetMasterVolumeLevel(-15, None)
+
         return 0
 
     def SetSourcesVolumes(self, volumes: list[float]) -> int:
@@ -143,10 +137,11 @@ class AudioController:
             - VoIP volume
         """
         # Todo : Handle speaker openning (include file copy ? )
-        # with open() as f:
-        #     data = f.read()
+        with open("icons/speaker.bin", "rb") as f:
+            data = f.read(128)
 
-        # self.active_apps.append(AudioActiveApp(self.master, "master", 0, data))
+        self.active_apps.append(AudioActiveApp(self.master, "master", 0, data))
+        print(self.active_apps)
 
         # Todo : Handle parsing of apps name, and then assign the right icons data
         # Todo : Assign app place
