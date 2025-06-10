@@ -278,3 +278,6 @@ dkms.conf
 *.hex
 *.map
 *.srec
+
+# Images built files
+*.bin
