@@ -109,10 +109,13 @@ def GetMatchingAudioSource(
     for index, exe in enumerate(executables):
         for app in apps.keys():
             if app in exe.name:
-                executables.remove(exe)
+                if executables:
+                    executables.remove(exe)
 
     # Check for the "any" tag
     if not ret:
+
+        # If the keyword "any" is present :
         if "any" in apps.keys():
             if executables:
                 ret.append(
@@ -126,6 +129,11 @@ def GetMatchingAudioSource(
                 )  # Get all executables names --> All affected by the volume
                 ret.append("")
                 ret.append("blank.bin")
+
+        else:
+            ret.append([])  # Get all executables names --> All affected by the volume
+            ret.append("")
+            ret.append("blank.bin")
 
     # Read the bytes
     with open(f"icons/{ret[2]}", "rb") as f:
