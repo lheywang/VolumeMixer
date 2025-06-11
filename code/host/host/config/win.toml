@@ -1,0 +1,43 @@
+[1] # Browser
+firefox = "firefox.bin"
+chrome = "chrome.bin"
+opera = "opera.bin"
+brave = "brave.bin"
+edge = "edge.bin"
+explorer = "internetexplorer.bin"
+ecosia = "ecosia.bin"
+
+[2] # VoIP / Chat
+discord = "discord.bin"
+mewe = "mewe.bin"
+qik = "qik.bin"
+skype = "skype.bin"
+slack = "slack.bin"
+telegram = "telegram.bin"
+whatsapp = "whatsapp.bin"
+zoom = "zoom.bin"
+messenger = "messenger.bin"
+kik = "kik.bin"
+line = "lineapp.bin"
+wechat = "wechat.bin"
+teams = "teams.bin"
+
+[3] # Music
+qobuz = "qobuz.bin"
+tidal = "tidal.bin"
+deezer = "deezer.bin"
+spotify = "spotify.bin"
+audacity = "audacity.bin"
+beats = "beats.bin"
+applemusic = "appleMusic.bin"
+soundcloud = "soundcloud.bin"
+youtube_music = "youtubemusic.bin"
+amazonmusic = "amazonLuna.bin" # Closest match for Amazon Music
+bandcamp = "bandcamp.bin"
+vlc = "vlc.bin"
+
+[4]  # Games
+netflix = "netflix.bin"
+obs = "obs.bin"
+shadow = "shadow.bin" 
+any = "" # The "any" key to exist enable any unknown app to be registered as games

@@ -23,7 +23,7 @@ class AudioSource:
 # Define a dataclass for apps
 @dataclass
 class AudioActiveApp:
-    source: AudioSource
+    source: AudioSource | list[AudioSource]
     name: str
     position: int
     icon: bytes | None = None

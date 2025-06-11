@@ -8,10 +8,11 @@
 
 # Import necessary libraries
 import sys
-from dataclasses import dataclass
+import os
+import tomllib
 
 # Custom imports
-from . import AudioSource, AudioActiveApp, GetdB
+from . import AudioSource, AudioActiveApp, GetdB, GetMatchingAudioSource
 
 
 # Import the appropriate audio libraries based on the operating system
@@ -75,7 +76,7 @@ class AudioController:
                     if session.Process is not None:
                         self.sources.append(
                             AudioSource(
-                                name=session.Process.name(),
+                                name=session.Process.name().lower(),
                                 id=index + 1,
                                 volume=(
                                     (
@@ -87,7 +88,7 @@ class AudioController:
                                     / 2
                                 ),
                                 muted=session.SimpleAudioVolume.GetMute(),
-                                handle=session,
+                                handle=session,  # This is the handle to the session
                             )
                         )
 
@@ -124,8 +125,8 @@ class AudioController:
 
         Windows :
             - Master volume
-            - Firefox volume
             - VoIP volume
+            - Firefox volume
             - Music app
             - Game app --> In reality, any unknown app will be assigned to the game app
 
@@ -136,12 +137,32 @@ class AudioController:
             - Music app
             - VoIP volume
         """
-        # Todo : Handle speaker openning (include file copy ? )
-        with open("icons/speaker.bin", "rb") as f:
-            data = f.read(128)
+        # First, load config files
+        match (self.OS):
+            case "linux":
+                with open("config/linux.toml", "rb") as f:
+                    config = tomllib.load(f)
 
+            case "windows":
+                with open("config/win.toml", "rb") as f:
+                    config = tomllib.load(f)
+
+        # Reading base icon data
+        with open("icons/speaker.bin", "rb") as f:
+            data = f.read()
+
+        # ensure the list is clean
+        self.active_apps.clear()
+
+        # Append the base handle, for the master volume
         self.active_apps.append(AudioActiveApp(self.master, "master", 0, data))
-        print(self.active_apps)
+
+        # Adding audio sources
+        self.active_apps.append(GetMatchingAudioSource(self.sources, config["1"], 1))
+        self.active_apps.append(GetMatchingAudioSource(self.sources, config["2"], 2))
+        self.active_apps.append(GetMatchingAudioSource(self.sources, config["3"], 3))
+        self.active_apps.append(GetMatchingAudioSource(self.sources, config["4"], 4))
 
         # Todo : Handle parsing of apps name, and then assign the right icons data
         # Todo : Assign app place
+        # Todo : Handle doublons (discord !) --> For volume change, we check all of the names and then change all of the volumes
