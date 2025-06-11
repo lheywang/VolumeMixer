@@ -10,12 +10,22 @@
 # Importing modules
 from dataclasses import dataclass
 
+# Local import
+from . import FormatCommand
+
+# Constants
+START = "START"
+END = "END"
+
 
 # Defining classes
 @dataclass
 class CmdASYNC:
     res: bool
     apps: dict
+
+    def cmd(self):
+        return f"{START};ASYNC;"
 
 
 @dataclass
@@ -39,3 +49,21 @@ class CmdDCONF:
     offset: float
     gain: float
     device: str
+
+
+@dataclass
+class CmdSHUTD:
+    def cmd(self):
+        return FormatCommand(f"SHUTD;000;;")
+
+
+@dataclass
+class CmdRESET:
+    def cmd(self):
+        return f"{START};ASYNC;"
+
+
+@dataclass
+class CMDCONNC:
+    def cmd(self):
+        return f"{START};ASYNC;"

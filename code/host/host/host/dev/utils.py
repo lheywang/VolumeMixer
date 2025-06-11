@@ -7,9 +7,25 @@
 # ==============================================================================
 
 # Import modules
+from . import (
+    CmdASYNC,
+    CmdDCONF,
+    CmdSLPOS,
+    CmdUICON,
+    CmdRESET,
+    CmdSHUTD,
+    CMDCONNC,
+)
 
 
 # Define functions
 def IsDeviceAvailable(buf: bytes):
     return True
     return False
+
+
+def FormatCommand(buf):
+    # Todo :  Add START and END token
+    # Todo :  Compute CRC32
+    # Todo :  Return formatted string
+    pass

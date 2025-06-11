@@ -15,6 +15,7 @@ import serial.tools.list_ports
 
 # Local imports
 from . import IsDeviceAvailable
+from . import CmdASYNC, CmdDCONF, CmdSLPOS, CmdUICON, CMDCONNC, CmdRESET, CmdSHUTD
 
 # Defining some constants
 BAUD = 921600
@@ -79,3 +80,6 @@ class MixerDevice:
 
         self.port = None
         return -1
+
+    def SendCommand(self, cmd):
+        pass
