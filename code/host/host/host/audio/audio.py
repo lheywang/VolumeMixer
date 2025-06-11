@@ -155,13 +155,12 @@ class AudioController:
         self.active_apps.clear()
 
         # Append the base handle, for the master volume
-        self.active_apps.append(AudioActiveApp(self.master, "master", 0, data))
+        self.active_apps.append(AudioActiveApp([self.master], "master", 0, data))
 
         # Adding audio sources
-        self.active_apps.append(GetMatchingAudioSource(self.sources, config["1"], 1))
-        self.active_apps.append(GetMatchingAudioSource(self.sources, config["2"], 2))
-        self.active_apps.append(GetMatchingAudioSource(self.sources, config["3"], 3))
-        self.active_apps.append(GetMatchingAudioSource(self.sources, config["4"], 4))
+        for k in range(4):
+            self.sources, tmp = GetMatchingAudioSource(self.sources, config, (k + 1))
+            self.active_apps.append(tmp)
 
         # Todo : Handle parsing of apps name, and then assign the right icons data
         # Todo : Assign app place

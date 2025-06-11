@@ -21,11 +21,12 @@ kik = "kik.bin"
 line = "lineapp.bin"
 wechat = "wechat.bin"
 teams = "teams.bin"
+steam = "steam.bin" # Remove the executable from the list because it is not a VoIP app, but a game platform (that can do VoIP)
 
 [3] # Music
+deezer = "deezer.bin"
 qobuz = "qobuz.bin"
 tidal = "tidal.bin"
-deezer = "deezer.bin"
 spotify = "spotify.bin"
 audacity = "audacity.bin"
 beats = "beats.bin"
