@@ -6,12 +6,16 @@
 #
 # ==============================================================================
 
+# ------------------------------------------------------------------------------
 # Import necessary libraries
+# ------------------------------------------------------------------------------
 import sys
 import os
 import tomllib
 
+# ------------------------------------------------------------------------------
 # Custom imports
+# ------------------------------------------------------------------------------
 from . import AudioSource, AudioActiveApp, GetdB, GetVal, GetMatchingAudioSource
 
 
@@ -32,6 +36,10 @@ match (sys.platform):
 
     case _:
         raise NotImplementedError(f"Platform {sys.platform} is not supported.")
+
+# ------------------------------------------------------------------------------
+# Defining classes
+# ------------------------------------------------------------------------------
 
 
 class AudioController:
@@ -112,11 +120,14 @@ class AudioController:
                             )
                         )
 
+                # Fetch interface
                 master = AudioUtilities.GetSpeakers()
                 interface = master.Activate(
                     IAudioEndpointVolume._iid_, CLSCTX_ALL, None
                 )
                 volume = interface.QueryInterface(IAudioEndpointVolume)
+
+                # Fetch some settings
                 self.master.volume = GetVal(volume.GetMasterVolumeLevel())
                 self.master.muted = volume.GetMute()
                 self.master.handle = volume

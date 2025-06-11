@@ -7,23 +7,31 @@
 #
 # ==============================================================================
 
+# ------------------------------------------------------------------------------
 # Importing modules
+# ------------------------------------------------------------------------------
 import serial
 import serial.serialutil
 import serial.tools.list_ports
 
+# ------------------------------------------------------------------------------
 # Local imports
+# ------------------------------------------------------------------------------
 from . import IsDeviceAvailable
 from . import CmdASYNC, CmdDCONF, CmdSLPOS, CmdUICON, CmdCONNC, CmdRESET, CmdSHUTD
 
+# ------------------------------------------------------------------------------
 # Defining some constants
+# ------------------------------------------------------------------------------
 BAUD = 921600
 BYTE = serial.EIGHTBITS
 PARITY = serial.PARITY_NONE
 STOP = serial.STOPBITS_ONE
 
 
+# ------------------------------------------------------------------------------
 # Defining the base class
+# ------------------------------------------------------------------------------
 class MixerDevice:
     def __init__(self) -> None:
         # First, choose the COM port and set the launch guard to prevent any IO on unconfigured com port.
@@ -78,8 +86,18 @@ class MixerDevice:
             else:
                 continue
 
-        self.port = None
         return -1
 
-    def SendCommand(self):
-        pass
+    def SendCommand(
+        self,
+        cmd: CmdASYNC | CmdDCONF | CmdSLPOS | CmdUICON | CmdCONNC | CmdRESET | CmdSHUTD,
+    ):
+        # First, get the command :
+        buf = cmd.cmd()
+
+        # Then, write the command on the serial port
+        if self.IsDeviceOpenned:
+            self.port.write(buf.encode())
+
+            # Then read the response
+            tmp = self.port.read_until()  # wait for \n to be seen
