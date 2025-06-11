@@ -12,7 +12,6 @@ from dev import MixerDevice
 if __name__ == "__main__":
     # First, initialize the pure software part
     controller = AudioController()
-    print(controller.active_apps)
 
     # Then, seek for the device and connect to it
     device = MixerDevice()

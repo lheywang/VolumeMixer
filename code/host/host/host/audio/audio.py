@@ -19,14 +19,14 @@ from . import AudioSource, AudioActiveApp, GetdB, GetVal, GetMatchingAudioSource
 match (sys.platform):
     case "linux":
         # Linux
-        import pulsectl
+        import pulsectl  # type: ignore
 
         OS = "linux"
 
     case "win32":
         # Windows
-        from comtypes import CLSCTX_ALL
-        from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
+        from comtypes import CLSCTX_ALL  # type: ignore
+        from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume  # type: ignore
 
         OS = "windows"
 
@@ -57,7 +57,7 @@ class AudioController:
         # Fetch the audio sources available on the system and assign them to the sources list
         self.FetchSources()
         self.AssignShownApps()
-        self.SetSourcesVolumes([1.0, 1.0, 1.0, 1.0, 1.0])
+        self.SetSourcesVolumes([0.66, 1.0, 1.0, 1.0, 1.0])
 
     def FetchSources(self):
         """
@@ -145,7 +145,7 @@ class AudioController:
         for index, app in enumerate(self.active_apps):
 
             # Then iterate over handles
-            for sources in app.source:
+            for sources in app.source:  # type: ignore
                 match (self.OS):
                     case "linux":
                         sources.volume = volumes[index]
