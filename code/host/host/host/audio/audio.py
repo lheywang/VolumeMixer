@@ -57,7 +57,7 @@ class AudioController:
         # Fetch the audio sources available on the system and assign them to the sources list
         self.FetchSources()
         self.AssignShownApps()
-        self.SetSourcesVolumes([0.55, 1.0, 1.0, 1.0, 1.0])
+        self.SetSourcesVolumes([1.0, 1.0, 1.0, 1.0, 1.0])
 
     def FetchSources(self):
         """
@@ -69,13 +69,26 @@ class AudioController:
                     for index, sink in enumerate(pulse.sink_input_list()):
                         self.sources.append(
                             AudioSource(
-                                name=sink.name,
+                                name=sink.name.lower(),
                                 id=index + 1,
                                 volume=sink.volume.value_flat,
                                 muted=sink.mute,
                                 handle=sink,  # This is the PulseAudio sink object
                             )
                         )
+
+                    # Get all of the current outputs
+                    outputs = pulse.sink_list()
+                    actual = pulse.server_info().default_sink_name
+
+                    # Fetch the actual member of the list
+                    for index, out in enumerate(outputs):
+                        if out.name == actual:
+                            output = out
+
+                    self.master.volume = output.volume.value_flat
+                    self.master.muted = output.mute
+                    self.master.handle = output
 
             case "windows":
                 sessions = AudioUtilities.GetAllSessions()
@@ -123,6 +136,11 @@ class AudioController:
         if len(volumes) != self.channel_number:
             return -1
 
+        # Ensure all volumes are on the same maximal level
+        for index, vol in enumerate(volumes):
+            if vol > 1.0:
+                volumes[index] = 1.0
+
         # # Iterate over apps
         for index, app in enumerate(self.active_apps):
 
@@ -130,7 +148,15 @@ class AudioController:
             for sources in app.source:
                 match (self.OS):
                     case "linux":
-                        pass
+                        sources.volume = volumes[index]
+                        with pulsectl.Pulse() as pulse:
+                            sources.handle.volume.volume_flat = volumes[index]
+                            pulse.volume_set(
+                                sources.handle,
+                                pulsectl.PulseVolumeInfo(
+                                    [volumes[index], volumes[index]]
+                                ),
+                            )
 
                     case "windows":
                         # Master volume
