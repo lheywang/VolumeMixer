@@ -32,6 +32,8 @@ STOP = serial.STOPBITS_ONE
 # ------------------------------------------------------------------------------
 # Defining the base class
 # ------------------------------------------------------------------------------
+
+
 class MixerDevice:
     def __init__(self) -> None:
         # First, choose the COM port and set the launch guard to prevent any IO on unconfigured com port.
