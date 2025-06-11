@@ -1,4 +1,5 @@
-from .device import MixerDevice
+from .utils import IsDeviceAvailable
+
 from .commands import (
     CmdASYNC,
     CmdDCONF,
@@ -6,7 +7,8 @@ from .commands import (
     CmdUICON,
     CmdRESET,
     CmdSHUTD,
-    CMDCONNC,
+    CmdCONNC,
 )
 
-from .utils import IsDeviceAvailable, FormatCommand
+
+from .device import MixerDevice

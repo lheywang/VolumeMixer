@@ -15,5 +15,6 @@ if __name__ == "__main__":
 
     # Then, seek for the device and connect to it
     device = MixerDevice()
+    print(device.SendCommand())
 
     # Todo : Add global algorithm !

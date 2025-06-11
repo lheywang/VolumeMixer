@@ -8,14 +8,13 @@
 # ==============================================================================
 
 # Importing modules
-import zlib
 import serial
 import serial.serialutil
 import serial.tools.list_ports
 
 # Local imports
 from . import IsDeviceAvailable
-from . import CmdASYNC, CmdDCONF, CmdSLPOS, CmdUICON, CMDCONNC, CmdRESET, CmdSHUTD
+from . import CmdASYNC, CmdDCONF, CmdSLPOS, CmdUICON, CmdCONNC, CmdRESET, CmdSHUTD
 
 # Defining some constants
 BAUD = 921600
@@ -27,11 +26,12 @@ STOP = serial.STOPBITS_ONE
 # Defining the base class
 class MixerDevice:
     def __init__(self) -> None:
-        # First, choose the COM port and set the launch guard to prevent any IO on unconfigured com port.rr
-        if self._SelectCOMPort() != 0:
-            print("No device available for now. Exiting...")
-            self.IsDeviceOpenned = False
-            return
+        # First, choose the COM port and set the launch guard to prevent any IO on unconfigured com port.
+        # Todo : Uncomment this for real working !
+        # if self._SelectCOMPort() != 0:
+        #     print("No device available for now. Exiting...")
+        #     self.IsDeviceOpenned = False
+        #     return
         self.IsDeviceOpenned = True
 
     def _SelectCOMPort(self):
@@ -81,5 +81,5 @@ class MixerDevice:
         self.port = None
         return -1
 
-    def SendCommand(self, cmd):
+    def SendCommand(self):
         pass
