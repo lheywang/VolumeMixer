@@ -21,7 +21,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "parser/parser.h"
+#include <stdio.h>
+#include <string.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -48,17 +50,20 @@ UART_HandleTypeDef huart2;
 
 PCD_HandleTypeDef hpcd_USB_FS;
 
+CRC_HandleTypeDef hcrc;
+
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-static void MX_GPIO_Init(void);
-static void MX_USART2_UART_Init(void);
-static void MX_ADC1_Init(void);
-static void MX_TSC_Init(void);
-static void MX_USB_PCD_Init(void);
+void MX_GPIO_Init(void);
+void MX_USART2_UART_Init(void);
+void MX_ADC1_Init(void);
+void MX_TSC_Init(void);
+void MX_USB_PCD_Init(void);
+void MX_CRC_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -101,7 +106,11 @@ int main(void)
   MX_ADC1_Init();
   MX_TSC_Init();
   MX_USB_PCD_Init();
+  MX_CRC_Init();
   /* USER CODE BEGIN 2 */
+
+  // struct CMD CMD_DATA;
+
 
   /* USER CODE END 2 */
 
@@ -110,20 +119,140 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
+	  ADC_ChannelConfTypeDef sConfig = {0}; // Structure to configure ADC channel
+	  int adc_value_ch0;
+	  int adc_value_ch1;
+	  char tx_buffer[128];
+
+	     /* --- Read ADC Channel 0 --- */
+	     sConfig.Channel = ADC_CHANNEL_1; // Select ADC Channel 0
+	     sConfig.Rank = ADC_REGULAR_RANK_1; // First conversion in sequence
+	     // Set sampling time; adjust based on your ADC clock and desired accuracy
+	     sConfig.SamplingTime = ADC_SAMPLETIME_19CYCLES_5;
+	     // Configure the selected channel
+	     if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+	     {
+	       Error_Handler();
+	     }
+
+	     // Start ADC conversion
+	     if (HAL_ADC_Start(&hadc1) != HAL_OK)
+	     {
+	       Error_Handler();
+	     }
+
+	     // Poll for conversion completion (blocking mode)
+	     // Timeout of HAL_MAX_DELAY means it will wait indefinitely
+	     if (HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY) == HAL_OK)
+	     {
+	       adc_value_ch0 = HAL_ADC_GetValue(&hadc1); // Get the converted value
+	     }
+	     else
+	     {
+	       Error_Handler(); // Handle ADC conversion error
+	     }
+
+	     // Stop ADC conversion after getting the value
+	     if (HAL_ADC_Stop(&hadc1) != HAL_OK)
+	     {
+	       Error_Handler();
+	     }
+
+	     /* --- Read ADC Channel 1 --- */
+	     sConfig.Channel = ADC_CHANNEL_2; // Select ADC Channel 1
+	     sConfig.Rank = ADC_REGULAR_RANK_2; // First conversion in sequence
+	     // Set sampling time; adjust based on your ADC clock and desired accuracy
+	     sConfig.SamplingTime = ADC_SAMPLETIME_19CYCLES_5;
+	     // Configure the selected channel
+	     if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+	     {
+	       Error_Handler();
+	     }
+
+	     HAL_Delay(100); // Add a small delay to avoid flooding the serial port
+
+	     // Start ADC conversion
+	     if (HAL_ADC_Start(&hadc1) != HAL_OK)
+	     {
+	       Error_Handler();
+	     }
+
+	     // Poll for conversion completion (blocking mode)
+	     if (HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY) == HAL_OK)
+	     {
+	       adc_value_ch1 = HAL_ADC_GetValue(&hadc1); // Get the converted value
+	     }
+	     else
+	     {
+	       Error_Handler(); // Handle ADC conversion error
+	     }
+
+	     // Stop ADC conversion after getting the value
+	     if (HAL_ADC_Stop(&hadc1) != HAL_OK)
+	     {
+	       Error_Handler();
+	     }
+
+	     /* --- Format and Transmit over UART --- */
+	     // Format the ADC values into a string
+	     // sprintf(buffer, "ADC0: %lu, ADC1: %lu\r\n", adc_value_ch0, adc_value_ch1);
+	     // Use %lu for unsigned long (uint32_t)
+	     int len = snprintf(tx_buffer, sizeof(tx_buffer), "ADC0: %lu, ADC1: %lu\r\n",
+	                        adc_value_ch0, adc_value_ch1);
+	     if (len < 0) {
+	         Error_Handler(); // Handle formatting error
+	     }
+
+	     // Transmit the formatted string over UART
+	     if (HAL_UART_Transmit(&huart2, (uint8_t*)tx_buffer, strlen(tx_buffer), HAL_MAX_DELAY) != HAL_OK)
+	     {
+	       Error_Handler(); // Handle UART transmission error
+	     }
+
+	     HAL_Delay(400); // Add a small delay to avoid flooding the serial port
+
+	  /*
+	  char Rx_data[1024] = {0}; // Buffer to store received byte
+	  char Tx_data[128] = {0};
+
+	// Wait for one byte to be received via UART in blocking mode
+	// HAL_UART_Receive(huart_handle, pData, Size, Timeout)
+	// Here, we wait indefinitely (HAL_MAX_DELAY) for 1 byte.
+	if (HAL_UART_Receive(&huart2, (uint8_t*)Rx_data, 25, HAL_MAX_DELAY) == HAL_OK)
+	{
+	  // If a byte is received successfully, transmit it back immediately
+	  // HAL_UART_Transmit(huart_handle, pData, Size, Timeout)
+	  // Transmit the received byte in blocking mode.
+	  if (HAL_UART_Transmit(&huart2, (uint8_t*)Rx_data, 25, HAL_MAX_DELAY) != HAL_OK)
+	  {
+		Error_Handler(); // Handle transmission error
+	  }
+
+	  // Toggle a pin
 	  HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_9);
 
-	  HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_8);
+	  // Start parsing (works fine), now need to add the logic behind the screen and everything else
+	  int val = parser(Rx_data, &CMD_DATA);
 
-	  HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_4);
-	  HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_5);
-	  HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_6);
-
-	  HAL_Delay(1000);
-
+	  if (val != 0)
+	  {
+		  snprintf(Tx_data, 128, "\nParser error : %d", val);
+		  if (HAL_UART_Transmit(&huart2, (uint8_t*)Tx_data, 32, HAL_MAX_DELAY) != HAL_OK)
+		  {
+			Error_Handler(); // Handle transmission error
+		  }
+	  }
+	}
+	else
+	{
+	  Error_Handler(); // Handle reception error
+	}
+	}*/
     /* USER CODE BEGIN 3 */
-  }
+
   /* USER CODE END 3 */
-}
+
+}}
 
 /**
   * @brief System Clock Configuration
@@ -178,7 +307,7 @@ void SystemClock_Config(void)
   * @param None
   * @retval None
   */
-static void MX_ADC1_Init(void)
+void MX_ADC1_Init(void)
 {
 
   /* USER CODE BEGIN ADC1_Init 0 */
@@ -235,7 +364,7 @@ static void MX_ADC1_Init(void)
   * @param None
   * @retval None
   */
-static void MX_TSC_Init(void)
+void MX_TSC_Init(void)
 {
 
   /* USER CODE BEGIN TSC_Init 0 */
@@ -278,7 +407,7 @@ static void MX_TSC_Init(void)
   * @param None
   * @retval None
   */
-static void MX_USART2_UART_Init(void)
+void MX_USART2_UART_Init(void)
 {
 
   /* USER CODE BEGIN USART2_Init 0 */
@@ -313,7 +442,7 @@ static void MX_USART2_UART_Init(void)
   * @param None
   * @retval None
   */
-static void MX_USB_PCD_Init(void)
+void MX_USB_PCD_Init(void)
 {
 
   /* USER CODE BEGIN USB_Init 0 */
@@ -344,7 +473,7 @@ static void MX_USB_PCD_Init(void)
   * @param None
   * @retval None
   */
-static void MX_GPIO_Init(void)
+void MX_GPIO_Init(void)
 {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
   /* USER CODE BEGIN MX_GPIO_Init_1 */
@@ -380,6 +509,14 @@ static void MX_GPIO_Init(void)
   /* USER CODE BEGIN MX_GPIO_Init_2 */
 
   /* USER CODE END MX_GPIO_Init_2 */
+}
+
+void MX_CRC_Init(void)
+{
+
+  hcrc.Instance = CRC;
+  HAL_CRC_Init(&hcrc);
+
 }
 
 /* USER CODE BEGIN 4 */
