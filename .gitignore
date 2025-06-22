@@ -281,3 +281,6 @@ dkms.conf
 
 # Images built files
 *.bin
+
+# Executabkes
+code/mixerlib/Tests/*
