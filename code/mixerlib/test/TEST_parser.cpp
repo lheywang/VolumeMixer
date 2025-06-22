@@ -1,14 +1,286 @@
 #include "gtest/gtest.h"
-#include "test.hpp"
+#include "parser/parser.h"
 
-TEST(BasicTest, PassingTest)
+/**
+ * ===============================================================
+ * FIRST : STRING FORMATION ERRORS
+ * ===============================================================
+ */
+
+TEST(Parser, InvalidBufferCheck)
 {
-	TrivialClass t;
-	EXPECT_TRUE(t.returnsTrue());
+	// Invalid buffer test
+	char *buf = 0;
+	struct CMD command;
+
+	int retval = parser(buf, &command);
+
+	ASSERT_EQ(retval, -1);
 }
 
-TEST(BasicTest, FailingTest)
+TEST(Parser, InvalidStructCheck)
 {
-	TrivialClass t;
-	EXPECT_TRUE(t.returnsFalse());
+	// Invalid struct test
+	char buf[1024] = "Hello World !";
+	struct CMD *command = 0;
+
+	int retval = parser(buf, command);
+
+	ASSERT_EQ(retval, -1);
 }
+
+
+TEST(Parser, TokenStartNotFound)
+{
+	// Invalid struct test
+	char buf[1024] = "YouWon'tFindStartGna";
+	struct CMD command;
+
+	int retval = parser(buf, &command);
+
+	ASSERT_EQ(retval, -10);
+}
+
+TEST(Parser, TokenCommandNotFound)
+{
+	// Invalid struct test
+	char buf[1024] = "START;GnaGnaGnaGnaGna";
+	struct CMD command;
+
+	int retval = parser(buf, &command);
+
+	ASSERT_EQ(retval, -11);
+	ASSERT_EQ(command.result, NACK);
+}
+
+TEST(Parser, TokenLengthNotFound)
+{
+	// Invalid struct test
+	char buf[1024] = "START;SHUTD;000:TUTUTUTUTUTUTUTUTTU";
+	struct CMD command;
+
+	int retval = parser(buf, &command);
+
+	ASSERT_EQ(retval, -12);
+}
+
+TEST(Parser, TokenCRCNotFound)
+{
+	// Invalid struct test
+	char buf[1024] = "START;SHUTD;000;;DEADBEEF:";
+	struct CMD command;
+
+	int retval = parser(buf, &command);
+
+	ASSERT_EQ(retval, -13);
+}
+
+TEST(Parser, TokenEndNotFound)
+{
+	// Invalid struct test
+	char buf[1024] = "START;SHUTD;000;;DEADBEEF;EMD";
+	struct CMD command;
+
+	int retval = parser(buf, &command);
+
+	ASSERT_EQ(retval, -15);
+}
+
+/**
+ * ===============================================================
+ * SECOND : COMMAND PARSING NAMES
+ * ===============================================================
+ */
+
+TEST(Parser, CommandSHUTDParsing)
+{
+	// Invalid struct test
+	char buf[1024] = "START;SHUTD;000;;DEADBEEF;END";
+	struct CMD command;
+
+	int retval = parser(buf, &command);
+
+	ASSERT_EQ(retval, 0);
+	ASSERT_EQ(command.type, SHUTD);
+	ASSERT_EQ(command.direction, RX);
+}
+
+TEST(Parser, CommandRINITParsing)
+{
+	// Invalid struct test
+	char buf[1024] = "START;RINIT;000;;DEADBEEF;END";
+	struct CMD command;
+
+	int retval = parser(buf, &command);
+
+	ASSERT_EQ(retval, 0);
+	ASSERT_EQ(command.type, RINIT);
+	ASSERT_EQ(command.direction, RX);
+}
+
+TEST(Parser, CommandCONNCParsing)
+{
+	// Invalid struct test
+	char buf[1024] = "START;CONNC;000;;DEADBEEF;END";
+	struct CMD command;
+
+	int retval = parser(buf, &command);
+
+	ASSERT_EQ(retval, 0);
+	ASSERT_EQ(command.type, CONNC);
+	ASSERT_EQ(command.direction, RX);
+}
+
+TEST(Parser, CommandASYNCParsing)
+{
+	// Invalid struct test
+	char buf[1024] = "START;ASYNC;000;;DEADBEEF;END";
+	struct CMD command;
+
+	int retval = parser(buf, &command);
+
+	ASSERT_EQ(retval, 0);
+	ASSERT_EQ(command.type, ASYNC);
+	ASSERT_EQ(command.direction, RX);
+}
+
+TEST(Parser, CommandUICONParsing)
+{
+	// Invalid struct test
+	char buf[1024] = "START;UICON;000;;DEADBEEF;END";
+	struct CMD command;
+
+	int retval = parser(buf, &command);
+
+	ASSERT_EQ(retval, 0);
+	ASSERT_EQ(command.type, UICON);
+	ASSERT_EQ(command.direction, RX);
+}
+
+TEST(Parser, CommandSLPOSParsing)
+{
+	// Invalid struct test
+	char buf[1024] = "START;SLPOS;000;;DEADBEEF;END";
+	struct CMD command;
+
+	int retval = parser(buf, &command);
+
+	ASSERT_EQ(retval, 0);
+	ASSERT_EQ(command.type, SLPOS);
+	ASSERT_EQ(command.direction, RX);
+}
+
+TEST(Parser, CommandDCONFParsing)
+{
+	// Invalid struct test
+	char buf[1024] = "START;DCONF;000;;DEADBEEF;END";
+	struct CMD command;
+
+	int retval = parser(buf, &command);
+
+	ASSERT_EQ(retval, 0);
+	ASSERT_EQ(command.type, DCONF);
+	ASSERT_EQ(command.direction, RX);
+}
+
+/**
+ * ===============================================================
+ * THIRD : Lenghts and PAYLOADS
+ * ===============================================================
+ */
+
+TEST(Parser, CommandLengthParsing000)
+{
+	// Invalid struct test
+	char buf[1024] = "START;DCONF;000;;DEADBEEF;END";
+	struct CMD command;
+
+	int retval = parser(buf, &command);
+
+	ASSERT_EQ(command.len, 0);
+
+	ASSERT_EQ(retval, 0);
+}
+
+TEST(Parser, CommandLengthParsing001)
+{
+	// Invalid struct test
+	char buf[1024] = "START;DCONF;001;A;DEADBEEF;END";
+	struct CMD command;
+
+	int retval = parser(buf, &command);
+
+	ASSERT_EQ(command.len, 1);
+	EXPECT_STREQ((char*)command.payload, "A");
+	ASSERT_EQ(retval, 0);
+}
+
+TEST(Parser, CommandLengthParsing001E)
+{
+	// Invalid struct test
+	char buf[1024] = "START;DCONF;001;;DEADBEEF;END";
+	struct CMD command;
+
+	int retval = parser(buf, &command);
+
+	ASSERT_EQ(command.len, 1);
+	ASSERT_EQ(retval, -13); // We can't differentiates errors past the LEN
+}
+
+TEST(Parser, CommandLengthParsing010)
+{
+	// Invalid struct test
+	char buf[1024] = "START;DCONF;010;AAAAAAAAAA;DEADBEEF;END";
+	struct CMD command;
+
+	int retval = parser(buf, &command);
+
+	ASSERT_EQ(command.len, 10);
+	EXPECT_STREQ((char*)command.payload, "AAAAAAAAAA");
+	ASSERT_EQ(retval, 0);
+}
+
+TEST(Parser, CommandLengthParsing100)
+{
+	// Invalid struct test
+	char buf[1024] = "START;DCONF;100;AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA;DEADBEEF;END";
+	struct CMD command;
+
+	int retval = parser(buf, &command);
+
+	ASSERT_EQ(command.len, 100);
+	EXPECT_STREQ((char*)command.payload, "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+	ASSERT_EQ(retval, 0);
+}
+
+TEST(Parser, CommandLengthParsing500)
+{
+	// Invalid struct test
+	char buf[1024] = "START;DCONF;500;AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA;DEADBEEF;END";
+	struct CMD command;
+
+	int retval = parser(buf, &command);
+
+	ASSERT_EQ(command.len, 500);
+	EXPECT_STREQ((char*)command.payload, "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+	ASSERT_EQ(retval, 0);
+}
+
+TEST(Parser, CommandLengthParsing995)
+{
+	// Invalid struct test
+	char buf[1025] = "START;DCONF;995;AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA;DEADBEEF;END";
+	struct CMD command;
+
+	int retval = parser(buf, &command);
+
+	ASSERT_EQ(command.len, 995);
+	EXPECT_STREQ((char*)command.payload, "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+	ASSERT_EQ(retval, 0);
+}
+
+/**
+ * ===============================================================
+ * FOURTH : ADD CRC32 Computing and testing
+ * ===============================================================
+ */

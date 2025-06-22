@@ -14,6 +14,10 @@
  */
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* -----------------------------------------------------------------
  * INCLUDING LIBS
  * -----------------------------------------------------------------
@@ -162,3 +166,7 @@ struct CMD_DCONF_RX
         double gain;
     } slider5;
 };
+
+#ifdef __cplusplus
+}
+#endif

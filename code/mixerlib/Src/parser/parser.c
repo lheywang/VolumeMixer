@@ -33,7 +33,7 @@
  * -----------------------------------------------------------------
  */
 
-int parser(char *buf, struct CMD *const command)
+int parser(char *buf, struct CMD * command)
 {
     // Input checks (prevent from null pointer)
     if ((buf == NULL) | (command == NULL))
@@ -58,7 +58,7 @@ int parser(char *buf, struct CMD *const command)
     memcpy((void *)work, (void *)&buf[6], (size_t)6);
     char *refcmd[] = {
         "SHUTD;",
-        "RESET;",
+        "RINIT;",
         "DCONF;",
         "CONNC;",
         "ASYNC;",
@@ -77,26 +77,34 @@ int parser(char *buf, struct CMD *const command)
     {
     case 0:
         command->type = SHUTD;
+        command->direction = RX;
         break;
     case 1:
-        command->type = REINIT;
+        command->type = RINIT;
+        command->direction = RX;
         break;
     case 2:
         command->type = DCONF;
+        command->direction = RX;
         break;
     case 3:
         command->type = CONNC;
+        command->direction = RX;
         break;
     case 4:
         command->type = ASYNC;
+        command->direction = RX;
         break;
     case 5:
         command->type = UICON;
+        command->direction = RX;
         break;
     case 6:
         command->type = SLPOS;
+        command->direction = RX;
         break;
     default:
+    	command->result = NACK;
         return -11; // Unknown command
     }
 
@@ -109,16 +117,17 @@ int parser(char *buf, struct CMD *const command)
     }
     work[3] = '\0';
     command->len = atoi((char *)work);
+    memset((void*)command->payload, 0x00, (size_t)1000);
     memcpy((void *)command->payload, (void *)&buf[16], (size_t)command->len);
 
     // Fetch the CRC32 of the whole message
     memset((void *)work, 0x00, 16);
-    memcpy((void *)work, (void *)&buf[16 + command->len + 1], (size_t)5);
-    if (work[4] != ';')
+    memcpy((void *)work, (void *)&buf[16 + command->len + 1], (size_t)9);
+    if (work[8] != ';')
     {
-        return -12; // Malformed command
+        return -13; // Malformed command
     }
-    work[4] = '\0';
+    work[8] = '\0';
     // uint32_t readCRC = atoi((char *)work);
 
     // Calculate CRC for the whole received message
@@ -129,16 +138,16 @@ int parser(char *buf, struct CMD *const command)
     // Compare CRC
     // if (calcCRC != readCRC)
     // {
-    //     return -13; // Invalid CRC.
+    //     return -14; // Invalid CRC.
     // }
 
     // Search for "END" token.
     memset((void *)work, 0x00, 16);
-    memcpy((void *)work, (void *)&buf[21 + command->len + 1], (size_t)3);
+    memcpy((void *)work, (void *)&buf[25 + command->len + 1], (size_t)3);
     char *ref2 = "END";
     if (strcmp((char *)work, (char *)ref2) != 0)
     {
-        return -14; // END token not found
+        return -15; // END token not found
     }
 
     // Parser sucessfull

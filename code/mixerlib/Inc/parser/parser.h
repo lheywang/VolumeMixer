@@ -14,6 +14,10 @@
  */
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* -----------------------------------------------------------------
  * INCLUDING LIBS
  * -----------------------------------------------------------------
@@ -33,7 +37,7 @@ enum COMMAND_TYPE
 {
     // System management
     SHUTD,
-    REINIT,
+    RINIT,
 
     // Connect requirement
     CONNC,
@@ -135,4 +139,8 @@ struct CMD
  * @retval -13 :    Invalid CRC32.
  * @retval -14 :    END token not found.
  */
-int parser(char *buf, struct CMD *const command);
+int parser(char *buf, struct CMD * command);
+
+#ifdef __cplusplus
+}
+#endif
