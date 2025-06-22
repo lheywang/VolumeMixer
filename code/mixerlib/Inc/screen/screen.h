@@ -1,0 +1,14 @@
+/** ================================================================
+ * @file    mixer/screen/sreen.h
+ *
+ * @brief   This file implement the functions that handle
+ * 			the bytestream creation for the screen
+ *
+ * @date    30-05-2025
+ *
+ * @version 1.0.0
+ *
+ * @author  l.heywang (leonard.heywang@proton.me)
+ *
+ *  ================================================================
+ */
