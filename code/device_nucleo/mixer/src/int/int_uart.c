@@ -22,7 +22,15 @@
 // ST HAL
 #include "main.h"
 
+// STD
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 extern UART_HandleTypeDef huart2;
+
+volatile char RxBuffer[1024];
+volatile char TxBuffer[1024];
 
 /* -----------------------------------------------------------------
  * INT_UART
@@ -33,15 +41,15 @@ int isr_uart_init(UART_HandleTypeDef *huartX)
 {
 	// First, enable the RTO interrupt on the STM32
 	// Timeout is set to 1000 bits, or about 2 ms.
-	huartX.Init.RTOEN = UART_RTOEN_ENABLE;
-	huartX.Init.ReceiverTimeout = 1000;
-	if (HAL_UART_Init(&huartX) != HAL_OK)
+	// huartX->Init.RTOEN = UART_RTOEN_ENABLE;
+	// huartX->Init.ReceiverTimeout = 1000;
+	if (HAL_UART_Init(huartX) != HAL_OK)
 	{
 	    Error_Handler();
 	}
 
 	// Enable the RTO interrupt in the UART peripheral
-	__HAL_UART_ENABLE_IT(&huartX, UART_IT_RTO);
+	__HAL_UART_ENABLE_IT(huartX, UART_IT_RTO);
 
 	// Configure the interrupt priority of the UART bus
 	HAL_NVIC_SetPriority(USART2_IRQn, 0, 0);
@@ -63,7 +71,7 @@ void HAL_UART_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
     // prepending it with "RTO RX: " or "Full RX: ".
 
     int len;
-    if (Size > 0 && Size <= RX_BUFFER_SIZE) // Ensure size is valid
+    if (Size > 0 && Size <= 1024) // Ensure size is valid
     {
         // Null-terminate the received data for string functions
         RxBuffer[Size] = '\0'; // Make sure the buffer has space for null terminator
@@ -71,7 +79,7 @@ void HAL_UART_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
         // Check if it was an RTO (implies partial buffer or end of message)
         // A common way to infer RTO is when the transfer stops before the full buffer is filled.
         // The HAL_UART_RxEventCallback is triggered for RTO.
-        if (Size < RX_BUFFER_SIZE) { // If less than full buffer, it's likely an RTO or Idle Line
+        if (Size < 1024) { // If less than full buffer, it's likely an RTO or Idle Line
             len = snprintf((char*)TxBuffer, sizeof(TxBuffer), "RTO RX (%u bytes): %s\r\n", Size, RxBuffer);
         } else { // Full buffer received
             len = snprintf((char*)TxBuffer, sizeof(TxBuffer), "Full RX (%u bytes): %s\r\n", Size, RxBuffer);
@@ -99,7 +107,7 @@ void HAL_UART_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 
     // IMPORTANT: Restart the DMA reception after processing the current data.
     // The DMA transfer stops when an RTO or full buffer event occurs.
-    if (HAL_UART_Receive_DMA(&huart2, RxBuffer, RX_BUFFER_SIZE) != HAL_OK)
+    if (HAL_UART_Receive_DMA(&huart2, RxBuffer, 1024) != HAL_OK)
     {
       Error_Handler(); // Handle error if DMA reception cannot be restarted
     }

@@ -120,7 +120,7 @@
 /** @addtogroup Device_Included
   * @{
   */
-
+#define STM32F302x8
 #if defined(STM32F301x8)
   #include "stm32f301x8.h"
 #elif defined(STM32F302x8)

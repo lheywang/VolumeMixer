@@ -219,6 +219,7 @@ int main(void)
 
     //    HAL_Delay(400); // Add a small delay to avoid flooding the serial port
 
+	  /*
     char Rx_data[1024] = {0}; // Buffer to store received byte
     char buf = '\0';
 
@@ -248,6 +249,7 @@ int main(void)
     {
       Error_Handler(); // Handle transmission error
     }
+    */
 
     /*
     char Rx_data[1024] = {0}; // Buffer to store received byte
