@@ -62,11 +62,11 @@ TX : The host list the device that shall be used.
 ```javascript
 {
     "apps" : [
-        {"1"    : "master"},
-        {"2"    : "discord.exe"},
-        {"3"    : "firefox.exe"},
-        {"4"    : "UNUSED"},
-        {"5"    : "Valorant.exe"}
+        {"1"    : CRC32["master"]},
+        {"2"    : CRC32["discord.exe"]},
+        {"3"    : CRC32["firefox.exe"]},
+        {"4"    : CRC32["UNUSED"]},
+        {"5"    : CRC32["Valorant.exe"]}
     ]
 }
 ```
@@ -79,23 +79,23 @@ Otherwise a match = false will indicate that the app is not know of the device.
     "match" : "false",
     "apps" : [
         {
-            "1"     : "master",
+            "1"     : CRC32["master"],
             "match" : "true"
         },
         {
-            "2"     : "discord.exe",
+            "2"     : CRC32["discord.exe"],
             "match" : "true"
         },
         {
-            "3"     : "firefox.exe",
+            "3"     : CRC32["firefox.exe]",
             "match" : "known"
         },
         {
-            "4"     : "UNUSED",
+            "4"     : CRC32["UNUSED]",
             "match" : "true"
         },
         {
-            "5"     : "Valorant.exe",
+            "5"     : CRC32["Valorant.exe]",
             "match" : "false"
         }
     ]
@@ -114,7 +114,7 @@ This command is used to uptate an icon (generally, this command follow an ASYNC 
 {
     "icon" : {
         "slider"    : "1",
-        "app"       : "world-of-tank.exe",
+        "app"       : CRC32["world-of-tank.exe"],
         "icon"      : "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
         "store"     : true
     }
