@@ -72,7 +72,7 @@ TEST(Parser, TokenCRCNotFound)
 
 	int retval = parser(buf, &command);
 
-	ASSERT_EQ(retval, -13);
+	ASSERT_EQ(retval, -14);
 }
 
 TEST(Parser, TokenEndNotFound)
@@ -83,7 +83,7 @@ TEST(Parser, TokenEndNotFound)
 
 	int retval = parser(buf, &command);
 
-	ASSERT_EQ(retval, -15);
+	ASSERT_EQ(retval, -16);
 }
 
 /**
@@ -102,7 +102,7 @@ TEST(Parser, CommandSHUTDParsing)
 
 	ASSERT_EQ(retval, 0);
 	ASSERT_EQ(command.type, SHUTD);
-	ASSERT_EQ(command.direction, RX);
+	ASSERT_EQ(command.direction, TX);
 }
 
 TEST(Parser, CommandRINITParsing)
@@ -115,7 +115,7 @@ TEST(Parser, CommandRINITParsing)
 
 	ASSERT_EQ(retval, 0);
 	ASSERT_EQ(command.type, RINIT);
-	ASSERT_EQ(command.direction, RX);
+	ASSERT_EQ(command.direction, TX);
 }
 
 TEST(Parser, CommandCONNCParsing)
@@ -128,7 +128,7 @@ TEST(Parser, CommandCONNCParsing)
 
 	ASSERT_EQ(retval, 0);
 	ASSERT_EQ(command.type, CONNC);
-	ASSERT_EQ(command.direction, RX);
+	ASSERT_EQ(command.direction, TX);
 }
 
 TEST(Parser, CommandASYNCParsing)
@@ -141,7 +141,7 @@ TEST(Parser, CommandASYNCParsing)
 
 	ASSERT_EQ(retval, 0);
 	ASSERT_EQ(command.type, ASYNC);
-	ASSERT_EQ(command.direction, RX);
+	ASSERT_EQ(command.direction, TX);
 }
 
 TEST(Parser, CommandUICONParsing)
@@ -154,7 +154,7 @@ TEST(Parser, CommandUICONParsing)
 
 	ASSERT_EQ(retval, 0);
 	ASSERT_EQ(command.type, UICON);
-	ASSERT_EQ(command.direction, RX);
+	ASSERT_EQ(command.direction, TX);
 }
 
 TEST(Parser, CommandSLPOSParsing)
@@ -167,7 +167,7 @@ TEST(Parser, CommandSLPOSParsing)
 
 	ASSERT_EQ(retval, 0);
 	ASSERT_EQ(command.type, SLPOS);
-	ASSERT_EQ(command.direction, RX);
+	ASSERT_EQ(command.direction, TX);
 }
 
 TEST(Parser, CommandDCONFParsing)
@@ -180,7 +180,7 @@ TEST(Parser, CommandDCONFParsing)
 
 	ASSERT_EQ(retval, 0);
 	ASSERT_EQ(command.type, DCONF);
-	ASSERT_EQ(command.direction, RX);
+	ASSERT_EQ(command.direction, TX);
 }
 
 /**
@@ -218,13 +218,24 @@ TEST(Parser, CommandLengthParsing001)
 TEST(Parser, CommandLengthParsing001E)
 {
 	// 1 char payload with issue.
-	char buf[1024] = "START;DCONF;001;;4bbb066d;END";
+	char buf[1024] = "START;DCONF;;;4bbb066d;END";
 	struct CMD command;
 
 	int retval = parser(buf, &command);
 
-	ASSERT_EQ(command.len, 1);
-	ASSERT_EQ(retval, -13); // We can't differentiates errors past the LEN
+	ASSERT_EQ(retval, -12);
+}
+
+TEST(Parser, CommandInvalidLength)
+{
+	// 1 char payload with issue.
+	char buf[1024] = "START;DCONF;AAA;e;4bbb066d;END";
+	struct CMD command;
+
+	int retval = parser(buf, &command);
+
+	ASSERT_EQ(command.len, 0);
+	ASSERT_EQ(retval, -14);
 }
 
 TEST(Parser, CommandLengthParsing010)
@@ -354,7 +365,7 @@ TEST(Parser, CRCError1)
 
 	int retval = parser(buf, &command);
 
-	ASSERT_EQ(retval, -15);
+	ASSERT_EQ(retval, -16);
 }
 
 TEST(Parser, CRCError2)
@@ -365,7 +376,7 @@ TEST(Parser, CRCError2)
 
 	int retval = parser(buf, &command);
 
-	ASSERT_EQ(retval, -15);
+	ASSERT_EQ(retval, -16);
 }
 
 TEST(Parser, CRCError3)
@@ -376,7 +387,7 @@ TEST(Parser, CRCError3)
 
 	int retval = parser(buf, &command);
 
-	ASSERT_EQ(retval, -15);
+	ASSERT_EQ(retval, -16);
 }
 
 TEST(Parser, CRCError4)
@@ -387,7 +398,7 @@ TEST(Parser, CRCError4)
 
 	int retval = parser(buf, &command);
 
-	ASSERT_EQ(retval, -15);
+	ASSERT_EQ(retval, -16);
 }
 
 TEST(Parser, CRCError5)
@@ -398,7 +409,7 @@ TEST(Parser, CRCError5)
 
 	int retval = parser(buf, &command);
 
-	ASSERT_EQ(retval, -15);
+	ASSERT_EQ(retval, -16);
 }
 
 TEST(Parser, CRCError6)
@@ -409,7 +420,7 @@ TEST(Parser, CRCError6)
 
 	int retval = parser(buf, &command);
 
-	ASSERT_EQ(retval, -15);
+	ASSERT_EQ(retval, -16);
 }
 
 TEST(Parser, CRCError7)
@@ -420,5 +431,5 @@ TEST(Parser, CRCError7)
 
 	int retval = parser(buf, &command);
 
-	ASSERT_EQ(retval, -15);
+	ASSERT_EQ(retval, -16);
 }

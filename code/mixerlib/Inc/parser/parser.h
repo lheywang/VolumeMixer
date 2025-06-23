@@ -82,17 +82,17 @@ struct CMD
     union
     {
         // Async command
-        struct CMD_ASYNC_RX ASYNC_RX;
         struct CMD_ASYNC_TX ASYNC_TX;
+        struct CMD_ASYNC_RX ASYNC_RX;
 
         // UICON
-        struct CMD_UICON_RX UICON_RX;
+        struct CMD_UICON_TX UICON_TX;
 
         // SLPOS
-        struct CMD_SLPOS_TX SLPOS_TX;
+        struct CMD_SLPOS_RX SLPOS_RX;
 
         // DCONF
-        struct CMD_DCONF_RX DCONF_RX;
+        struct CMD_DCONF_TX DCONF_TX;
     };
 
     uint32_t len;
@@ -125,8 +125,11 @@ struct CMD
  *      The command is borned with START and END tokens to clearly identify the
  *      start and end of a said command.
  *
- * @warning Commands can embbed a payload of max 999 chars. After that, the command will be
+ * @warning Commands can embbed a payload of max 995  chars. After that, the command will be
  *          considered as invalid.
+ *
+ * @warning The input buffer is considered as been 1024 chars longs. Thus, no checks are done on this part.
+ * 			The lib may then cause SegFault.
  *
  * @param   buf     (char *)    The buffer that store the command buffer.
  * @param   command (int *)     A pointer to the storage of the command. Return the value.
@@ -137,12 +140,13 @@ struct CMD
  * @retval -10 :    START token not found
  * @retval -11 :    Unknown command name.
  * @retval -12 :    Malformed command.
- * @retval -13 :    Invalid CRC32 structure.
- * @retval -14 :	Could not convert the CRC to it's value.
- * @retval -15 : 	CRC32 does not match the input string.
- * @retval -16 :    END token not found.
+ * @retval -13 :	Could not convert properly len.
+ * @retval -14 :	Invalid CRC32 structure.
+ * @retval -15 :	Could not convert the CRC to it's value.
+ * @retval -16 :   	CRC32 does not match the input string.
+ * @retval -17 : 	END token not found.
  */
-int parser(char *buf, struct CMD * command);
+int parser(char *buf, struct CMD * const command);
 
 #ifdef __cplusplus
 }

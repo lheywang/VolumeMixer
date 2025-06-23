@@ -31,6 +31,12 @@
 #include <errno.h>
 
 /* -----------------------------------------------------------------
+ * DEFINES
+ * -----------------------------------------------------------------
+ */
+#define PARSER_BUFFER_SIZE 16
+
+/* -----------------------------------------------------------------
  * FUNCTIONS
  * -----------------------------------------------------------------
  */
@@ -44,10 +50,9 @@ int parser(char *buf, struct CMD * command)
     }
 
     // Create a working buffer
-    uint8_t work[16] = {0};
+    uint8_t work[PARSER_BUFFER_SIZE] = {0};
 
     // Search for "START;" token.
-    memset((void *)work, 0x00, 16);
     memcpy((void *)work, (void *)buf, (size_t)6);
     char *ref = "START;";
     if (strcmp((char *)work, (char *)ref) != 0)
@@ -56,7 +61,7 @@ int parser(char *buf, struct CMD * command)
     }
 
     // Search for the command name
-    memset((void *)work, 0x00, 16);
+    memset((void *)work, 0x00, PARSER_BUFFER_SIZE);
     memcpy((void *)work, (void *)&buf[6], (size_t)6);
     char *refcmd[] = {
         "SHUTD;",
@@ -79,31 +84,31 @@ int parser(char *buf, struct CMD * command)
     {
     case 0:
         command->type = SHUTD;
-        command->direction = RX;
+        command->direction = TX;
         break;
     case 1:
         command->type = RINIT;
-        command->direction = RX;
+        command->direction = TX;
         break;
     case 2:
         command->type = DCONF;
-        command->direction = RX;
+        command->direction = TX;
         break;
     case 3:
         command->type = CONNC;
-        command->direction = RX;
+        command->direction = TX;
         break;
     case 4:
         command->type = ASYNC;
-        command->direction = RX;
+        command->direction = TX;
         break;
     case 5:
         command->type = UICON;
-        command->direction = RX;
+        command->direction = TX;
         break;
     case 6:
         command->type = SLPOS;
-        command->direction = RX;
+        command->direction = TX;
         break;
     default:
     	command->result = NACK;
@@ -111,31 +116,36 @@ int parser(char *buf, struct CMD * command)
     }
 
     // Fetch the payload lenght and the data by itself
-    memset((void *)work, 0x00, 16);
+    memset((void *)work, 0x00, PARSER_BUFFER_SIZE);
     memcpy((void *)work, (void *)&buf[12], (size_t)4);
     if (work[3] != ';')
     {
         return -12; // Malformed command
     }
     work[3] = '\0';
-    command->len = atoi((char *)work);
+    command->len = strtol((char *)work, NULL, 10);
+    if ((errno == EINVAL) | (errno == ERANGE))
+	{
+		return -13;
+	}
+
     memset((void*)command->payload, 0x00, (size_t)1000);
     memcpy((void *)command->payload, (void *)&buf[16], (size_t)command->len);
 
     // Fetch the CRC32 of the whole message
-    memset((void *)work, 0x00, 16);
+    memset((void *)work, 0x00, PARSER_BUFFER_SIZE);
     memcpy((void *)work, (void *)&buf[16 + command->len + 1], (size_t)9);
     if (work[8] != ';')
     {
-        return -13; // Malformed command
+        return -14; // Malformed command
     }
     work[8] = '\0';
 
     // Attempt a conversion and check for the errno
     command->crc = strtol((char *)work, NULL, 16);
-    if (errno == EINVAL)
+    if ((errno == EINVAL) | (errno == ERANGE))
     {
-    	return -14;
+    	return -15;
     }
 
     // Calculate CRC for the whole received message
@@ -147,16 +157,16 @@ int parser(char *buf, struct CMD * command)
     // Comparing both CRC
     if (crc != command->crc)
     {
-    	return -15; // CRC does not match
+    	return -16; // CRC does not match
     }
 
     // Search for "END" token.
-    memset((void *)work, 0x00, 16);
+    memset((void *)work, 0x00, PARSER_BUFFER_SIZE);
     memcpy((void *)work, (void *)&buf[25 + command->len + 1], (size_t)3);
     char *ref2 = "END";
     if (strcmp((char *)work, (char *)ref2) != 0)
     {
-        return -16; // END token not found
+        return -17; // END token not found
     }
 
     // Parser sucessfull
