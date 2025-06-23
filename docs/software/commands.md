@@ -116,7 +116,7 @@ This command is used to uptate an icon (generally, this command follow an ASYNC 
         "slider"    : "1",
         "app"       : CRC32["world-of-tank.exe"],
         "icon"      : "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-        "store"     : true
+        "store"     : 1
     }
 }
 ```
