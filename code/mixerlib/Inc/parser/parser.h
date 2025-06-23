@@ -96,6 +96,7 @@ struct CMD
     };
 
     uint32_t len;
+    uint32_t crc;
     uint8_t payload[1000];
 };
 
@@ -136,8 +137,10 @@ struct CMD
  * @retval -10 :    START token not found
  * @retval -11 :    Unknown command name.
  * @retval -12 :    Malformed command.
- * @retval -13 :    Invalid CRC32.
- * @retval -14 :    END token not found.
+ * @retval -13 :    Invalid CRC32 structure.
+ * @retval -14 :	Could not convert the CRC to it's value.
+ * @retval -15 : 	CRC32 does not match the input string.
+ * @retval -16 :    END token not found.
  */
 int parser(char *buf, struct CMD * command);
 

@@ -22,11 +22,13 @@
 
 // locals libs
 #include "parser/commands.h"
+#include "CRC/checksum.h"
 
 // STD
 #include <stdlib.h>
 #include <stddef.h>
 #include <string.h>
+#include <errno.h>
 
 /* -----------------------------------------------------------------
  * FUNCTIONS
@@ -128,18 +130,25 @@ int parser(char *buf, struct CMD * command)
         return -13; // Malformed command
     }
     work[8] = '\0';
-    // uint32_t readCRC = atoi((char *)work);
+
+    // Attempt a conversion and check for the errno
+    command->crc = strtol((char *)work, NULL, 16);
+    if (errno == EINVAL)
+    {
+    	return -14;
+    }
 
     // Calculate CRC for the whole received message
     uint8_t crc_buf[1024] = {0};
-    memcpy((void *)crc_buf, (void *)buf, (size_t)(16 + command->len + 1));
-    // uint32_t calcCRC = HAL_CRC_Calculate(&hcrc, (uint32_t *)crc_buf, (((16 + command->len + 1) * sizeof(uint8_t)) / sizeof(uint32_t)));
+    size_t len = (size_t)(16 + command->len + 1);
+    memcpy((void *)crc_buf, (void *)buf, len);
+    uint32_t crc = crc_32(crc_buf, len);
 
-    // Compare CRC
-    // if (calcCRC != readCRC)
-    // {
-    //     return -14; // Invalid CRC.
-    // }
+    // Comparing both CRC
+    if (crc != command->crc)
+    {
+    	return -15; // CRC does not match
+    }
 
     // Search for "END" token.
     memset((void *)work, 0x00, 16);
@@ -147,7 +156,7 @@ int parser(char *buf, struct CMD * command)
     char *ref2 = "END";
     if (strcmp((char *)work, (char *)ref2) != 0)
     {
-        return -15; // END token not found
+        return -16; // END token not found
     }
 
     // Parser sucessfull
