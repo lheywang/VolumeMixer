@@ -80,29 +80,29 @@ Otherwise a match = false will indicate that the app is not know of the device.
     "apps" : [
         {
             "1"     : CRC32["master"],
-            "match" : "true"
+            "match" : 1
         },
         {
             "2"     : CRC32["discord.exe"],
-            "match" : "true"
+            "match" : 1
         },
         {
             "3"     : CRC32["firefox.exe]",
-            "match" : "known"
+            "match" : 2"
         },
         {
             "4"     : CRC32["UNUSED]",
-            "match" : "true"
+            "match" : 1
         },
         {
             "5"     : CRC32["Valorant.exe]",
-            "match" : "false"
+            "match" : 0
         }
     ]
 }
 ```
 
-There's three state : true, known and false. If the app is not actually displayed (known or false), the device will start
+There's three state : true (1), known (2) and false (0). If the app is not actually displayed (known or false), the device will start
 to update the icon on the screen. The difference is that for "known", the device already know the icon in it's memory, and will thus
 use the icon stored internally. Only the "false" shall trigger an UICON command.
 
@@ -132,24 +132,24 @@ of the command, but the device respond with the following data structure :
 {
     "sliders" : [
         {
-            "1"     : "082",
-            "1M"    : true
+            "1"     : 082,
+            "1M"    : 1
         },
                 {
-            "2"     : "029",
-            "2M"    : false
+            "2"     : 029,
+            "2M"    : 0
         },
                 {
-            "3"     : "050",
-            "3M"    : true
+            "3"     : 050,
+            "3M"    : 1
         },
                 {
-            "4"     : "100",
-            "4M"    : true
+            "4"     : 100,
+            "4M"    : 1
         },
                 {
-            "5"     : "000",
-            "5M"    : true
+            "5"     : 000,
+            "5M"    : 1
         }
     ]
 }
