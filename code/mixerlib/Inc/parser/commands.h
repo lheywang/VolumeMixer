@@ -149,6 +149,11 @@ int parse_async_payload(const char * buf, const int len, struct CMD_ASYNC_TX * c
  * @param 	cmd 	The command to be built.
  * @param 	buf 	The output buffer.
  * @param 	len 	The lenght of the buffer.
+ *
+ * @return 	int
+ * @retval 	- 1 	Invalid pointer
+ * @retval 	- 2		Buffer too short
+ * @retval 	-60 	Failed to format the string.
  */
 int build_async_payload(const struct CMD_ASYNC_RX * const cmd, char *buf, int * len);
 /**
@@ -186,6 +191,11 @@ int parse_uicon_payload(const char * buf, const int len, struct CMD_UICON_TX * c
  * @param 	cmd 	The command to be built.
  * @param 	buf 	The output buffer.
  * @param 	len 	The lenght of the buffer.
+ *
+ * @return 	int
+ * @retval 	- 1 	Invalid pointer
+ * @retval 	- 2		Buffer too short
+ * @retval 	-70 	Failed to format the string.
  */
 int build_slpos_payload(const struct CMD_SLPOS_RX * const cmd, char *buf, int * len);
 

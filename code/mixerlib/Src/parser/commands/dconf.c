@@ -81,7 +81,7 @@ int parse_dconf_payload(const char * buf, const int len, struct CMD_DCONF_TX * c
 	{
 		return -1;
 	}
-	if (len < 212)
+	if (len < 211)
 	{
 		return -2; // Not enough char to ensure a correct command
 	}

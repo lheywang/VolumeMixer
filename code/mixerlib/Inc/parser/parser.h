@@ -133,6 +133,7 @@ struct CMD
  *
  * @param   buf     (char *)    The buffer that store the command buffer.
  * @param   command (int *)     A pointer to the storage of the command. Return the value.
+ * @param 	ParsePayload (int) 	Shall we attempt to parse the payload ? (This make testing a bit easier)
  *
  * @return  int
  * @retval   0 :    Command sucessfully parsed.
@@ -146,7 +147,7 @@ struct CMD
  * @retval -16 :   	CRC32 does not match the input string.
  * @retval -17 : 	END token not found.
  */
-int parser(char *buf, struct CMD * const command);
+int parser(char *buf, struct CMD * const command, int ParsePayload);
 
 #ifdef __cplusplus
 }

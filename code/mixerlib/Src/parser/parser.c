@@ -43,7 +43,7 @@
  * -----------------------------------------------------------------
  */
 
-int parser(char *buf, struct CMD * command)
+int parser(char *buf, struct CMD * command, int ParsePayload)
 {
     // Input checks (prevent from null pointer)
     if ((buf == NULL) | (command == NULL))
@@ -183,6 +183,33 @@ int parser(char *buf, struct CMD * command)
         return PARSER_ERROR_CODE(7); // END token not found
     }
 
-    // Parser sucessfull
-    return 0;
+    // If needed, parse the payload.
+    if (ParsePayload == 1)
+    {
+		switch (command->type)
+		{
+		case DCONF:
+			return parse_dconf_payload((char*)&command->payload, command->len, &command->DCONF_TX);
+			break;
+
+		case ASYNC:
+			return parse_async_payload((char*)&command->payload, command->len, &command->ASYNC_TX);
+			break;
+
+		case UICON:
+			return parse_uicon_payload((char*)&command->payload, command->len, &command->UICON_TX);
+			break;
+
+		default:
+			// Parser sucessfull
+			return 0;
+			break;
+		}
+    }
+    else
+    {
+    	return 0;
+    }
+
+    return -32768; // We sould NEVER get here...
 }
