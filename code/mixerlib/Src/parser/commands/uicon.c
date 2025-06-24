@@ -45,22 +45,27 @@
  *  "icon" : {
  *      "slider"    : "1",
  *      "app"       : "deadbeef", // This is the CRC32 of the APP name, to ensure it'll fit on the same length
- *      "icon"      : "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+ *      "icon"      : "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
  *      "store"     : true
  *  	}
  *  }
  *
  * Raw buffer :
- * {"icon":{"slider":"1","app":"deadbeef","icon":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","store":1}}
+ * {"icon":{"slider":"1","app":"deadbeef","icon":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","store":1}}
  */
 
-int parse_uicon_payload(const char * buf, struct CMD_UICON_TX * const cmd)
+int parse_uicon_payload(const char * buf, const int len, struct CMD_UICON_TX * const cmd)
 {
 	// Input checks
 	if ((buf == NULL) | (cmd == NULL))
 	{
-		return -1;
+		return -1; // Invalid pointers
 	}
+	if (len < 316)
+	{
+		return -2; // Not enough characters to parse.
+	}
+
 
     // Create a working buffer
     uint8_t work[UICON_PARSER_BUFFER] = {0};

@@ -31,7 +31,7 @@
  * -----------------------------------------------------------------
  */
 
-int parse_async_payload(const char * buf, struct CMD_ASYNC_TX * const cmd)
+int parse_async_payload(const char * buf, const int len, struct CMD_ASYNC_TX * const cmd)
 {
 	return 0;
 }

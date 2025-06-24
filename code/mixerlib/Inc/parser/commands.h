@@ -134,37 +134,18 @@ struct CMD_DCONF_TX
 {
     uint8_t SN[8];
     double adcGain;
-    uint16_t adcOffset;
+    double adcOffset;
 
-    struct
+    struct slider
     {
-        uint16_t offset;
+    	double offset;
         double gain;
     } slider1;
 
-    struct
-    {
-        uint16_t offset;
-        double gain;
-    } slider2;
-
-    struct
-    {
-        uint16_t offset;
-        double gain;
-    } slider3;
-
-    struct
-    {
-        uint16_t offset;
-        double gain;
-    } slider4;
-
-    struct
-    {
-        uint16_t offset;
-        double gain;
-    } slider5;
+    struct slider slider2;
+    struct slider slider3;
+    struct slider slider4;
+    struct slider slider5;
 };
 
 /* -----------------------------------------------------------------
@@ -183,12 +164,13 @@ struct CMD_DCONF_TX
  * @brief 	Parse the payload of an async command, and fill a struct with the rights elements.
  *
  * @param 	buf 	The input buffer to be parsed.
+ * @param 	len 	The lengh of the buffer. Used to ensure the buffer CAN store enough data.
  * @param 	cmd 	The struct to be filled.
  *
  * @return 	int
  * @retval	  0 	Everything went fine
  */
-int parse_async_payload(const char * buf, struct CMD_ASYNC_TX * const cmd);
+int parse_async_payload(const char * buf, const int len, struct CMD_ASYNC_TX * const cmd);
 /**
  * @brief 	Build the buffer output for the async command, with the updated values.
  *
@@ -204,11 +186,13 @@ int build_async_payload(const struct CMD_ASYNC_RX * const cmd, const char *buf, 
  * @brief 	Parse the payload of an async command, and fill a struct with the rights elements.
  *
  * @param 	buf 	The input buffer to be parsed.
+ * @param 	len 	The lengh of the buffer. Used to ensure the buffer CAN store enough data.
  * @param 	cmd 	The struct to be filled.
  *
  * @return 	int
  * @retval	  0 	Everything went fine
  * @retval 	- 1 	Invalid pointer passed
+ * @retval  - 2 	Invalid buffer len. Must be 316 bytes len.
  * @retval 	-20		JSON Header not found
  * @retval  -21		Unable to cast the slider value
  * @retval  -22		Invalid slider position
@@ -219,7 +203,7 @@ int build_async_payload(const struct CMD_ASYNC_RX * const cmd, const char *buf, 
  * @retval  -27		Unable to find the store JSON Header
  * @retval  -28		Unable to cast the store value to an integer
  */
-int parse_uicon_payload(const char * buf, struct CMD_UICON_TX * const cmd);
+int parse_uicon_payload(const char * buf, const int len, struct CMD_UICON_TX * const cmd);
 
 /**
  * SLPOS Command functions
@@ -240,12 +224,28 @@ int build_slpos_payload(const struct CMD_SLPOS_RX * const cmd, const char *buf, 
  * @brief 	Parse the payload of an async command, and fill a struct with the rights elements.
  *
  * @param 	buf 	The input buffer to be parsed.
+ * @param 	len 	The lengh of the buffer. Used to ensure the buffer CAN store enough data.
  * @param 	cmd 	The struct to be filled.
  *
  * @return 	int
  * @retval	  0 	Everything went fine
+ * @retval  - 1 	Invalid buffer provided
+ * @retval  - 2		Buffer too short (must be 213 char min.).
+ * @retval 	-30		Invalid calibration data header found
+ * @retval 	-31		Invalid DATA formatting for (at least) a channel.
+ * @retval 	-32		A channel identifier isn't a number.
+ * @retval 	-33		Passed channel aren't equal.
+ * @retval 	-34		Invalid channel provided.
+ * @retval 	-35		Error while casting gain to it's double value.
+ * @retval 	-36		Error while casting offset to it's double value.
+ * @retval 	-37		Invalid JSON header for the global ADC Gain.
+ * @retval 	-38		Error while casting global adc gain to double.
+ * @retval 	-39		Invalid JSON header for the global ADC offset.
+ * @retval 	-40		Error while casting global offset to double.
+ * @retval 	-41		Invalid JSON descriptor for device field
+ * @retval 	-42		Invalid END Json.
  */
-int parse_dconf_payload(const char * buf, struct CMD_DCONF_TX * const cmd);
+int parse_dconf_payload(const char * buf, const int len, struct CMD_DCONF_TX * const cmd);
 
 #ifdef __cplusplus
 }

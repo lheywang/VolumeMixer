@@ -129,7 +129,7 @@ struct CMD
  *          considered as invalid.
  *
  * @warning The input buffer is considered as been 1024 chars longs. Thus, no checks are done on this part.
- * 			The lib may then cause SegFault.
+ * 			The lib may then cause SegFault if used with mallocs.
  *
  * @param   buf     (char *)    The buffer that store the command buffer.
  * @param   command (int *)     A pointer to the storage of the command. Return the value.

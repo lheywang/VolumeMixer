@@ -235,7 +235,19 @@ TEST(Parser, CommandInvalidLength)
 	int retval = parser(buf, &command);
 
 	ASSERT_EQ(command.len, 0);
-	ASSERT_EQ(retval, -14);
+	ASSERT_EQ(retval, -13);
+}
+
+TEST(Parser, CommandInvalidCRC)
+{
+	// 1 char payload with issue.
+	char buf[1024] = "START;DCONF;001;e;nnnnnnnn;END";
+	struct CMD command;
+
+	int retval = parser(buf, &command);
+
+	ASSERT_EQ(command.len, 1);
+	ASSERT_EQ(retval, -15);
 }
 
 TEST(Parser, CommandLengthParsing010)

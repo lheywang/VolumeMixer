@@ -29,6 +29,7 @@
 #include <stddef.h>
 #include <string.h>
 #include <errno.h>
+#include <ctype.h>
 
 /* -----------------------------------------------------------------
  * DEFINES
@@ -123,11 +124,18 @@ int parser(char *buf, struct CMD * command)
         return -12; // Malformed command
     }
     work[3] = '\0';
+
+    // Cast to digit
+    for (int k = 0; k < 3; k ++)
+    {
+        // Attempt a conversion and check for the errno
+    	if (!isdigit(work[k]))
+    	{
+    		command->len = 0;
+    		return -13;
+    	}
+    }
     command->len = strtol((char *)work, NULL, 10);
-    if ((errno == EINVAL) | (errno == ERANGE))
-	{
-		return -13;
-	}
 
     memset((void*)command->payload, 0x00, (size_t)1000);
     memcpy((void *)command->payload, (void *)&buf[16], (size_t)command->len);
@@ -141,12 +149,17 @@ int parser(char *buf, struct CMD * command)
     }
     work[8] = '\0';
 
-    // Attempt a conversion and check for the errno
-    command->crc = strtol((char *)work, NULL, 16);
-    if ((errno == EINVAL) | (errno == ERANGE))
+    // Cast to digit
+    for (int k = 0; k < 8; k ++)
     {
-    	return -15;
+        // Attempt a conversion and check for the errno
+    	if (!isxdigit(work[k]))
+    	{
+    		command->crc = 0x00000000UL;
+    		return -15;
+    	}
     }
+    command->crc = strtol((char *)work, NULL, 16);
 
     // Calculate CRC for the whole received message
     uint8_t crc_buf[1024] = {0};
