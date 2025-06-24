@@ -33,6 +33,7 @@
  */
 
 #define DCONF_PARSER_BUFFER 32
+#define DCONF_ERROR_CODE(x) (-x - 30)
 
 /* -----------------------------------------------------------------
  * FUNCTIONS
@@ -93,7 +94,7 @@ int parse_dconf_payload(const char * buf, const int len, struct CMD_DCONF_TX * c
     char *ref = "{\"cal\":[";
     if (strcmp((char *)work, (char *)ref) != 0)
     {
-        return -30; // JSON Header not found
+        return DCONF_ERROR_CODE(0); // JSON Header not found
     }
 
     // Then, try to split the different substrings
@@ -123,23 +124,23 @@ int parse_dconf_payload(const char * buf, const int len, struct CMD_DCONF_TX * c
     	char ref2[] = "{\"%OFF\":\"%%%%%%\",\"%G\":\"%%%%\"}\0\0";
         if (strcmp((char *)work, (char *)ref2) != 0)
         {
-            return -31; // JSON Channel data invalid.
+            return DCONF_ERROR_CODE(1); // JSON Channel data invalid.
         }
 
         // Cast the channel identifier
         if ((!isdigit(channel[0])) | (!isdigit(channel[2])))
 		{
-			return -32; // At least a channel is not a number
+			return DCONF_ERROR_CODE(2); // At least a channel is not a number
 		}
 		int chan = strtol((char *)&channel[0], NULL, 10);
 		int chan2 = strtol((char *)&channel[2], NULL, 10);
 		if (chan != chan2)
 		{
-			return -33; // Two channel identifiers aren't the same.
+			return DCONF_ERROR_CODE(3); // Two channel identifiers aren't the same.
 		}
 		if ((0 > chan) | (chan > 5))
 		{
-			return -34; // Invalid channel identifier
+			return DCONF_ERROR_CODE(4); // Invalid channel identifier
 		}
 
 		// Cast the data
@@ -147,13 +148,13 @@ int parse_dconf_payload(const char * buf, const int len, struct CMD_DCONF_TX * c
 		double chan_gain = strtod((char *)gain, &cmp);
 		if (cmp <= (char*)&gain[3])
 		{
-			return -35; // Error while casting gain to double
+			return DCONF_ERROR_CODE(5); // Error while casting gain to double
 		}
 
 		double chan_offset = strtod((char*)offset, &cmp);
 		if (cmp <= (char *)&offset[5])
 		{
-			return -36; // Error while casting offset to double
+			return DCONF_ERROR_CODE(6); // Error while casting offset to double
 		}
 
 		// Assign the data out :
@@ -192,7 +193,7 @@ int parse_dconf_payload(const char * buf, const int len, struct CMD_DCONF_TX * c
     char ref3[] = "}],\"gain\":\"";
     if (strcmp((char *)work, (char *)ref3) != 0)
 	{
-		return -37; // JSON Gain invalid
+		return DCONF_ERROR_CODE(7); // JSON Gain invalid
 	}
 
     memset((void *)work, 0x00, (size_t)DCONF_PARSER_BUFFER);
@@ -201,7 +202,7 @@ int parse_dconf_payload(const char * buf, const int len, struct CMD_DCONF_TX * c
     cmd->adcGain = strtod((char *)work, &cmp);
     if (cmp <= (char *)&work[3])
 	{
-		return -38; // Error while casting gain to double
+		return DCONF_ERROR_CODE(8); // Error while casting gain to double
 	}
 
 	// Clear and copy the next sub element
@@ -210,7 +211,7 @@ int parse_dconf_payload(const char * buf, const int len, struct CMD_DCONF_TX * c
 	char ref4[] = "\",\"offset\":\"";
 	if (strcmp((char *)work, (char *)ref4) != 0)
 	{
-		return -39; // JSON Offset invalid
+		return DCONF_ERROR_CODE(9); // JSON Offset invalid
 	}
 
 	memset((void *)work, 0x00, (size_t)DCONF_PARSER_BUFFER);
@@ -218,7 +219,7 @@ int parse_dconf_payload(const char * buf, const int len, struct CMD_DCONF_TX * c
 	cmd->adcOffset = strtod((char *)work, &cmp);
 	if (cmp <= (char *)&work[5])
 	{
-		return -40; // Error while casting offset to double
+		return DCONF_ERROR_CODE(10); // Error while casting offset to double
 	}
 
 
@@ -228,7 +229,7 @@ int parse_dconf_payload(const char * buf, const int len, struct CMD_DCONF_TX * c
 	char ref5[] = "\",\"device\":\"";
 	if (strcmp((char *)work, (char *)ref5) != 0)
 	{
-		return -41; // JSON Device invalid
+		return DCONF_ERROR_CODE(11); // JSON Device invalid
 	}
 
 	// Copy the ID
@@ -237,7 +238,7 @@ int parse_dconf_payload(const char * buf, const int len, struct CMD_DCONF_TX * c
 	// Final checks
 	if ((buf[209] != '"') | (buf[210] != '}'))
 	{
-		return -42; // Invalid END JSON
+		return DCONF_ERROR_CODE(12); // Invalid END JSON
 	}
 
 	return 0;

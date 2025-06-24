@@ -33,6 +33,7 @@
  * -----------------------------------------------------------------
  */
 #define UICON_PARSER_BUFFER 256
+#define UICON_ERROR_CODE(x) (-x - 20)
 
 /* -----------------------------------------------------------------
  * FUNCTIONS
@@ -75,7 +76,7 @@ int parse_uicon_payload(const char * buf, const int len, struct CMD_UICON_TX * c
     char *ref = "{\"icon\":{\"slider\":\"";
     if (strcmp((char *)work, (char *)ref) != 0)
     {
-        return -20; // JSON Header not found
+        return UICON_ERROR_CODE(0); // JSON Header not found
     }
 
 	// Fetch the following target slider
@@ -85,12 +86,12 @@ int parse_uicon_payload(const char * buf, const int len, struct CMD_UICON_TX * c
     // Attempt a conversion
 	if (!isdigit(work[0]))
 	{
-		return -21;
+		return UICON_ERROR_CODE(1);
 	}
     cmd->posSlider = strtol((char *)work, NULL, 10); // We don't care about the base here, since < 10.
     if ((1 > cmd->posSlider) || (cmd->posSlider > 5))
     {
-    	return -22; // Invalid value for slider position
+    	return UICON_ERROR_CODE(2); // Invalid value for slider position
     }
 
 	// Fetch the following target app hash
@@ -99,7 +100,7 @@ int parse_uicon_payload(const char * buf, const int len, struct CMD_UICON_TX * c
 	char *ref2 = "\",\"app\":\"";
 	if (strcmp((char *)work, (char *)ref2) != 0)
 	{
-		return -23; // App Name not found
+		return UICON_ERROR_CODE(3); // App Name not found
 	}
 
 	// Fetch the following target slider
@@ -112,7 +113,7 @@ int parse_uicon_payload(const char * buf, const int len, struct CMD_UICON_TX * c
 	    // Attempt a conversion
 		if (!isxdigit(work[k]))
 		{
-			return -24;
+			return UICON_ERROR_CODE(4);
 		}
 	}
 	cmd->appSlider = strtol((char *)work, NULL, 16);
@@ -123,7 +124,7 @@ int parse_uicon_payload(const char * buf, const int len, struct CMD_UICON_TX * c
 	char *ref3 = "\",\"icon\":\"";
 	if (strcmp((char *)work, (char *)ref3) != 0)
 	{
-		return -25; // Icon not found
+		return UICON_ERROR_CODE(5); // Icon not found
 	}
 
 	// Fetch the following icon data
@@ -140,7 +141,7 @@ int parse_uicon_payload(const char * buf, const int len, struct CMD_UICON_TX * c
 		temp_char[0] = work[k * 2];
 		if (!isxdigit(temp_char[0]))
 		{
-			return -26;
+			return UICON_ERROR_CODE(6);
 		}
 		int c_tmp = (strtol(temp_char, NULL, 16) & 0x0F) << 4;
 
@@ -148,7 +149,7 @@ int parse_uicon_payload(const char * buf, const int len, struct CMD_UICON_TX * c
 		temp_char[0] = work[(k * 2) + 1];
 		if (!isxdigit(temp_char[0]))
 		{
-			return -26;
+			return UICON_ERROR_CODE(6);
 		}
 		c_tmp |= (strtol(temp_char, NULL, 16)  & 0x0F);
 
@@ -162,7 +163,7 @@ int parse_uicon_payload(const char * buf, const int len, struct CMD_UICON_TX * c
 	char *ref4 = "\",\"store\":";
 	if (strcmp((char *)work, (char *)ref4) != 0)
 	{
-		return -27; // Store not found
+		return UICON_ERROR_CODE(7); // Store not found
 	}
 
 	// Fetch the following target store argument
@@ -172,7 +173,7 @@ int parse_uicon_payload(const char * buf, const int len, struct CMD_UICON_TX * c
     // Attempt a conversion and check for the errno
 	if (!isdigit(work[0]))
 	{
-		return -28;
+		return UICON_ERROR_CODE(8);
 	}
     int tmp = strtol((char *)work, NULL, 16); // We don't care about the base here, since < 10.
 

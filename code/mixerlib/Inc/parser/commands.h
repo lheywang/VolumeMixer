@@ -48,35 +48,16 @@ struct CMD_ASYNC_TX
 
 struct CMD_ASYNC_RX
 {
-    struct
+    struct slider_async
     {
         uint32_t appSlider;
         uint32_t appMatch;
     } slider1;
 
-    struct
-    {
-        uint32_t appSlider;
-        uint32_t appMatch;
-    } slider2;
-
-    struct
-    {
-        uint32_t appSlider;
-        uint32_t appMatch;
-    } slider3;
-
-    struct
-    {
-        uint32_t appSlider;
-        uint32_t appMatch;
-    } slider4;
-
-    struct
-    {
-        uint32_t appSlider;
-        uint32_t appMatch;
-    } slider5;
+    struct slider_async slider2;
+    struct slider_async slider3;
+    struct slider_async slider4;
+    struct slider_async slider5;
 };
 
 /**
@@ -96,35 +77,16 @@ struct CMD_UICON_TX
 
 struct CMD_SLPOS_RX
 {
-    struct
+    struct slider_slpos
     {
         uint32_t Pos;
         uint32_t Mute;
     } slider1;
 
-    struct
-    {
-        uint32_t Pos;
-        uint32_t Mute;
-    } slider2;
-
-    struct
-    {
-        uint32_t Pos;
-        uint32_t Mute;
-    } slider3;
-
-    struct
-    {
-        uint32_t Pos;
-        uint32_t Mute;
-    } slider4;
-
-    struct
-    {
-        uint32_t Pos;
-        uint32_t Mute;
-    } slider5;
+    struct slider_slpos slider2;
+    struct slider_slpos slider3;
+    struct slider_slpos slider4;
+    struct slider_slpos slider5;
 };
 
 /**
@@ -136,16 +98,16 @@ struct CMD_DCONF_TX
     double adcGain;
     double adcOffset;
 
-    struct slider
+    struct slider_dconf
     {
     	double offset;
         double gain;
     } slider1;
 
-    struct slider slider2;
-    struct slider slider3;
-    struct slider slider4;
-    struct slider slider5;
+    struct slider_dconf slider2;
+    struct slider_dconf slider3;
+    struct slider_dconf slider4;
+    struct slider_dconf slider5;
 };
 
 /* -----------------------------------------------------------------

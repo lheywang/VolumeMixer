@@ -36,6 +36,7 @@
  * -----------------------------------------------------------------
  */
 #define PARSER_BUFFER_SIZE 16
+#define PARSER_ERROR_CODE(x) (-x - 10)
 
 /* -----------------------------------------------------------------
  * FUNCTIONS
@@ -58,7 +59,7 @@ int parser(char *buf, struct CMD * command)
     char *ref = "START;";
     if (strcmp((char *)work, (char *)ref) != 0)
     {
-        return -10; // START token not found
+        return PARSER_ERROR_CODE(0); // START token not found
     }
 
     // Search for the command name
@@ -113,7 +114,7 @@ int parser(char *buf, struct CMD * command)
         break;
     default:
     	command->result = NACK;
-        return -11; // Unknown command
+        return PARSER_ERROR_CODE(1); // Unknown command
     }
 
     // Fetch the payload lenght and the data by itself
@@ -121,7 +122,7 @@ int parser(char *buf, struct CMD * command)
     memcpy((void *)work, (void *)&buf[12], (size_t)4);
     if (work[3] != ';')
     {
-        return -12; // Malformed command
+        return PARSER_ERROR_CODE(2); // Malformed command
     }
     work[3] = '\0';
 
@@ -132,7 +133,7 @@ int parser(char *buf, struct CMD * command)
     	if (!isdigit(work[k]))
     	{
     		command->len = 0;
-    		return -13;
+    		return PARSER_ERROR_CODE(3);
     	}
     }
     command->len = strtol((char *)work, NULL, 10);
@@ -145,7 +146,7 @@ int parser(char *buf, struct CMD * command)
     memcpy((void *)work, (void *)&buf[16 + command->len + 1], (size_t)9);
     if (work[8] != ';')
     {
-        return -14; // Malformed command
+        return PARSER_ERROR_CODE(4); // Malformed command
     }
     work[8] = '\0';
 
@@ -156,7 +157,7 @@ int parser(char *buf, struct CMD * command)
     	if (!isxdigit(work[k]))
     	{
     		command->crc = 0x00000000UL;
-    		return -15;
+    		return PARSER_ERROR_CODE(5);
     	}
     }
     command->crc = strtol((char *)work, NULL, 16);
@@ -170,7 +171,7 @@ int parser(char *buf, struct CMD * command)
     // Comparing both CRC
     if (crc != command->crc)
     {
-    	return -16; // CRC does not match
+    	return PARSER_ERROR_CODE(6); // CRC does not match
     }
 
     // Search for "END" token.
@@ -179,7 +180,7 @@ int parser(char *buf, struct CMD * command)
     char *ref2 = "END";
     if (strcmp((char *)work, (char *)ref2) != 0)
     {
-        return -17; // END token not found
+        return PARSER_ERROR_CODE(7); // END token not found
     }
 
     // Parser sucessfull
