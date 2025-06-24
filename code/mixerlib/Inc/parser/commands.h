@@ -58,6 +58,8 @@ struct CMD_ASYNC_RX
     struct slider_async slider3;
     struct slider_async slider4;
     struct slider_async slider5;
+
+    uint8_t sync;
 };
 
 /**
@@ -131,6 +133,14 @@ struct CMD_DCONF_TX
  *
  * @return 	int
  * @retval	  0 	Everything went fine
+ * @retval  - 1		Invalid pointer passed
+ * @retval 	- 2		Buffer too short
+ * @retval 	-50		Cannot found Apps JSON Header
+ * @retval  -51		Channel element passed unmatched.
+ * @retval  -52		Unable to parse the channel number
+ * @retval  -53		Invalid channel identifier
+ * @retval  -54		Passed hash for app isn't an hex number
+ * @retval  -55		Invalid END JSON Header
  */
 int parse_async_payload(const char * buf, const int len, struct CMD_ASYNC_TX * const cmd);
 /**
@@ -140,7 +150,7 @@ int parse_async_payload(const char * buf, const int len, struct CMD_ASYNC_TX * c
  * @param 	buf 	The output buffer.
  * @param 	len 	The lenght of the buffer.
  */
-int build_async_payload(const struct CMD_ASYNC_RX * const cmd, const char *buf, const int * len);
+int build_async_payload(const struct CMD_ASYNC_RX * const cmd, char *buf, int * len);
 /**
  * UICON Command functions
  */
@@ -177,7 +187,7 @@ int parse_uicon_payload(const char * buf, const int len, struct CMD_UICON_TX * c
  * @param 	buf 	The output buffer.
  * @param 	len 	The lenght of the buffer.
  */
-int build_slpos_payload(const struct CMD_SLPOS_RX * const cmd, const char *buf, const int * len);
+int build_slpos_payload(const struct CMD_SLPOS_RX * const cmd, char *buf, int * len);
 
 /**
  * DCONF Command functions

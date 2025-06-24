@@ -22,6 +22,7 @@
 
 // STD
 #include <stdlib.h>
+#include <stdio.h>
 #include <stddef.h>
 #include <string.h>
 #include <errno.h>
@@ -160,8 +161,71 @@ int parse_async_payload(const char * buf, const int len, struct CMD_ASYNC_TX * c
 	return 0;
 }
 
-int build_async_payload(const struct CMD_ASYNC_RX * const cmd, const char *buf, const int * len)
+/**
+ *{
+ *  "match" : "false",
+ *  "apps" : [
+ *      {
+ *          "1"     : CRC32["master"],
+ *          "match" : 1
+ *      },
+ *      {
+ *          "2"     : CRC32["discord.exe"],
+ *          "match" : 1
+ *      },
+ *      {
+ *          "3"     : CRC32["firefox.exe]",
+ *          "match" : 2
+ *      },
+ *      {
+ *          "4"     : CRC32["UNUSED]",
+ *          "match" : 1
+ *      },
+ *      {
+ *          "5"     : CRC32["Valorant.exe]",
+ *          "match" : 0
+ *      }
+ *  ]
+ *}
+ *
+ *{"match":0,"apps":[{"1":deadbeef,"match":1},{"2":deadbeef,"match":1},{"3":deadbeef","match":2},{"4":deadbeef","match":1},{"5":deadbeef","match":0}]}
+ *
+ *
+ */
+
+int build_async_payload(const struct CMD_ASYNC_RX * const cmd, char *buf, int * len)
 {
+	// First, check for the different parameters
+	if ((cmd == NULL) | (buf == NULL) | (len == NULL))
+	{
+		return -1; // Invalid pointer
+	}
+
+	if (*len < 148)
+	{
+		return -2; // Buffer too small
+	}
+
+	*len = snprintf(buf,
+			160,
+			"{\"match\":%1d,\"apps\":[{\"1\":%08x,\"match\":%1d},{\"2\":%08x,\"match\":%1d},{\"3\":%08x,\"match\":%1d},{\"4\":%08x,\"match\":%1d},{\"5\":%08x,\"match\":%1d}]}",
+			cmd->sync,
+			cmd->slider1.appSlider,
+			cmd->slider1.appMatch,
+			cmd->slider2.appSlider,
+			cmd->slider2.appMatch,
+			cmd->slider3.appSlider,
+			cmd->slider3.appMatch,
+			cmd->slider4.appSlider,
+			cmd->slider4.appMatch,
+			cmd->slider5.appSlider,
+			cmd->slider5.appMatch
+			);
+
+	if (*len != 145)
+	{
+		return ASYNC_B_ERROR_CODE(0); // Wrong number of chars printed.
+	}
 	return 0;
 }
 
