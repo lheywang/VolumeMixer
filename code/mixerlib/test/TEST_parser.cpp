@@ -452,6 +452,9 @@ TEST(Parser, CRCError7)
  * ===============================================================
  */
 
+/*
+ * We don't test ALL functions here, because everything is already tested independently.
+ */
 
 TEST(Parser, DCONFParser)
 {
@@ -463,27 +466,23 @@ TEST(Parser, DCONFParser)
 
 	ASSERT_EQ(retval, 0);
 
-	ASSERT_FLOAT_EQ(command.slider1.gain, 1.01);
-	ASSERT_FLOAT_EQ(command.slider1.offset, 0.082);
+	ASSERT_EQ(command.len, 211);
 
-	ASSERT_FLOAT_EQ(command.slider2.gain, 1.09);
-	ASSERT_FLOAT_EQ(command.slider2.offset, 0.029);
+	ASSERT_FLOAT_EQ(command.DCONF_TX.slider1.gain, 1.01);
+	ASSERT_FLOAT_EQ(command.DCONF_TX.slider1.offset, 0.082);
 
-	ASSERT_FLOAT_EQ(command.slider3.gain, 1.00);
-	ASSERT_FLOAT_EQ(command.slider3.offset, 0.050);
+	ASSERT_FLOAT_EQ(command.DCONF_TX.slider2.gain, 1.09);
+	ASSERT_FLOAT_EQ(command.DCONF_TX.slider2.offset, 0.029);
 
-	ASSERT_FLOAT_EQ(command.slider4.gain, 1.12);
-	ASSERT_FLOAT_EQ(command.slider4.offset, 0.000);
+	ASSERT_FLOAT_EQ(command.DCONF_TX.slider3.gain, 1.00);
+	ASSERT_FLOAT_EQ(command.DCONF_TX.slider3.offset, 0.050);
 
-	ASSERT_FLOAT_EQ(command.slider5.gain, 0.98);
-	ASSERT_FLOAT_EQ(command.slider5.offset, -0.012);
+	ASSERT_FLOAT_EQ(command.DCONF_TX.slider4.gain, 1.12);
+	ASSERT_FLOAT_EQ(command.DCONF_TX.slider4.offset, 0.000);
 
-	ASSERT_FLOAT_EQ(command.adcGain, 1.09);
-	ASSERT_FLOAT_EQ(command.adcOffset, 0.012);
+	ASSERT_FLOAT_EQ(command.DCONF_TX.slider5.gain, 0.98);
+	ASSERT_FLOAT_EQ(command.DCONF_TX.slider5.offset, -0.012);
 
-	uint8_t buf2[] = "25MYH0D0";
-	for (int k = 0; k < 8; k++)
-	{
-		ASSERT_EQ(command.SN[k], buf2[k]);
-	}
+	ASSERT_FLOAT_EQ(command.DCONF_TX.adcGain, 1.09);
+	ASSERT_FLOAT_EQ(command.DCONF_TX.adcOffset, 0.012);
 }
