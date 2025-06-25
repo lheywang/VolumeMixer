@@ -58,6 +58,7 @@ enum COMMAND_DIR
 
 enum COMMAND_RES
 {
+	INPUT, // Raw input buffer.
     OK,
     NACK
 };
@@ -97,7 +98,7 @@ struct CMD
 
     uint32_t len;
     uint32_t crc;
-    uint8_t payload[1000];
+    uint8_t payload[384]; // The longest payload used is going to be 316 bytes long. More than enough !
 };
 
 /* -----------------------------------------------------------------
@@ -148,6 +149,20 @@ struct CMD
  * @retval -17 : 	END token not found.
  */
 int parser(char *buf, struct CMD * const command, int ParsePayload);
+
+/* -----------------------------------------------------------------
+ * BUILDER
+ * -----------------------------------------------------------------
+ */
+
+/**
+ * @brief		Build serial commands to be sent on the serial bus. Handle all of the nasty for the user.
+ *
+ * @details		Used to build responses to a command, while ensuring it does match the specification.
+ *
+ * @
+ */
+int builder(struct CMD * const command, char *buf);
 
 #ifdef __cplusplus
 }
