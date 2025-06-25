@@ -171,51 +171,68 @@ int main(void)
   HAL_UART_Transmit(&huart2, (uint8_t *)&uart2Data,24, 0xFFFF);
   memset((void*)uart2Data, 0x00, (size_t)24);
 
-  snprintf(uart2Data,24,"Finished !");
+  snprintf(uart2Data,24,"Finished !\n\n");
   HAL_UART_Transmit(&huart2, (uint8_t *)&uart2Data,24, 0xFFFF);
   memset((void*)uart2Data, 0x00, (size_t)24);
 
   /* USER CODE END 2 */
-  // Start acquisition for the selected channel (PB11 in group 4)
-
-  if (HAL_TSC_Start(&htsc) != HAL_OK)
-  {
-    Error_Handler();
-  }
 
   /* Infinite loop */
+  static uint32_t count = 0;
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    /* USER CODE END WHILE */
-    // Wait for the acquisition to complete
-    if (HAL_TSC_PollForAcquisition(&htsc) != HAL_OK)
-    {
- 	 Error_Handler();
-    }
+	  /*##-2- Discharge the touch-sensing IOs ##################################*/
+	     /* Must be done before each acquisition */
+	     HAL_TSC_IODischarge(&htsc, ENABLE);
+	     HAL_Delay(1); /* 1 ms is more than enough to discharge all capacitors */
 
-    // Check if the acquisition was completed successfully
-    if (HAL_TSC_GetState(&htsc) == HAL_TSC_STATE_READY)
-    {
- 	  int capture_value = HAL_TSC_GroupGetValue(&htsc, TSC_GROUP6);
-  	  snprintf(uart2Data,24,"TSC Value: %d\r\n", capture_value);
-  	  HAL_UART_Transmit(&huart2, (uint8_t *)&uart2Data,24, 0xFFFF);
-  	  memset((void*)uart2Data, 0x00, (size_t)24);
-    }
-    else
-    {
-  	  snprintf(uart2Data,24,"TSC Acq. Error\r\n");
-  	  HAL_UART_Transmit(&huart2, (uint8_t *)&uart2Data,24, 0xFFFF);
-  	  memset((void*)uart2Data, 0x00, (size_t)24);
-	}
+	     /*##-3- Start the acquisition process ####################################*/
+	     if (HAL_TSC_Start(&htsc) != HAL_OK)
+	     {
+	       /* Acquisition Error */
+	       Error_Handler();
+	     }
 
-    HAL_Delay(500);
+	     // HAL_Delay(9); /* 1 ms is more than enough to discharge all capacitors */
 
-    /* USER CODE BEGIN 3 */
+	     /*##-4- Wait for the end of acquisition ##################################*/
+	     /*  Before starting a new acquisition, you need to check the current state of
+	          the peripheral; if it is busy you need to wait for the end of current
+	          acquisition before starting a new one. */
+	     while (HAL_TSC_GetState(&htsc) == HAL_TSC_STATE_BUSY)
+	     {
+	       /* For simplicity reasons, this example is just waiting till the end of the
+	          acquisition, but application may perform other tasks while acquisition
+	          operation is ongoing. */
+	     }
+
+	     /*##-5- Clear flags ######################################################*/
+	     __HAL_TSC_CLEAR_FLAG(&htsc, (TSC_FLAG_EOA | TSC_FLAG_MCE));
+
+	     /*##-6- Check if the acquisition is correct (no max count) ###############*/
+	     if (HAL_TSC_GroupGetStatus(&htsc, TSC_GROUP6_IDX) == TSC_GROUP_COMPLETED)
+	     {
+	       /*##-7- Store the acquisition value ####################################*/
+	       int uhTSCAcquisitionValue = HAL_TSC_GroupGetValue(&htsc, TSC_GROUP6_IDX);
+
+	       if (uhTSCAcquisitionValue > 1)
+	       {
+			   snprintf(uart2Data,24,"%06lu Value = %01d\n", count, (uhTSCAcquisitionValue> 1));
+			   HAL_UART_Transmit(&huart2, (uint8_t *)&uart2Data,24, 0xFFFF);
+			   memset((void*)uart2Data, 0x00, (size_t)24);
+	       }
+	       else
+	       {
+			   snprintf(uart2Data,24,"%06lu\n", count);
+			   HAL_UART_Transmit(&huart2, (uint8_t *)&uart2Data,24, 0xFFFF);
+			   memset((void*)uart2Data, 0x00, (size_t)24);
+	       }
+	       count++;
+	     }
 
   /* USER CODE END 3 */
-}
-}
+}}
 
 /**
   * @brief System Clock Configuration
@@ -468,13 +485,13 @@ static void MX_TSC_Init(void)
   /** Configure the TSC peripheral
   */
   htsc.Instance = TSC;
-  htsc.Init.CTPulseHighLength = TSC_CTPH_2CYCLES;
-  htsc.Init.CTPulseLowLength = TSC_CTPL_2CYCLES;
+  htsc.Init.CTPulseHighLength = TSC_CTPH_1CYCLE;
+  htsc.Init.CTPulseLowLength = TSC_CTPL_1CYCLE;
   htsc.Init.SpreadSpectrum = DISABLE;
-  htsc.Init.SpreadSpectrumDeviation = 1;
-  htsc.Init.SpreadSpectrumPrescaler = TSC_SS_PRESC_DIV1;
+  htsc.Init.SpreadSpectrumDeviation = 127;
+  htsc.Init.SpreadSpectrumPrescaler = TSC_SS_PRESC_DIV2;
   htsc.Init.PulseGeneratorPrescaler = TSC_PG_PRESC_DIV4;
-  htsc.Init.MaxCountValue = TSC_MCV_8191;
+  htsc.Init.MaxCountValue = TSC_MCV_16383;
   htsc.Init.IODefaultMode = TSC_IODEF_OUT_PP_LOW;
   htsc.Init.SynchroPinPolarity = TSC_SYNC_POLARITY_FALLING;
   htsc.Init.AcquisitionMode = TSC_ACQ_MODE_NORMAL;
