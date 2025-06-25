@@ -341,3 +341,4 @@ VP_USB_DEVICE_VS_USB_DEVICE_CDC_FS.Signal=USB_DEVICE_VS_USB_DEVICE_CDC_FS
 board=NUCLEO-F302R8
 boardIOC=true
 isbadioc=false
+isbadioc=false

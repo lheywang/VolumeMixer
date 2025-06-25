@@ -163,7 +163,7 @@ int parser(char *buf, struct CMD * command, int ParsePayload)
     command->crc = strtol((char *)work, NULL, 16);
 
     // Calculate CRC for the whole received message
-    uint8_t crc_buf[1024] = {0};
+    uint8_t crc_buf[384] = {0}; // The longest we may use it 316 bytes payload. Add the small 16 bytes, 384 is way more than needed.
     size_t len = (size_t)(16 + command->len + 1);
     memcpy((void *)crc_buf, (void *)buf, len);
     uint32_t crc = crc_32(crc_buf, len);
@@ -202,6 +202,7 @@ int parser(char *buf, struct CMD * command, int ParsePayload)
 
 		default:
 			// Parser sucessfull
+			command->result = INPUT;
 			return 0;
 			break;
 		}
