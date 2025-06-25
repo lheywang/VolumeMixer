@@ -95,13 +95,5 @@ int build_slpos_payload(const struct CMD_SLPOS_RX * const cmd, char *buf, int * 
 			cmd->slider5.Pos,
 			cmd->slider5.Mute
 			);
-
-	if (*len != 98)
-	{
-		return SLPOS_ERROR_CODE(0); // Wrong number of chars printed.
-	}
-	return 0;
-
-
 	return 0;
 }

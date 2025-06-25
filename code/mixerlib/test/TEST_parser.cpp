@@ -275,7 +275,11 @@ TEST(Parser, CommandLengthParsing100)
 	EXPECT_STREQ((char*)command.payload, "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 	ASSERT_EQ(retval, 0);
 }
+/*
+ * Removed theses tests after memory optimizations (they does not fit anymore)
+ */
 
+/*
 TEST(Parser, CommandLengthParsing500)
 {
 	// 500 char payload
@@ -301,6 +305,7 @@ TEST(Parser, CommandLengthParsing995)
 	EXPECT_STREQ((char*)command.payload, "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 	ASSERT_EQ(retval, 0);
 }
+*/
 
 /**
  * ===============================================================
@@ -424,6 +429,11 @@ TEST(Parser, CRCError5)
 	ASSERT_EQ(retval, -16);
 }
 
+/*
+ * Removed theses tests after memory optimizations (they does not fit anymore)
+ */
+
+/*
 TEST(Parser, CRCError6)
 {
 	// changed an A in the middle
@@ -445,15 +455,12 @@ TEST(Parser, CRCError7)
 
 	ASSERT_EQ(retval, -16);
 }
+*/
 
 /**
  * ===============================================================
- * FIFHT : A full command parsing !
+ * FIFHT : Some full command parsing !
  * ===============================================================
- */
-
-/*
- * We don't test ALL functions here, because everything is already tested independently.
  */
 
 TEST(Parser, DCONFParser)
@@ -486,3 +493,65 @@ TEST(Parser, DCONFParser)
 	ASSERT_FLOAT_EQ(command.DCONF_TX.adcGain, 1.09);
 	ASSERT_FLOAT_EQ(command.DCONF_TX.adcOffset, 0.012);
 }
+
+TEST(Parser, ASYNCParser)
+{
+	// changed case of an A
+	char buf[1025] = "START;ASYNC;085;{\"apps\":[{\"2\":deadbeef},{\"1\":beefdead},{\"3\":aaaaaaaa},{\"4\":eeeeeeee},{\"5\":55555555}]};885533c2;END";
+	struct CMD command;
+
+	int retval = parser(buf, &command , 1); // This time, parse the output
+
+	ASSERT_EQ(retval, 0);
+
+	ASSERT_EQ(command.len, 85);
+
+	ASSERT_EQ(command.ASYNC_TX.appSlider2, 0xdeadbeef);
+	ASSERT_EQ(command.ASYNC_TX.appSlider1, 0xbeefdead);
+	ASSERT_EQ(command.ASYNC_TX.appSlider3, 0xaaaaaaaa);
+	ASSERT_EQ(command.ASYNC_TX.appSlider4, 0xeeeeeeee);
+	ASSERT_EQ(command.ASYNC_TX.appSlider5, 0x55555555);
+}
+
+TEST(Parser, UICONParser)
+{
+	// changed case of an A
+	char buf[1025] = "START;UICON;316;{\"icon\":{\"slider\":\"1\",\"app\":\"deadbeef\",\"icon\":\"00000000000000000000000000f81f00001e78000003c00080c18301c0f81f03600c30063006600c1003c0089801801998c0031988600611c8300c13c8100813c8100813c8300c138860061198c01b199801b819100370083006e00c600cd005c0f89f0380c103070003c00e001e780c00f81f00000000000000000000000000\",\"store\":1}};064cb0b4;END";
+	struct CMD command;
+
+	int retval = parser(buf, &command , 1); // This time, parse the output
+
+	ASSERT_EQ(retval, 0);
+
+	ASSERT_EQ(command.len, 316);
+
+	ASSERT_EQ(command.UICON_TX.posSlider, 1);
+	ASSERT_EQ(command.UICON_TX.appSlider, 0xdeadbeef);
+	ASSERT_EQ(command.UICON_TX.appStore, 1);
+
+	uint8_t qobuz[128] =
+	{
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0xf8, 0x1f, 0x00,
+		0x00, 0x1e, 0x78, 0x00, 0x00, 0x03, 0xc0, 0x00,
+		0x80, 0xc1, 0x83, 0x01, 0xc0, 0xf8, 0x1f, 0x03,
+		0x60, 0x0c, 0x30, 0x06, 0x30, 0x06, 0x60, 0x0c,
+		0x10, 0x03, 0xc0, 0x08, 0x98, 0x01, 0x80, 0x19,
+		0x98, 0xc0, 0x03, 0x19, 0x88, 0x60, 0x06, 0x11,
+		0xc8, 0x30, 0x0c, 0x13, 0xc8, 0x10, 0x08, 0x13,
+		0xc8, 0x10, 0x08, 0x13, 0xc8, 0x30, 0x0c, 0x13,
+		0x88, 0x60, 0x06, 0x11, 0x98, 0xc0, 0x1b, 0x19,
+		0x98, 0x01, 0xb8, 0x19, 0x10, 0x03, 0x70, 0x08,
+		0x30, 0x06, 0xe0, 0x0c, 0x60, 0x0c, 0xd0, 0x05,
+		0xc0, 0xf8, 0x9f, 0x03, 0x80, 0xc1, 0x03, 0x07,
+		0x00, 0x03, 0xc0, 0x0e, 0x00, 0x1e, 0x78, 0x0c,
+		0x00, 0xf8, 0x1f, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	};
+
+	for (int k = 0; k < 128; k++)
+	{
+		ASSERT_EQ(command.UICON_TX.icon[k], qobuz[k]);
+	}
+}
+

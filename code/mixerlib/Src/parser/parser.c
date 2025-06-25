@@ -80,6 +80,7 @@ int parser(char *buf, struct CMD * command, int ParsePayload)
         if (strcmp((char *)work, (char *)refcmd[k]) == 0)
         {
             cmd_id = k;
+            break;
         }
     }
     switch (cmd_id)
@@ -87,30 +88,37 @@ int parser(char *buf, struct CMD * command, int ParsePayload)
     case 0:
         command->type = SHUTD;
         command->direction = TX;
+        command->result = INPUT;
         break;
     case 1:
         command->type = RINIT;
         command->direction = TX;
+        command->result = INPUT;
         break;
     case 2:
         command->type = DCONF;
         command->direction = TX;
+        command->result = INPUT;
         break;
     case 3:
         command->type = CONNC;
         command->direction = TX;
+        command->result = INPUT;
         break;
     case 4:
         command->type = ASYNC;
         command->direction = TX;
+        command->result = INPUT;
         break;
     case 5:
         command->type = UICON;
         command->direction = TX;
+        command->result = INPUT;
         break;
     case 6:
         command->type = SLPOS;
         command->direction = TX;
+        command->result = INPUT;
         break;
     default:
     	command->result = NACK;
@@ -138,7 +146,7 @@ int parser(char *buf, struct CMD * command, int ParsePayload)
     }
     command->len = strtol((char *)work, NULL, 10);
 
-    memset((void*)command->payload, 0x00, (size_t)1000);
+    memset((void*)command->payload, 0x00, (size_t)PARSER_PAYLOAD_LENGTH);
     memcpy((void *)command->payload, (void *)&buf[16], (size_t)command->len);
 
     // Fetch the CRC32 of the whole message

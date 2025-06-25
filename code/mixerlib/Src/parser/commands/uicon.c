@@ -62,7 +62,7 @@ int parse_uicon_payload(const char * buf, const int len, struct CMD_UICON_TX * c
 	{
 		return -1; // Invalid pointers
 	}
-	if (len < 316)
+	if (len < 315)
 	{
 		return -2; // Not enough characters to parse.
 	}

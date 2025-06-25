@@ -221,11 +221,6 @@ int build_async_payload(const struct CMD_ASYNC_RX * const cmd, char *buf, int * 
 			cmd->slider5.appSlider,
 			cmd->slider5.appMatch
 			);
-
-	if (*len != 145)
-	{
-		return ASYNC_B_ERROR_CODE(0); // Wrong number of chars printed.
-	}
 	return 0;
 }
 
