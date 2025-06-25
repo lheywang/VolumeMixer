@@ -16,6 +16,10 @@
  */
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* -----------------------------------------------------------------
  * ENUMS
  * -----------------------------------------------------------------
@@ -76,3 +80,7 @@ enum command
  * @retval     -1 :     Error while updated status.
  */
 int mixer();
+
+#ifdef __cplusplus
+}
+#endif
