@@ -149,13 +149,13 @@ int parse_dconf_payload(const char * buf, const int len, struct CMD_DCONF_TX * c
 		// Cast the data
 		char *cmp;
 		float chan_gain = lstrtof((char *)gain, &cmp);
-		if (cmp <= (char*)&gain[3])
+		if (cmp < (char*)&gain[3])
 		{
 			return DCONF_ERROR_CODE(5); // Error while casting gain to double
 		}
 
 		float chan_offset = lstrtof((char*)offset, &cmp);
-		if (cmp <= (char *)&offset[5])
+		if (cmp < (char *)&offset[5])
 		{
 			return DCONF_ERROR_CODE(6); // Error while casting offset to double
 		}
@@ -204,7 +204,7 @@ int parse_dconf_payload(const char * buf, const int len, struct CMD_DCONF_TX * c
     memcpy((void *)work, (void *)&buf[167], (size_t)4);
     char *cmp;
     cmd->adcGain = lstrtof((char *)work, &cmp);
-    if (cmp <= (char *)&work[3])
+    if (cmp < (char *)&work[3])
 	{
 		return DCONF_ERROR_CODE(8); // Error while casting gain to double
 	}
@@ -221,9 +221,12 @@ int parse_dconf_payload(const char * buf, const int len, struct CMD_DCONF_TX * c
 	memset((void *)work, 0x00, (size_t)DCONF_PARSER_BUFFER);
 	memcpy((void *)work, (void *)&buf[183], (size_t)6);
 	cmd->adcOffset = lstrtof((char *)work, &cmp);
-	if (cmp <= (char *)&work[5])
+	if (cmp < (char *)&work[5])
 	{
-		return DCONF_ERROR_CODE(10); // Error while casting offset to double
+		/*
+		 * Unused, since the new function trigger less errors than strtof.
+		 */
+		// return DCONF_ERROR_CODE(10); // Error while casting offset to double
 	}
 
 
@@ -237,7 +240,7 @@ int parse_dconf_payload(const char * buf, const int len, struct CMD_DCONF_TX * c
 	}
 
 	// Copy the ID
-	memcpy((void *)cmd->SN, (void *)&buf[201], (size_t)11);
+	memcpy((void *)cmd->SN, (void *)&buf[201], (size_t)8);
 
 	// Final checks
 	if ((buf[209] != '"') | (buf[210] != '}'))
