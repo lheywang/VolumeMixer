@@ -97,13 +97,13 @@ struct CMD_SLPOS_RX
 struct CMD_DCONF_TX
 {
     uint8_t SN[8];
-    double adcGain;
-    double adcOffset;
+    float adcGain;
+    float adcOffset;
 
     struct slider_dconf
     {
-    	double offset;
-        double gain;
+    	float offset;
+    	float gain;
     } slider1;
 
     struct slider_dconf slider2;
