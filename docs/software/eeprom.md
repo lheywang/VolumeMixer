@@ -57,12 +57,13 @@ This data is stored on page 0, with the following placement :
 | 25    | CH3_G    | ADC Gain error for channel 3 (S Q1.6)  |
 | 26    | CH4_G    | ADC Gain error for channel 4 (S Q1.6)  |
 | 27    | CH5_G    | ADC Gain error for channel 5 (S Q1.6)  |
-| 28-31 | CHKSM    | CRC32 of the config                    |
+| 28-31 | EMPTY    | UNUSED                                 |
 | 32-35 | SLIDER1  | HASH for slider 1 before shutdown      |
 | 36-39 | SLIDER2  | HASH for slider 2 before shutdown      |
 | 40-43 | SLIDER3  | HASH for slider 3 before shutdown      |
 | 44-47 | SLIDER4  | HASH for slider 4 before shutdown      |
 | 48-51 | SLIDER5  | HASH for slider 5 before shutdown      |
+| 52-55 | CHKSM    | CRC32 of the config                    |
 
 ### Address reference
 
