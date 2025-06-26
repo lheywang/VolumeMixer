@@ -24,6 +24,7 @@
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
 #include <string.h>
+#include "parser/parser.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -174,6 +175,12 @@ int main(void)
   snprintf(uart2Data,24,"Finished !\n\n");
   HAL_UART_Transmit(&huart2, (uint8_t *)&uart2Data,24, 0xFFFF);
   memset((void*)uart2Data, 0x00, (size_t)24);
+
+  struct CMD command;
+  command.direction = RX;
+  parser(uart2Data, &command, 1);
+  builder(&command, uart2Data);
+
 
   /* USER CODE END 2 */
 

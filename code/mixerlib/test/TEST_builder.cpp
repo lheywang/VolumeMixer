@@ -262,6 +262,8 @@ TEST(Builder, ACK_ASYNC)
 	command.type = ASYNC;
 	command.result = OK;
 
+	command.ASYNC_RX.sync = 1;
+
 	command.ASYNC_RX.slider1.appSlider = 0xdeadbeef;
 	command.ASYNC_RX.slider2.appSlider = 0xfeefbeef;
 	command.ASYNC_RX.slider3.appSlider = 0x12345678;
@@ -277,10 +279,8 @@ TEST(Builder, ACK_ASYNC)
 	int retval = builder(&command, buf);
 
 	ASSERT_EQ(retval, 0);
-	printf("%s", buf);
-	EXPECT_STREQ(buf, "START;ASYNC;146;{\"match\":17,\"apps\":[{\"1\":deadbeef,\"match\":1},{\"2\":feefbeef,\"match\":0},{\"3\":12345678,\"match\":1},{\"4\":9abcdef0,\"match\":0},{\"5\":aaaaaaaa,\"match\":1}]};cacbe155;END");
+	EXPECT_STREQ(buf, "START;ASYNC;145;{\"match\":1,\"apps\":[{\"1\":deadbeef,\"match\":1},{\"2\":feefbeef,\"match\":0},{\"3\":12345678,\"match\":1},{\"4\":9abcdef0,\"match\":0},{\"5\":aaaaaaaa,\"match\":1}]};21839d75;END");
 }
-
 
 TEST(Builder, ACK_SLPOS)
 {
