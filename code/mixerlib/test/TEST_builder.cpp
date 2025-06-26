@@ -7,7 +7,7 @@
  * ===============================================================
  */
 
-TEST(Builder, InvalidBufferCheck)
+TEST(BUILDER, InvalidBufferCheck)
 {
 	// Invalid buffer test
 	char *buf = 0;
@@ -18,7 +18,7 @@ TEST(Builder, InvalidBufferCheck)
 	ASSERT_EQ(retval, -1);
 }
 
-TEST(Builder, InvalidCommandCheck)
+TEST(BUILDER, InvalidCommandCheck)
 {
 	// Invalid buffer test
 	char buf[1024] = {0};
@@ -35,7 +35,7 @@ TEST(Builder, InvalidCommandCheck)
  * ===============================================================
  */
 
-TEST(Builder, InvalidResultCheck)
+TEST(BUILDER, InvalidResultCheck)
 {
 	// Invalid buffer test
 	char buf[1024] = {0};
@@ -48,7 +48,7 @@ TEST(Builder, InvalidResultCheck)
 	ASSERT_EQ(retval, -2);
 }
 
-TEST(Builder, InvalidDirectionCheck)
+TEST(BUILDER, InvalidDirectionCheck)
 {
 	// Invalid buffer test
 	char buf[1024] = {0};
@@ -67,7 +67,7 @@ TEST(Builder, InvalidDirectionCheck)
  * ===============================================================
  */
 
-TEST(Builder, NACK_SLPOS)
+TEST(BUILDER, NACK_SLPOS)
 {
 	// Invalid buffer test
 	char buf[1024] = {0};
@@ -83,7 +83,7 @@ TEST(Builder, NACK_SLPOS)
 	EXPECT_STREQ(buf, "START;SLPOS;004;NACK;c4c62382;END");
 }
 
-TEST(Builder, NACK_UICON)
+TEST(BUILDER, NACK_UICON)
 {
 	// Invalid buffer test
 	char buf[1024] = {0};
@@ -99,7 +99,7 @@ TEST(Builder, NACK_UICON)
 	EXPECT_STREQ(buf, "START;UICON;004;NACK;0e30dac5;END");
 }
 
-TEST(Builder, NACK_ASYNC)
+TEST(BUILDER, NACK_ASYNC)
 {
 	// Invalid buffer test
 	char buf[1024] = {0};
@@ -115,7 +115,7 @@ TEST(Builder, NACK_ASYNC)
 	EXPECT_STREQ(buf, "START;ASYNC;004;NACK;aac2078a;END");
 }
 
-TEST(Builder, NACK_CONNC)
+TEST(BUILDER, NACK_CONNC)
 {
 	// Invalid buffer test
 	char buf[1024] = {0};
@@ -131,7 +131,7 @@ TEST(Builder, NACK_CONNC)
 	EXPECT_STREQ(buf, "START;CONNC;004;NACK;8777bbd8;END");
 }
 
-TEST(Builder, NACK_DCONF)
+TEST(BUILDER, NACK_DCONF)
 {
 	// Invalid buffer test
 	char buf[1024] = {0};
@@ -147,7 +147,7 @@ TEST(Builder, NACK_DCONF)
 	EXPECT_STREQ(buf, "START;DCONF;004;NACK;9a425028;END");
 }
 
-TEST(Builder, NACK_RINIT)
+TEST(BUILDER, NACK_RINIT)
 {
 	// Invalid buffer test
 	char buf[1024] = {0};
@@ -163,7 +163,7 @@ TEST(Builder, NACK_RINIT)
 	EXPECT_STREQ(buf, "START;RINIT;004;NACK;71798c0e;END");
 }
 
-TEST(Builder, NACK_SHUTD)
+TEST(BUILDER, NACK_SHUTD)
 {
 	// Invalid buffer test
 	char buf[1024] = {0};
@@ -185,7 +185,7 @@ TEST(Builder, NACK_SHUTD)
  * ===============================================================
  */
 
-TEST(Builder, ACK_SHUTD)
+TEST(BUILDER, ACK_SHUTD)
 {
 	// Invalid buffer test
 	char buf[1024] = {0};
@@ -201,7 +201,7 @@ TEST(Builder, ACK_SHUTD)
 	EXPECT_STREQ(buf, "START;SHUTD;003;ACK;668281c8;END");
 }
 
-TEST(Builder, ACK_RINIT)
+TEST(BUILDER, ACK_RINIT)
 {
 	// Invalid buffer test
 	char buf[1024] = {0};
@@ -218,7 +218,7 @@ TEST(Builder, ACK_RINIT)
 }
 
 
-TEST(Builder, ACK_DCONF)
+TEST(BUILDER, ACK_DCONF)
 {
 	// Invalid buffer test
 	char buf[1024] = {0};
@@ -235,7 +235,7 @@ TEST(Builder, ACK_DCONF)
 }
 
 
-TEST(Builder, ACK_UICON)
+TEST(BUILDER, ACK_UICON)
 {
 	// Invalid buffer test
 	char buf[1024] = {0};
@@ -252,7 +252,7 @@ TEST(Builder, ACK_UICON)
 }
 
 
-TEST(Builder, ACK_ASYNC)
+TEST(BUILDER, ACK_ASYNC)
 {
 	// Invalid buffer test
 	char buf[1024] = {0};
@@ -282,7 +282,7 @@ TEST(Builder, ACK_ASYNC)
 	EXPECT_STREQ(buf, "START;ASYNC;145;{\"match\":1,\"apps\":[{\"1\":deadbeef,\"match\":1},{\"2\":feefbeef,\"match\":0},{\"3\":12345678,\"match\":1},{\"4\":9abcdef0,\"match\":0},{\"5\":aaaaaaaa,\"match\":1}]};21839d75;END");
 }
 
-TEST(Builder, ACK_SLPOS)
+TEST(BUILDER, ACK_SLPOS)
 {
 	// Invalid buffer test
 	char buf[1024] = {0};

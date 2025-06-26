@@ -27,6 +27,13 @@ extern "C" {
 #include <stdint.h>
 
 /* -----------------------------------------------------------------
+ * DEFINES
+ * -----------------------------------------------------------------
+ */
+#define ADC_RESOLUTION_BITS 12
+#define ADC_MAX_VOLTAGE 	3.3
+
+/* -----------------------------------------------------------------
  * FUNCTIONS
  * -----------------------------------------------------------------
  */
@@ -41,7 +48,9 @@ extern "C" {
  * @param 	code 	The raw 12 bit code
  * @param 	*val 	Pointer to the output buffer.
  *
- * @return 	int (0).
+ * @return 	int
+ * @retval    0 	Operation successfull.
+ * @retval 	- 1 	Out of range code (MAX = 4096).
  */
 int ADC2Double(uint16_t code, double *val);
 
@@ -51,7 +60,8 @@ int ADC2Double(uint16_t code, double *val);
  * @param 	val		Value to be formatted
  * @param 	*code 	Pointer to the output buffer.
  *
- * @return 	int (0).
+ * @retval    0 	Operation successfull.
+ * @retval 	- 1 	Out of range code (MIN = 0.0V, MAX = ADC_MAX_VOLTAGE);
  */
 int Double2ADC(double val, uint16_t *code);
 
@@ -67,7 +77,7 @@ int Double2ADC(double val, uint16_t *code);
  *
  * @return 	int (0).
  */
-int S162Double(uint8_t code, double *val);
+int S162Double(int8_t code, double *val);
 
 /**
  * @brief 	Convert a double into it's raw ADC code representation.
@@ -75,9 +85,11 @@ int S162Double(uint8_t code, double *val);
  * @param 	val		Value to be formatted
  * @param 	*code 	Pointer to the output buffer.
  *
- * @return 	int (0).
+ * @return 	int
+ * @retval    0 	Operation successfull.
+ * @retval 	- 1 	Out of range code (MIN = -1.5, MAX = 1.5);
  */
-int Double2S16(double val, uint8_t *code);
+int Double2S16(double val, int8_t *code);
 
 #ifdef __cplusplus
 }
