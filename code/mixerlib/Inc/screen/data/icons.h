@@ -30,8 +30,8 @@ extern "C" {
  */
 
 extern const uint8_t volumes[5][128];
-extern const uint8_t decimals[10][20];
-extern const uint8_t bigdecimals[2][40];
+extern const uint8_t decimals[10][32];
+extern const uint8_t bigdecimals[2][20];
 
 #ifdef __cplusplus
 }
