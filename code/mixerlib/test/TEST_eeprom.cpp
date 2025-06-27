@@ -57,10 +57,50 @@ TEST(EEPROM, CorrectParser)
 	// Comparisons
 	ASSERT_EQ(retval, 0);
 
+	// Preambule
 	ASSERT_EQ(header.preambule, 0xbeef);
 
+	// SN
 	for (int k = 0; k < 8; k++)
 	{
 		ASSERT_EQ(header.SN[k], 'A');
 	}
+
+	// Offset
+	EXPECT_NEAR(header.offset, 3.3f, 0.001);
+	float res1[] = {0.205f, 0.012f, 0.00f, 3.094f, 3.231};
+	for (int k = 0; k < 5; k++)
+	{
+		EXPECT_NEAR(header.chan_offsets[k], res1[k], 0.001);
+	}
+
+	EXPECT_NEAR(header.gain, 1.0f, 0.001);
+	float res2[] = {-1.5f, -1.0f, -0.5f, 0.0f, 1.5f};
+	for (int k = 0; k < 5; k++)
+	{
+		EXPECT_NEAR(header.chan_gain[k], res2[k], 0.001);
+	}
+
+	for (int k = 0; k < 5; k++)
+	{
+		ASSERT_EQ(header.default_apps[k], 0xdead);
+	}
+
+	for (int k = 0; k < 15; k++)
+	{
+		ASSERT_EQ(hashs.Icons[k].hash, 0xdead);
+		ASSERT_EQ(hashs.Icons[k].address, 0xbeef);
+	}
 }
+
+/*
+ * Add here builder test
+ */
+
+
+/**
+ * ===============================================================
+ * SECOND : ERRORS TRIGGERING
+ * ===============================================================
+ */
+

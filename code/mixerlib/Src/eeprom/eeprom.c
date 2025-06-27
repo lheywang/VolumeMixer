@@ -75,6 +75,10 @@ int parse_raw_eeprom_header(uint8_t buf[128])
 		return -3;
 	}
 
+	// Copy the crc
+	header.crc = crc[0];
+	hashs.crc = crc[1];
+
 	// The preambule was checked, a static init is easier to perform.
 	header.preambule = 0xbeef;
 
@@ -98,31 +102,31 @@ int parse_raw_eeprom_header(uint8_t buf[128])
 	}
 
 	// ADC gain correction factord
-	if (ADC2Double(buf[22], &header.gain) != 0)
+	if (S162Double(buf[22], &header.gain) != 0)
 	{
 		return -5;
 	}
 
 	for (int k = 0; k < 5; k++)
 	{
-		if (ADC2Double(buf[k + 23], &header.chan_offsets[k]) != 0)
+		if (S162Double(buf[k + 23], &header.chan_gain[k]) != 0)
 		{
 			return -5;
 		}
 	}
 
 	// Now, get the hashes for the apps
-	/*
-	 * We can here perform a raw copy, which will indeed cast the data to their right storage
-	 * types.
-	 */
-	memcpy((void *)&header.default_apps, (void *)&buf[32], (size_t)10);
+	for (int k = 0; k < 5; k ++)
+	{
+		header.default_apps[k] = (buf[(2 * k) + 32] << 8) | (buf[(2 * k) + 32 + 1]);
+	}
 
 	// Now, get app addresses and hashes
-	/*
-	 * Same here, we can also perform a raw copy
-	 */
-	memcpy((void *)&hashs.Icons, (void *)&buf[64], (size_t)60); // 15 images can be stored into the EEPROM
+	for (int k = 0; k < 15; k++)
+	{
+		hashs.Icons[k].hash = (buf[(4 * k) + 64] << 8) | buf[(4 * k) + 64 + 1];
+		hashs.Icons[k].address = (buf[(4 * k) + 64 + 2] << 8) | buf[(4 * k) + 64 + 3];
+	}
 
 	return 0;
 }

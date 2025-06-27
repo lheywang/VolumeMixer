@@ -53,7 +53,7 @@ struct EEPROM_hash {
 	struct {
 		uint16_t hash;
 		uint16_t address;
-	} Icons[16];
+	} Icons[15];
 	uint32_t crc;
 };
 
