@@ -34,6 +34,12 @@ extern "C" {
 #define ADC_MAX_VOLTAGE 	3.3
 
 /* -----------------------------------------------------------------
+ * MACROS
+ * -----------------------------------------------------------------
+ */
+#define GET_INTERNAL_HASH(x) ((x & 0x0000FFFF) ^ ((x & 0xFFFF0000) >> 16))
+
+/* -----------------------------------------------------------------
  * FUNCTIONS
  * -----------------------------------------------------------------
  */
@@ -52,7 +58,7 @@ extern "C" {
  * @retval    0 	Operation successfull.
  * @retval 	- 1 	Out of range code (MAX = 4096).
  */
-int ADC2Double(uint16_t code, double *val);
+int ADC2Double(uint16_t code, float *val);
 
 /**
  * @brief 	Convert a double into it's raw ADC code representation.
@@ -63,7 +69,7 @@ int ADC2Double(uint16_t code, double *val);
  * @retval    0 	Operation successfull.
  * @retval 	- 1 	Out of range code (MIN = 0.0V, MAX = ADC_MAX_VOLTAGE);
  */
-int Double2ADC(double val, uint16_t *code);
+int Double2ADC(float val, uint16_t *code);
 
 /**
  * Functions for the GAIN storage (S1.6 format)
@@ -77,7 +83,7 @@ int Double2ADC(double val, uint16_t *code);
  *
  * @return 	int (0).
  */
-int S162Double(int8_t code, double *val);
+int S162Double(int8_t code, float *val);
 
 /**
  * @brief 	Convert a double into it's raw ADC code representation.
@@ -89,7 +95,7 @@ int S162Double(int8_t code, double *val);
  * @retval    0 	Operation successfull.
  * @retval 	- 1 	Out of range code (MIN = -1.5, MAX = 1.5);
  */
-int Double2S16(double val, int8_t *code);
+int Double2S16(float val, int8_t *code);
 
 #ifdef __cplusplus
 }

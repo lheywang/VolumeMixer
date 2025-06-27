@@ -11,7 +11,7 @@ TEST(MATHS, ADC2DoubleInvalidValue)
 {
 	// Invalid buffer test
 	uint16_t code = 5000;
-	double val = 0.0f;
+	float val = 0.0f;
 
 	int retval = ADC2Double(code, &val);
 
@@ -22,7 +22,7 @@ TEST(MATHS, DoubleToADCInvalidValue)
 {
 	// Invalid buffer test
 	uint16_t code = 0;
-	double val = -0.1f;
+	float val = -0.1f;
 
 	int retval = Double2ADC(val, &code);
 	ASSERT_EQ(retval, -1);
@@ -32,7 +32,7 @@ TEST(MATHS, DoubleToADCInvalidValue2)
 {
 	// Invalid buffer test
 	uint16_t code = 0;
-	double val = 3.4f;
+	float val = 3.4f;
 
 	int retval = Double2ADC(val, &code);
 	ASSERT_EQ(retval, -1);
@@ -42,7 +42,7 @@ TEST(MATHS, DoubleToS16InvalidValue)
 {
 	// Invalid buffer test
 	int8_t code = 0;
-	double val = -1.6f;
+	float val = -1.6f;
 
 	int retval = Double2S16(val, &code);
 	ASSERT_EQ(retval, -1);
@@ -52,7 +52,7 @@ TEST(MATHS, DoubleToS16InvalidValue2)
 {
 	// Invalid buffer test
 	int8_t code = 0;
-	double val = 1.6f;
+	float val = 1.6f;
 
 	int retval = Double2S16(val, &code);
 	ASSERT_EQ(retval, -1);
@@ -70,7 +70,7 @@ TEST(MATHS, DoubleToS16InvalidValue2)
 TEST(MATHS, ADC2DoubleZero)
 {
 	uint16_t code = 0;
-	double val;
+	float val;
 
 	int retval = ADC2Double(code, &val);
 
@@ -81,7 +81,7 @@ TEST(MATHS, ADC2DoubleZero)
 TEST(MATHS, ADC2DoubleOne)
 {
 	uint16_t code = 1241;
-	double val;
+	float val;
 
 	int retval = ADC2Double(code, &val);
 
@@ -92,7 +92,7 @@ TEST(MATHS, ADC2DoubleOne)
 TEST(MATHS, ADC2DoubleTwo)
 {
 	uint16_t code = 2482;
-	double val;
+	float val;
 
 	int retval = ADC2Double(code, &val);
 
@@ -103,7 +103,7 @@ TEST(MATHS, ADC2DoubleTwo)
 TEST(MATHS, ADC2DoubleThree)
 {
 	uint16_t code = 3723;
-	double val;
+	float val;
 
 	int retval = ADC2Double(code, &val);
 
@@ -114,7 +114,7 @@ TEST(MATHS, ADC2DoubleThree)
 TEST(MATHS, ADC2DoubleThreeDotThree)
 {
 	uint16_t code = 4095;
-	double val;
+	float val;
 
 	int retval = ADC2Double(code, &val);
 
@@ -129,7 +129,7 @@ TEST(MATHS, ADC2DoubleThreeDotThree)
 TEST(MATHS, Double2ADCZero)
 {
 	uint16_t code = 0;
-	double val = 0.0f;
+	float val = 0.0f;
 
 	int retval = Double2ADC(val, &code);
 
@@ -140,7 +140,7 @@ TEST(MATHS, Double2ADCZero)
 TEST(MATHS, Double2ADCOne)
 {
 	uint16_t code = 0;
-	double val = 1.0f;
+	float val = 1.0f;
 
 	int retval = Double2ADC(val, &code);
 
@@ -151,7 +151,7 @@ TEST(MATHS, Double2ADCOne)
 TEST(MATHS, Double2ADCTwo)
 {
 	uint16_t code = 0;
-	double val = 2.0f;
+	float val = 2.0f;
 
 	int retval = Double2ADC(val, &code);
 
@@ -162,7 +162,7 @@ TEST(MATHS, Double2ADCTwo)
 TEST(MATHS, Double2ADCThree)
 {
 	uint16_t code = 0;
-	double val = 3.0f;
+	float val = 3.0f;
 
 	int retval = Double2ADC(val, &code);
 
@@ -173,7 +173,7 @@ TEST(MATHS, Double2ADCThree)
 TEST(MATHS, Double2ADCThreeDotThree)
 {
 	uint16_t code = 0;
-	double val = 3.3f;
+	float val = 3.3f;
 
 	int retval = Double2ADC(val, &code);
 
@@ -188,7 +188,7 @@ TEST(MATHS, Double2ADCThreeDotThree)
 TEST(MATHS, S162DoubleZero)
 {
 	int8_t code = 0;
-	double val;
+	float val;
 
 	int retval = S162Double(code, &val);
 
@@ -199,7 +199,7 @@ TEST(MATHS, S162DoubleZero)
 TEST(MATHS, S162DoubleOne)
 {
 	int8_t code = 64;
-	double val;
+	float val;
 
 	int retval = S162Double(code, &val);
 
@@ -210,7 +210,7 @@ TEST(MATHS, S162DoubleOne)
 TEST(MATHS, S162DoubleMinusOne)
 {
 	int8_t code = -64;
-	double val;
+	float val;
 
 	int retval = S162Double(code, &val);
 
@@ -221,7 +221,7 @@ TEST(MATHS, S162DoubleMinusOne)
 TEST(MATHS, S162DoubleOneDotFive)
 {
 	int8_t code = 96;
-	double val;
+	float val;
 
 	int retval = S162Double(code, &val);
 
@@ -232,7 +232,7 @@ TEST(MATHS, S162DoubleOneDotFive)
 TEST(MATHS, S162DoubleMinusOneDotFive)
 {
 	int8_t code = -96;
-	double val;
+	float val;
 
 	int retval = S162Double(code, &val);
 
@@ -243,7 +243,7 @@ TEST(MATHS, S162DoubleMinusOneDotFive)
 TEST(MATHS, S162DoubleDotFive)
 {
 	int8_t code = 32;
-	double val;
+	float val;
 
 	int retval = S162Double(code, &val);
 
@@ -254,7 +254,7 @@ TEST(MATHS, S162DoubleDotFive)
 TEST(MATHS, S162DoubleMinusDotFive)
 {
 	int8_t code = -32;
-	double val;
+	float val;
 
 	int retval = S162Double(code, &val);
 
@@ -269,7 +269,7 @@ TEST(MATHS, S162DoubleMinusDotFive)
 TEST(MATHS, Double2S16Zero)
 {
 	int8_t code;
-	double val = 0.0f;
+	float val = 0.0f;
 
 	int retval = Double2S16(val, &code);
 
@@ -280,7 +280,7 @@ TEST(MATHS, Double2S16Zero)
 TEST(MATHS, Double2S16One)
 {
 	int8_t code;
-	double val = 1.0f;
+	float val = 1.0f;
 
 	int retval = Double2S16(val, &code);
 
@@ -291,7 +291,7 @@ TEST(MATHS, Double2S16One)
 TEST(MATHS, Double2S16MinusOne)
 {
 	int8_t code;
-	double val = -1.0f;
+	float val = -1.0f;
 
 	int retval = Double2S16(val, &code);
 
@@ -302,7 +302,7 @@ TEST(MATHS, Double2S16MinusOne)
 TEST(MATHS, Double2S16OneDotFive)
 {
 	int8_t code;
-	double val = 1.5f;
+	float val = 1.5f;
 
 	int retval = Double2S16(val, &code);
 
@@ -313,7 +313,7 @@ TEST(MATHS, Double2S16OneDotFive)
 TEST(MATHS, Double2S16MinusOneDotFive)
 {
 	int8_t code;
-	double val = -1.5f;
+	float val = -1.5f;
 
 	int retval = Double2S16(val, &code);
 
@@ -324,7 +324,7 @@ TEST(MATHS, Double2S16MinusOneDotFive)
 TEST(MATHS, Double2S16DotFive)
 {
 	int8_t code;
-	double val = 0.5f;
+	float val = 0.5f;
 
 	int retval = Double2S16(val, &code);
 
@@ -335,7 +335,7 @@ TEST(MATHS, Double2S16DotFive)
 TEST(MATHS, Double2S16MinusDotFive)
 {
 	int8_t code;
-	double val = -0.5f;
+	float val = -0.5f;
 
 	int retval = Double2S16(val, &code);
 
