@@ -139,6 +139,9 @@ int build_raw_eeprom_header(uint8_t buf[128])
 		return -1;
 	}
 
+	// First, fill the whole buffer with 0xFF (default value of bits on the eeprom, and also the one for the tests
+	memset((void *)buf, 0xFF, (size_t)128);
+
 	// Updated marker
 	buf[0] = 0xbe;
 	buf[1] = 0xef;
@@ -146,46 +149,76 @@ int build_raw_eeprom_header(uint8_t buf[128])
 	// Add the SN
 	memcpy((void *)&buf[2], header.SN, (size_t)8);
 
+	// Temp variable
+	uint16_t tmp;
+
 	// Add ADC offsets
-	if (Double2ADC(header.offset, (uint16_t *)&buf[10]) != 0)
+	if (Double2ADC(header.offset, &tmp) != 0)
 	{
 		return -2;
 	}
+	buf[10] = (tmp & 0xFF00) >> 8;
+	buf[11] = (tmp & 0x00FF);
 
 	for (int k = 0; k < 5; k++)
 	{
-		if (Double2ADC(header.chan_offsets[k], (uint16_t *)&buf[(2 * k) + 12]) != 0)
+		if (Double2ADC(header.chan_offsets[k], &tmp) != 0)
 		{
-			return -4;
+			return -2;
 		}
+
+		buf[(2 * k) + 12] = (tmp & 0xFF00) >> 8;
+		buf[(2 * k) + 12 + 1] = (tmp & 0x00FF);
+
 	}
 
-	// ADC gain correction factord
-	if (Double2ADC(header.gain, (uint16_t *)&buf[22]) != 0)
+	// ADC gain correction factor
+	if (Double2S16(header.gain, (int8_t*)&buf[22]) != 0)
 	{
-		return -5;
+		return -3;
 	}
 
 	for (int k = 0; k < 5; k++)
 	{
-		if (Double2ADC(header.chan_offsets[k], (uint16_t *)&buf[k + 23]) != 0)
+		if (Double2S16(header.chan_gain[k], (int8_t*)&buf[k + 23]) != 0)
 		{
-			return -5;
+			return -3;
 		}
 	}
 
 	// Now, get the hashes for the apps
-	/*
-	 * We can here perform a raw copy, which will indeed cast the data to their right storage
-	 * types.
-	 */
-	memcpy((void *)&buf[32], (void *)&header.default_apps, (size_t)10);
+	for (int k = 0; k < 5; k ++)
+	{
+		buf[(2 * k) + 32] = (header.default_apps[k] & 0xFF00) >> 8;
+		buf[(2 * k) + 32 + 1] = header.default_apps[k] & 0x00FF;
+	}
 
 	// Now, get app addresses and hashes
-	/*
-	 * Same here, we can also perform a raw copy
-	 */
-	memcpy((void *)&buf[64], (void *)&hashs.Icons, (size_t)60); // 15 images can be stored into the EEPROM
+	for (int k = 0; k < 15; k++)
+	{
+		buf[(4 * k) + 64] = (hashs.Icons[k].hash & 0xFF00) >> 8;
+		buf[(4 * k) + 64 + 1] = hashs.Icons[k].hash & 0x00FF;
+		buf[(4 * k) + 64 + 2] = (hashs.Icons[k].address & 0xFF00) >> 8;
+		buf[(4 * k) + 64 + 3] = hashs.Icons[k].address & 0x00FF;
+	}
+
+	// Finally, add the CRCs
+	// First, perform an CRC verification for both of the data elements
+	uint32_t crc[2] =  {
+			crc_32(&buf[0], (size_t)60),
+			crc_32(&buf[64], (size_t)60),
+	};
+
+	// Add the CRC to the buffer
+	buf[60] = (crc[0] & 0xFF000000) >> 24;
+	buf[61] = (crc[0] & 0x00FF0000) >> 16;
+	buf[62] = (crc[0] & 0x0000FF00) >> 8;
+	buf[63] = crc[0] & 0x000000FF;
+
+	buf[124] = (crc[1] & 0xFF000000) >> 24;
+	buf[125] = (crc[1] & 0x00FF0000) >> 16;
+	buf[126] = (crc[1] & 0x0000FF00) >> 8;
+	buf[127] = crc[1] & 0x000000FF;
 
 	return 0;
 }

@@ -54,7 +54,7 @@ inline int Double2ADC(float val, uint16_t *code)
 		return -1;
 	}
 
-	*code = round(val / ADC_RESOLUTION);
+	*code = ceil(val / ADC_RESOLUTION);
 	return 0;
 }
 
