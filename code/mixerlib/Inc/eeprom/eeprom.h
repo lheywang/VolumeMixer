@@ -58,7 +58,7 @@ struct EEPROM_hash {
 };
 
 /* -----------------------------------------------------------------
- * FUNCTIONS
+ * FUNCTIONS TO PARSE AND BUILD THE EEPROM HEADER
  * -----------------------------------------------------------------
  */
 /**
@@ -94,6 +94,78 @@ int parse_raw_eeprom_header(uint8_t buf[128]);
  * @retval 	- 1 : 	Invalid pointer to buf passed.
  */
 int build_raw_eeprom_header(uint8_t buf[128]);
+
+/* -----------------------------------------------------------------
+ * FUNCTIONS TO FETCH EEPROMS ADDRESSES
+ * -----------------------------------------------------------------
+ */
+
+/**
+ * @brief 	Get the address of an app within the eeprom from it's
+ * 			reduced hash (got from crc).
+ *
+ * @details Mostly used internally to retrieve addresses of data
+ * 			within the already known apps hash.
+ *
+ * @warning Any return value under 128 shall be considered as invalid.
+ *
+ * @param 	hash	hash value on 16 bits.
+ * @return	int 	the address value.
+ */
+uint16_t get_eeprom_address_from_hash(uint16_t hash);
+
+/**
+ * @brief 	Get the address of an app within the eeprom from it's
+ * 			crc (raw transmitted from app name).
+ *
+ * @details Mostly used with an unknown app crc is fetched.
+ *
+ * @warning Any return value under 128 shall be considered as invalid.
+ *
+ * @param 	hash	hash value on 32 bits.
+ * @return	int 	the address value.
+ */
+uint16_t get_eeprom_address_from_app(uint32_t hash);
+
+/**
+ * @brief 	Get the address of an empty EEPROM slot.
+ *
+ * @details Used to allocate a new memory slot.
+ *
+ * @warning Any return value under 128 shall be considered as invalid.
+ *
+ * @param 	app 	the crc of the app where the data need to be allocated.
+ * @return	int 	the address value.
+ */
+uint16_t get_new_eeprom_address_from_app(uint32_t app);
+
+/**
+ * @brief 	Get the address of an empty EEPROM slot.
+ *
+ * @details Used to allocate a new memory slot.
+ *
+ * @warning Any return value under 128 shall be considered as invalid.
+ *
+ * @param 	app 	the raw hash.
+ * @return	int 	the address value.
+ */
+uint16_t get_new_eeprom_address_from_hash(uint16_t hash);
+
+/**
+ * @brief	Free the address of an existing EEPROM slot.
+ *
+ * @param 	hash	The app hash to be freed.
+ * @return	int		0.
+ */
+int free_eeprom_address(uint16_t hash);
+
+/**
+ * @brief	Compute the hash of a crc to fit into 16 bit variables.
+ *
+ * @param 	input		32 bits crc
+ * @return	uint16_t	the 16 bit "equivalent".
+ */
+uint16_t GetHashFromCRC(uint32_t input);
 
 #ifdef __cplusplus
 }

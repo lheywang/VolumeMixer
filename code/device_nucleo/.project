@@ -3,6 +3,7 @@
 	<name>device_nucleo</name>
 	<comment></comment>
 	<projects>
+		<project>mixerlib</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

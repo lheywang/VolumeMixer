@@ -497,4 +497,69 @@ TEST(EEPROM, BuilderInvalidBuffer)
 	ASSERT_EQ(retval, -1);
 }
 
+TEST(EEPROM, AccessTests)
+{
+
+	// Set some addresses
+	for (int k = 0; k < 15; k++)
+	{
+		hashs.Icons[k].hash = (0xaaa0 + k);
+		hashs.Icons[k].address = ((k * 128) + 128);
+	}
+
+	// Comparisons
+	for (int k = 0; k < 15; k++)
+	{
+		ASSERT_EQ(get_eeprom_address_from_hash(0xaaa0 + k), ((k * 128) + 128));
+	}
+	for (int k = 0; k < 15; k++)
+	{
+		uint32_t tmp = 0x555FFFFF - k;
+		ASSERT_EQ(get_eeprom_address_from_app(tmp), ((k * 128) + 128));
+	}
+}
+
+
+TEST(EEPROM, FreeAndAllocate)
+{
+
+	// Set some addresses
+	for (int k = 0; k < 15; k++)
+	{
+		hashs.Icons[k].hash = (0xaaa0 + k);
+		hashs.Icons[k].address = ((k * 128) + 128);
+	}
+
+	// Comparisons
+	for (int k = 0; k < 15; k++)
+	{
+		ASSERT_EQ(free_eeprom_address(0xaaa0 + k), 0);
+	}
+
+	// Verify correct addressing
+	for (int k = 0; k < 15; k++)
+	{
+		ASSERT_EQ(hashs.Icons[k].hash, 0);
+	}
+
+	// Fetch new addresses
+	for (int k = 0; k < 6; k++)
+	{
+		ASSERT_EQ(get_new_eeprom_address_from_hash(0xaaa0), ((k * 128) + 128));
+	}
+	// Fetch new addresses
+	for (int k = 6; k < 14; k++)
+	{
+		ASSERT_EQ(get_new_eeprom_address_from_app(0x555FFFFF), ((k * 128) + 128));
+	}
+
+	// Ensure hashes where correctly storeds
+	for (int k = 0; k < 14; k ++)
+	{
+		ASSERT_EQ(hashs.Icons[k].hash, 0xaaa0);
+	}
+}
+
+
+
 

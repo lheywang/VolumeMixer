@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "parser/parser.h"
+#include "eeprom/eeprom.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -75,7 +76,8 @@ static void MX_CRC_Init(void);
 static void MX_I2C2_Init(void);
 static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
-
+extern struct EEPROM_Header header;
+extern struct EEPROM_hash hashs;
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -176,10 +178,15 @@ int main(void)
   HAL_UART_Transmit(&huart2, (uint8_t *)&uart2Data,24, 0xFFFF);
   memset((void*)uart2Data, 0x00, (size_t)24);
 
+  // here only to include the right symbols into the build system...
   struct CMD command;
   command.direction = RX;
   parser(uart2Data, &command, 1);
   builder(&command, uart2Data);
+
+  uint8_t buf[128] = { 0 };
+  parse_raw_eeprom_header(buf);
+  build_raw_eeprom_header(buf);
 
 
   /* USER CODE END 2 */
