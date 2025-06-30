@@ -13,6 +13,7 @@
 #include <stdint.h>
 
 int show_icon(uint8_t *buf);
+int show_buffer(uint8_t *buf);
 
 
 

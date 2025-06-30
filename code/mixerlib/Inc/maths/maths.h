@@ -44,7 +44,7 @@ extern "C" {
  * -----------------------------------------------------------------
  */
 
-/**
+/*
  * Functions for the ADC conversion
  */
 
@@ -58,7 +58,7 @@ extern "C" {
  * @retval    0 	Operation successfull.
  * @retval 	- 1 	Out of range code (MAX = 4096).
  */
-int ADC2Double(uint16_t code, float *val);
+int ADC2Double(int16_t code, float *val);
 
 /**
  * @brief 	Convert a double into it's raw ADC code representation.
@@ -69,7 +69,7 @@ int ADC2Double(uint16_t code, float *val);
  * @retval    0 	Operation successfull.
  * @retval 	- 1 	Out of range code (MIN = 0.0V, MAX = ADC_MAX_VOLTAGE);
  */
-int Double2ADC(float val, uint16_t *code);
+int Double2ADC(float val, int16_t *code);
 
 /**
  * Functions for the GAIN storage (S1.6 format)
@@ -96,6 +96,20 @@ int S162Double(int8_t code, float *val);
  * @retval 	- 1 	Out of range code (MIN = -1.5, MAX = 1.5);
  */
 int Double2S16(float val, int8_t *code);
+
+/*
+ * Functions for to get the real position of the slider in %
+ */
+
+/**
+ * @brief	Convert, and correct the value of the slider into it's percentage representation.
+ *
+ * @param 	value	raw 12 bits value from the ADC
+ * @param 	slider	position of the slider (1-5). If 0, it's correction is bypassed.
+ *
+ * @return	int		The position percentage
+ */
+int ADC2POS(uint16_t value, int slider);
 
 #ifdef __cplusplus
 }

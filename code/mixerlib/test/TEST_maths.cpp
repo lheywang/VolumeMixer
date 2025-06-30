@@ -10,7 +10,7 @@
 TEST(MATHS, ADC2DoubleInvalidValue)
 {
 	// Invalid buffer test
-	uint16_t code = 5000;
+	int16_t code = 5000;
 	float val = 0.0f;
 
 	int retval = ADC2Double(code, &val);
@@ -21,7 +21,7 @@ TEST(MATHS, ADC2DoubleInvalidValue)
 TEST(MATHS, DoubleToADCInvalidValue)
 {
 	// Invalid buffer test
-	uint16_t code = 0;
+	int16_t code = 0;
 	float val = -0.1f;
 
 	int retval = Double2ADC(val, &code);
@@ -31,7 +31,7 @@ TEST(MATHS, DoubleToADCInvalidValue)
 TEST(MATHS, DoubleToADCInvalidValue2)
 {
 	// Invalid buffer test
-	uint16_t code = 0;
+	int16_t code = 0;
 	float val = 3.4f;
 
 	int retval = Double2ADC(val, &code);
@@ -69,7 +69,7 @@ TEST(MATHS, DoubleToS16InvalidValue2)
  */
 TEST(MATHS, ADC2DoubleZero)
 {
-	uint16_t code = 0;
+	int16_t code = 0;
 	float val;
 
 	int retval = ADC2Double(code, &val);
@@ -80,7 +80,7 @@ TEST(MATHS, ADC2DoubleZero)
 
 TEST(MATHS, ADC2DoubleOne)
 {
-	uint16_t code = 1241;
+	int16_t code = 1241;
 	float val;
 
 	int retval = ADC2Double(code, &val);
@@ -89,9 +89,20 @@ TEST(MATHS, ADC2DoubleOne)
 	EXPECT_NEAR(val, 1.0f, 0.001f);
 }
 
+TEST(MATHS, ADC2DoubleMinusOne)
+{
+	int16_t code = -1241;
+	float val;
+
+	int retval = ADC2Double(code, &val);
+
+	ASSERT_EQ(retval, 0);
+	EXPECT_NEAR(val, -1.0f, 0.001f);
+}
+
 TEST(MATHS, ADC2DoubleTwo)
 {
-	uint16_t code = 2482;
+	int16_t code = 2482;
 	float val;
 
 	int retval = ADC2Double(code, &val);
@@ -100,9 +111,20 @@ TEST(MATHS, ADC2DoubleTwo)
 	EXPECT_NEAR(val, 2.0f, 0.001f);
 }
 
+TEST(MATHS, ADC2DoubleMinusTwo)
+{
+	int16_t code = -2482;
+	float val;
+
+	int retval = ADC2Double(code, &val);
+
+	ASSERT_EQ(retval, 0);
+	EXPECT_NEAR(val, -2.0f, 0.001f);
+}
+
 TEST(MATHS, ADC2DoubleThree)
 {
-	uint16_t code = 3723;
+	int16_t code = 3723;
 	float val;
 
 	int retval = ADC2Double(code, &val);
@@ -111,9 +133,20 @@ TEST(MATHS, ADC2DoubleThree)
 	EXPECT_NEAR(val, 3.0f, 0.001f);
 }
 
+TEST(MATHS, ADC2DoubleMinusThree)
+{
+	int16_t code = -3723;
+	float val;
+
+	int retval = ADC2Double(code, &val);
+
+	ASSERT_EQ(retval, 0);
+	EXPECT_NEAR(val, -3.0f, 0.001f);
+}
+
 TEST(MATHS, ADC2DoubleThreeDotThree)
 {
-	uint16_t code = 4095;
+	int16_t code = 4095;
 	float val;
 
 	int retval = ADC2Double(code, &val);
@@ -122,13 +155,24 @@ TEST(MATHS, ADC2DoubleThreeDotThree)
 	EXPECT_NEAR(val, 3.3f, 0.001f);
 }
 
+TEST(MATHS, ADC2DoubleMinusThreeDotThree)
+{
+	int16_t code = -4095;
+	float val;
+
+	int retval = ADC2Double(code, &val);
+
+	ASSERT_EQ(retval, 0);
+	EXPECT_NEAR(val, -3.3f, 0.001f);
+}
+
 /**
  * Double 2 ADC
  */
 
 TEST(MATHS, Double2ADCZero)
 {
-	uint16_t code = 0;
+	int16_t code = 0;
 	float val = 0.0f;
 
 	int retval = Double2ADC(val, &code);
@@ -139,7 +183,7 @@ TEST(MATHS, Double2ADCZero)
 
 TEST(MATHS, Double2ADCOne)
 {
-	uint16_t code = 0;
+	int16_t code = 0;
 	float val = 1.0f;
 
 	int retval = Double2ADC(val, &code);
@@ -150,7 +194,7 @@ TEST(MATHS, Double2ADCOne)
 
 TEST(MATHS, Double2ADCTwo)
 {
-	uint16_t code = 0;
+	int16_t code = 0;
 	float val = 2.0f;
 
 	int retval = Double2ADC(val, &code);
@@ -161,7 +205,7 @@ TEST(MATHS, Double2ADCTwo)
 
 TEST(MATHS, Double2ADCThree)
 {
-	uint16_t code = 0;
+	int16_t code = 0;
 	float val = 3.0f;
 
 	int retval = Double2ADC(val, &code);
@@ -172,7 +216,7 @@ TEST(MATHS, Double2ADCThree)
 
 TEST(MATHS, Double2ADCThreeDotThree)
 {
-	uint16_t code = 0;
+	int16_t code = 0;
 	float val = 3.3f;
 
 	int retval = Double2ADC(val, &code);

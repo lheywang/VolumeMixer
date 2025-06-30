@@ -36,7 +36,7 @@
 /**
  * ADC Conversions
  */
-inline int ADC2Double(uint16_t code, float *val)
+inline int ADC2Double(int16_t code, float *val)
 {
 	if (code > (1 << ADC_RESOLUTION_BITS))
 	{
@@ -47,7 +47,7 @@ inline int ADC2Double(uint16_t code, float *val)
 	return 0;
 }
 
-inline int Double2ADC(float val, uint16_t *code)
+inline int Double2ADC(float val, int16_t *code)
 {
 	if ((0 > val) | (val > ADC_MAX_VOLTAGE))
 	{
