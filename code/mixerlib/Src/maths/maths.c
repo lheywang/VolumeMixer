@@ -33,7 +33,7 @@
  * -----------------------------------------------------------------
  */
 
-/**
+/*
  * ADC Conversions
  */
 inline int ADC2Double(int16_t code, float *val)

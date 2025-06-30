@@ -23,22 +23,64 @@ extern "C" {
  * INCLUDING LIBS
  * -----------------------------------------------------------------
  */
-
-/* -----------------------------------------------------------------
- * DEFINES
- * -----------------------------------------------------------------
- */
-#define PARSER_PAYLOAD_LENGTH 384UL
+#include <stdint.h>
 
 /* -----------------------------------------------------------------
  * ENUMS
  * -----------------------------------------------------------------
  */
+enum BufferRval {
+	OK,
+	MEMREQUEST,
+	ERROR
+};
+
+enum ChannelStatus {
+	MUTE,
+	UNMUTE
+};
+
+enum RefreshType {
+	FULL,
+	VOLUME,
+	STATUS
+};
 
 /* -----------------------------------------------------------------
- * ENUMS
+ * STRUCTS
  * -----------------------------------------------------------------
  */
+struct BufferRequest {
+
+	enum BufferRval status;
+
+	uint16_t address;
+	uint16_t len;
+	uint8_t buffer[512];
+
+};
+
+struct ScreenOrder {
+
+	enum RefreshType type;
+
+	int Volume;
+	int Status;
+	uint8_t icon[128];
+};
+
+/* -----------------------------------------------------------------
+ * FUNCTIONS
+ * -----------------------------------------------------------------
+ */
+
+/**
+ * @brief	Fill a buffer with the appropriate data to be displayed on the screen
+ *
+ * @param 	cmd	A struct that contain the different orders.
+ * @return	BufferRequest : A struct that contain different infos about the buffer, including it.
+ */
+struct BufferRequest* draw_buffer(struct ScreenOrder const *cmd);
 
 #ifdef __cplusplus
 }
