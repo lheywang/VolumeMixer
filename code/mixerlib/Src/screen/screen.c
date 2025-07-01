@@ -19,21 +19,18 @@
 // Header
 #include "screen/screen.h"
 
+// Others headers
+#include "screen/buffers/buffers.h"
+
 // STD
 #include <stdint.h>
 #include <stddef.h>
+#include <string.h>
 
 /* -----------------------------------------------------------------
  * BUFFER VARIABLES
  * -----------------------------------------------------------------
  */
-/*
- * Theses store the raw bytestream out of the drawing functions.
- * There's one only one of them, since we're not supposed to get high
- * refresh rates, and we may use a simple partial refresh.
- */
-uint8_t __video_buffer[512] = { 0 };
-
 /*
  * Buffer for the output type
  */
@@ -59,15 +56,30 @@ struct BufferRequest* draw_buffer(struct ScreenOrder const *cmd)
 		return &__rval;
 	}
 
+	// Ensure the return struct is correctly filled
+	memcpy((void *)&__rval.command, (void *)cmd, (size_t)sizeof(struct ScreenOrder));
+
+	// Then, fill the buffer
 	switch (cmd->type)
 	{
 	case FULL:
+		_draw_icon(&__rval);
+		_draw_volume(&__rval);
+		_draw_status(&__rval);
+		_draw_mute(&__rval);
 		break;
 	case VOLUME:
+		_draw_volume(&__rval);
+		_draw_status(&__rval);
 		break;
 	case STATUS:
+		_draw_mute(&__rval);
 		break;
 	}
+
+	// Finally, set flags and returns
+	__rval.status = OK;
+	return &__rval;
 }
 
 

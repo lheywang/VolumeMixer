@@ -50,6 +50,15 @@ enum RefreshType {
  * STRUCTS
  * -----------------------------------------------------------------
  */
+struct ScreenOrder {
+
+	enum RefreshType type;
+	enum ChannelStatus status;
+
+	int volume;
+	uint8_t icon[128];
+};
+
 struct BufferRequest {
 
 	enum BufferRval status;
@@ -58,15 +67,8 @@ struct BufferRequest {
 	uint16_t len;
 	uint8_t buffer[512];
 
-};
+	struct ScreenOrder command;
 
-struct ScreenOrder {
-
-	enum RefreshType type;
-
-	int Volume;
-	int Status;
-	uint8_t icon[128];
 };
 
 /* -----------------------------------------------------------------

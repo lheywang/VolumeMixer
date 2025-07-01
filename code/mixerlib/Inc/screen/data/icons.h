@@ -29,9 +29,10 @@ extern "C" {
  * -----------------------------------------------------------------
  */
 
-extern const uint8_t volumes[5][128];
-extern const uint8_t decimals[10][32];
-extern const uint8_t bigdecimals[2][20];
+extern const uint8_t volumes[5][128]; // Volumes
+extern const uint8_t letters[4][11]; // MUTE Letters
+extern const uint8_t decimals[10][32]; // Numbers
+extern const uint8_t bigdecimals[2][20]; // Smaller numbers (only 1 and 0)
 
 #ifdef __cplusplus
 }

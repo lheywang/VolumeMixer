@@ -1,10 +1,10 @@
 /** ================================================================
- * @file    screen/buffers/icon.c
+ * @file    screen/data/status.c
  *
- * @brief   This file implement the functions to that fill an icon
- * 			into the main graphical buffer.
+ * @brief   This file implement define the variable that store
+ * 			the speaker status on screen.
  *
- * @date    27-06-2025
+ * @date    30-06-2025
  *
  * @version 1.0.0
  *
@@ -18,26 +18,25 @@
  * -----------------------------------------------------------------
  */
 // Header
-#include "screen/buffers/buffers.h"
-
-// Others header
 #include "screen/data/icons.h"
 
 // STD
 #include <stdint.h>
-#include <string.h>
 
 /* -----------------------------------------------------------------
- * FUNCTIONS
+ * VARIABLES
  * -----------------------------------------------------------------
  */
 
-inline int _draw_icon(struct BufferRequest* const cmd)
-{
-	// This function only copy the buffer from the output into the right place
-	memcpy((void *)&cmd->buffer[ICON_START], (void *)cmd->command.icon, (size_t)(ICON_END - ICON_START));
-	return 0;
-}
-
+const uint8_t letters[4][11] = {
+	// 'M', 7x11px
+	{0x00, 0x42, 0x66, 0x5a, 0x42, 0x42, 0x42, 0x42, 0x42, 0x42, 0x00},
+	// 'U', 7x11px
+	{0x00, 0x42, 0x42, 0x42, 0x42, 0x42, 0x42, 0x42, 0x42, 0x3c, 0x00},
+	// 'T', 7x11px
+	{0x00, 0x7e, 0x18, 0x18, 0x18, 0x18, 0x18, 0x18, 0x18, 0x18, 0x00},
+	// 'E', 7x11px
+	{0x00, 0x7e, 0x02, 0x02, 0x02, 0x0e, 0x02, 0x02, 0x02, 0x7e, 0x00}
+};
 
 

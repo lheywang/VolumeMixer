@@ -44,7 +44,7 @@ int show_icon(uint8_t *buf)
 		{
 			if ((tmp & (1 << row)) != 0)
 			{
-				printf("o");
+				printf("x");
 			}
 			else
 			{
@@ -68,7 +68,7 @@ int show_buffer(uint8_t *buf)
 		{
 			if ((tmp & (1 << row)) != 0)
 			{
-				printf("o");
+				printf("x");
 			}
 			else
 			{
