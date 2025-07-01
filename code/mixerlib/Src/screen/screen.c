@@ -35,7 +35,7 @@
  * Buffer for the output type
  */
 struct BufferRequest __rval = {
-		.status = ERROR,
+		.status = SCREEN_ERROR,
 		.address = 0x0000,
 		.buffer = { 0 },
 		.len = 0x0000,
@@ -52,9 +52,12 @@ struct BufferRequest* draw_buffer(struct ScreenOrder const *cmd)
 	// input checks
 	if (cmd == NULL)
 	{
-		__rval.status = ERROR;
+		__rval.status = SCREEN_ERROR;
 		return &__rval;
 	}
+
+	// Clear the actual buffer
+	memset((void *)&__rval.buffer, 0x00, (size_t)512);
 
 	// Ensure the return struct is correctly filled
 	memcpy((void *)&__rval.command, (void *)cmd, (size_t)sizeof(struct ScreenOrder));
@@ -78,7 +81,7 @@ struct BufferRequest* draw_buffer(struct ScreenOrder const *cmd)
 	}
 
 	// Finally, set flags and returns
-	__rval.status = OK;
+	__rval.status = SCREEN_OK;
 	return &__rval;
 }
 

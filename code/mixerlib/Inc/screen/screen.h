@@ -30,9 +30,9 @@ extern "C" {
  * -----------------------------------------------------------------
  */
 enum BufferRval {
-	OK,
+	SCREEN_OK,
 	MEMREQUEST,
-	ERROR
+	SCREEN_ERROR
 };
 
 enum ChannelStatus {

@@ -44,7 +44,7 @@ int show_icon(uint8_t *buf)
 		{
 			if ((tmp & (1 << row)) != 0)
 			{
-				printf("x");
+				printf("\e[47m0\e[0m");
 			}
 			else
 			{
@@ -68,7 +68,7 @@ int show_buffer(uint8_t *buf)
 		{
 			if ((tmp & (1 << row)) != 0)
 			{
-				printf("x");
+				printf("\e[47m0\e[0m");
 			}
 			else
 			{

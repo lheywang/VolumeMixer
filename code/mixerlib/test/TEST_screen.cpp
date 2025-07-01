@@ -8,6 +8,8 @@
  * ===============================================================
  */
 
+// #define SHOW_BUFFER
+
 TEST(SCREEN, CorrectFullFiller)
 {
 	struct ScreenOrder cmd = {
@@ -35,40 +37,67 @@ TEST(SCREEN, CorrectFullFiller)
 			};
 
 	struct BufferRequest *rval = draw_buffer(&cmd);
+	ASSERT_EQ(rval->status, SCREEN_OK);
 
 	// Then, show buffer
+#ifdef SHOW_BUFFER
 	show_buffer(rval->buffer);
+#endif
 
 	cmd.volume = 23;
 	rval = draw_buffer(&cmd);
+	ASSERT_EQ(rval->status, SCREEN_OK);
 
 	// Then, show buffer
+#ifdef SHOW_BUFFER
 	show_buffer(rval->buffer);
+#endif
 
 	cmd.volume = 45;
 	rval = draw_buffer(&cmd);
+	ASSERT_EQ(rval->status, SCREEN_OK);
 
 	// Then, show buffer
+#ifdef SHOW_BUFFER
 	show_buffer(rval->buffer);
+#endif
 
 	cmd.volume = 67;
 	rval = draw_buffer(&cmd);
+	ASSERT_EQ(rval->status, SCREEN_OK);
 
 	// Then, show buffer
+#ifdef SHOW_BUFFER
 	show_buffer(rval->buffer);
+#endif
 
 	cmd.volume = 89;
 	rval = draw_buffer(&cmd);
+	ASSERT_EQ(rval->status, SCREEN_OK);
 
 	// Then, show buffer
+#ifdef SHOW_BUFFER
 	show_buffer(rval->buffer);
+#endif
+
+	cmd.volume = 100;
+	rval = draw_buffer(&cmd);
+	ASSERT_EQ(rval->status, SCREEN_OK);
+
+	// Then, show buffer
+#ifdef SHOW_BUFFER
+	show_buffer(rval->buffer);
+#endif
 
 	cmd.volume = 89;
 	cmd.status = MUTE;
 	rval = draw_buffer(&cmd);
+	ASSERT_EQ(rval->status, SCREEN_OK);
 
 	// Then, show buffer
+#ifdef SHOW_BUFFER
 	show_buffer(rval->buffer);
+#endif
 
 
 }
