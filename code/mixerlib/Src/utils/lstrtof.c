@@ -46,7 +46,7 @@ float lstrtof(char *input, char **end)
 
 	// Check for sign
 	float sign;
-	int intpos = 0;
+	unsigned int intpos = 0;
 	switch (input[0])
 	{
 	case '-':
@@ -69,7 +69,7 @@ float lstrtof(char *input, char **end)
 	int off = (intpos == 1) ? 1 : 0;
 
 	// Fetch the integer part of the number
-	while(isdigit(input[intpos])) // Check for separator or end of string
+	while(isdigit((unsigned int)input[intpos])) // Check for separator or end of string
 	{
 		// Check if we risk an overflow of the buffer
 		if (intpos > INTEGER_PART_BUFFER_SIZE)
@@ -95,8 +95,8 @@ float lstrtof(char *input, char **end)
 	}
 
 	// Fetch the decimal part of the number
-	int posbckp = intpos;
-	while(isdigit(input[intpos])) // Check for separator or end of string
+	unsigned int posbckp = intpos;
+	while(isdigit((unsigned int)input[intpos])) // Check for separator or end of string
 	{
 		// Check if we risk an overflow of the buffer
 		if ((intpos - posbckp) > DECIMAL_PART_BUFFER_SIZE)

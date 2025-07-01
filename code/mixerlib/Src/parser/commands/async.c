@@ -208,7 +208,7 @@ int build_async_payload(const struct CMD_ASYNC_RX * const cmd, char *buf, int * 
 
 	*len = snprintf(buf,
 			160,
-			"{\"match\":%1d,\"apps\":[{\"1\":%08x,\"match\":%1d},{\"2\":%08x,\"match\":%1d},{\"3\":%08x,\"match\":%1d},{\"4\":%08x,\"match\":%1d},{\"5\":%08x,\"match\":%1d}]}",
+			"{\"match\":%1d,\"apps\":[{\"1\":%08lx,\"match\":%1lu},{\"2\":%08lx,\"match\":%1lu},{\"3\":%08lx,\"match\":%1lu},{\"4\":%08lx,\"match\":%1lu},{\"5\":%08lx,\"match\":%1lu}]}",
 			cmd->sync,
 			cmd->slider1.appSlider,
 			cmd->slider1.appMatch,

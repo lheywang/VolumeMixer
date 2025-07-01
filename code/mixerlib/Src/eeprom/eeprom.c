@@ -150,7 +150,7 @@ int build_raw_eeprom_header(uint8_t buf[128])
 	memcpy((void *)&buf[2], header.SN, (size_t)8);
 
 	// Temp variable
-	uint16_t tmp;
+	int16_t tmp;
 
 	// Add ADC offsets
 	if (Double2ADC(header.offset, &tmp) != 0)
