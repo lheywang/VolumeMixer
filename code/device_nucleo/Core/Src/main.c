@@ -24,6 +24,8 @@
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
 #include <string.h>
+#include <parser/parser.h>
+#include "external_drivers/ssd1306.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -176,6 +178,25 @@ int main(void)
   memset((void*)uart2Data, 0x00, (size_t)24);
 
   /* USER CODE END 2 */
+  SSD1306_Init(&hi2c2);
+  SSD1306_Fill(false);
+  /*
+  for (int k = 0; k < 128; k++) // Lines, now columns
+  {
+	  SSD1306_DrawPixel(k, 1, true);
+	  SSD1306_DrawPixel(k, 15, true);
+	  SSD1306_DrawPixel(k, 31, true);
+  }
+
+  for (int k = 0; k < 32; k++) // columns, now lines
+  {
+	  SSD1306_DrawPixel(0, k, true);
+	  SSD1306_DrawPixel(15, k, true);
+	  SSD1306_DrawPixel(31, k, true);
+  }
+*/
+  SSD1306_DrawBitmap(30, 0, 32, 32, volumes[3]);
+  SSD1306_UpdateScreen();
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
