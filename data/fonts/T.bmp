@@ -1,0 +1,4 @@
+#define /home/lheywang/Dev/VolumeMixer/data/icons/T.bmp_width 8
+#define /home/lheywang/Dev/VolumeMixer/data/icons/T.bmp_height 11
+static unsigned char /home/lheywang/Dev/VolumeMixer/data/icons/T.bmp_bits[] = {
+   0x00, 0x7e, 0x18, 0x18, 0x18, 0x18, 0x18, 0x18, 0x18, 0x18, 0x00};

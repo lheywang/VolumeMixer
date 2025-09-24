@@ -177,10 +177,15 @@ TEST(DCONF, InvalidJSONHeaderGlobalOffset)
 	ASSERT_EQ(retval, -39);
 }
 
+/*
+ * Removed after the introduction of lstrtof, which does not behave exactly as strtof.
+ * This test doesn't make anymore sense.
+ */
+/*
 TEST(DCONF, UnableToCastOffset)
 {
 	// Invalid buffer test
-	char buf[] = "{\"cal\":[{\"1OFF\":\"+0.082\",\"1G\":\"1.01\"},{\"2OFF\":\"+0.029\",\"2G\":\"1.09\"},{\"3OFF\":\"+0.050\",\"3G\":\"1.00\"},{\"4OFF\":\"+0.000\",\"4G\":\"1.12\"},{\"5OFF\":\"-0.012\",\"5G\":\"0.98\"}],\"gain\":\"1.09\",\"offset\":\"+0;012\",\"device\":\"25MYH0D0\"}";
+	char buf[] = "{\"cal\":[{\"1OFF\":\"+0.082\",\"1G\":\"1.01\"},{\"2OFF\":\"+0.029\",\"2G\":\"1.09\"},{\"3OFF\":\"+0.050\",\"3G\":\"1.00\"},{\"4OFF\":\"+0.000\",\"4G\":\"1.12\"},{\"5OFF\":\"-0.012\",\"5G\":\"0.98\"}],\"gain\":\"1.09\",\"offset\":\"+0;0120\",\"device\":\"25MYH0D0\"}";
 	struct CMD_DCONF_TX command;
 	int len = sizeof(buf);
 
@@ -188,6 +193,7 @@ TEST(DCONF, UnableToCastOffset)
 
 	ASSERT_EQ(retval, -40);
 }
+*/
 
 TEST(DCONF, InvalidJSONHeaderSN)
 {

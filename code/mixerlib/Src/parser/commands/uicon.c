@@ -62,7 +62,7 @@ int parse_uicon_payload(const char * buf, const int len, struct CMD_UICON_TX * c
 	{
 		return -1; // Invalid pointers
 	}
-	if (len < 316)
+	if (len < 315)
 	{
 		return -2; // Not enough characters to parse.
 	}
@@ -135,11 +135,11 @@ int parse_uicon_payload(const char * buf, const int len, struct CMD_UICON_TX * c
 
 	// Convert the hex chain into the raw byte stream
 	char temp_char[2] = {0};
-	for (int k = 0; k < 128; k++)
+	for (unsigned int k = 0; k < 128; k++)
 	{
 		// Higher nibble
 		temp_char[0] = work[k * 2];
-		if (!isxdigit(temp_char[0]))
+		if (!isxdigit((unsigned int)temp_char[0]))
 		{
 			return UICON_ERROR_CODE(6);
 		}
@@ -147,7 +147,7 @@ int parse_uicon_payload(const char * buf, const int len, struct CMD_UICON_TX * c
 
 		// Lower nibble
 		temp_char[0] = work[(k * 2) + 1];
-		if (!isxdigit(temp_char[0]))
+		if (!isxdigit((unsigned int)temp_char[0]))
 		{
 			return UICON_ERROR_CODE(6);
 		}

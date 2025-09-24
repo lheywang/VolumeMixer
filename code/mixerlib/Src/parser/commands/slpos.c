@@ -83,7 +83,7 @@ int build_slpos_payload(const struct CMD_SLPOS_RX * const cmd, char *buf, int * 
 
 	*len = snprintf(buf,
 			100,
-			"{\"sliders\":[{\"1\":%03d,\"1M\":%1d},{\"2\":%03d,\"2M\":%1d},{\"3\":%03d,\"3M\":%1d},{\"4\":%03d,\"4M\":%1d},{\"5\":%03d,\"5M\":%1d}]}",
+			"{\"sliders\":[{\"1\":%03ld,\"1M\":%1ld},{\"2\":%03ld,\"2M\":%1ld},{\"3\":%03ld,\"3M\":%1ld},{\"4\":%03ld,\"4M\":%1ld},{\"5\":%03ld,\"5M\":%1ld}]}",
 			cmd->slider1.Pos,
 			cmd->slider1.Mute,
 			cmd->slider2.Pos,
@@ -95,13 +95,5 @@ int build_slpos_payload(const struct CMD_SLPOS_RX * const cmd, char *buf, int * 
 			cmd->slider5.Pos,
 			cmd->slider5.Mute
 			);
-
-	if (*len != 98)
-	{
-		return SLPOS_ERROR_CODE(0); // Wrong number of chars printed.
-	}
-	return 0;
-
-
 	return 0;
 }

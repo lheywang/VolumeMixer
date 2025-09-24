@@ -30,6 +30,12 @@ extern "C" {
 #include <stdint.h>
 
 /* -----------------------------------------------------------------
+ * DEFINES
+ * -----------------------------------------------------------------
+ */
+#define PARSER_PAYLOAD_LENGTH 384UL
+
+/* -----------------------------------------------------------------
  * ENUMS
  * -----------------------------------------------------------------
  */
@@ -98,7 +104,7 @@ struct CMD
 
     uint32_t len;
     uint32_t crc;
-    uint8_t payload[384]; // The longest payload used is going to be 316 bytes long. More than enough !
+    uint8_t payload[PARSER_PAYLOAD_LENGTH]; // The longest payload used is going to be 316 bytes long. More than enough !
 };
 
 /* -----------------------------------------------------------------
@@ -159,8 +165,25 @@ int parser(char *buf, struct CMD * const command, int ParsePayload);
  * @brief		Build serial commands to be sent on the serial bus. Handle all of the nasty for the user.
  *
  * @details		Used to build responses to a command, while ensuring it does match the specification.
+ * 				Internally, the function check for different elements such as :
+ * 					- Command direction
+ * 					- Command status
  *
- * @
+ * 				They're used to define which content shall be placed into the string before been sent.
+ * 				Basically : in the payload there may be a payload if the command support it, or a
+ * 					ACK / NACK bit. A valid JSON payload is handled as an ACK bit.
+ *
+ * @param 	command (CMD*)		A pointer to the command to be built.
+ * @param 	buf (char *) 		A pointer to the output buffer.
+ *
+ * @return	int
+ * @retval 	 0 :	Command successfully built.
+ * @retval 	-1 : 	Invalid pointer.
+ * @retval  -2 :	Command need to be treated before responding.
+ * @retval  -3 : 	Wrong direction for the command.
+ * @retval  -4 : 	Failed to build the payload
+ * @retval  -5 :	Failed to add the length
+ * @retval  -6 : 	Failed the final formatting.
  */
 int builder(struct CMD * const command, char *buf);
 
