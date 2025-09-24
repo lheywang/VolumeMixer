@@ -24,13 +24,8 @@
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
 #include <string.h>
-#include <parser/parser.h>
 #include "external_drivers/ssd1306.h"
-#include "parser/parser.h"
-#include "eeprom/eeprom.h"
-#include "screen/screen.h"
-#include "screen/data/icons.h"
-#include "external_drivers/ssd1306.h"
+#include "fsm/fsm.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -81,47 +76,10 @@ static void MX_CRC_Init(void);
 static void MX_I2C2_Init(void);
 static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
-extern struct EEPROM_Header header;
-extern struct EEPROM_hash hashs;
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-DMA_HandleTypeDef hdma_usart2_rx; // Handle for USART2 RX DMA channel
-
-// Define a receive buffer and its size
-#define RX_BUFFER_SIZE 1024
-uint8_t RxBuffer[RX_BUFFER_SIZE];
-uint8_t TxBuffer[RX_BUFFER_SIZE]; // Buffer for transmitting messages back
-
-int show_buffer(uint8_t *buf)
-{
-	char *full = "x";
-	char *empty = " ";
-	char nl[2] = "\r\n";
-	HAL_UART_Transmit(&huart2, (uint8_t *)nl,2, 0xFFFF);
-
-	for (int col = 0; col < 128; col ++)
-	{
-		// Fetch data
-		int tmp = buf[4 * col]  << 24 | buf[(4 * col) + 1]  << 16 | buf[(4 * col) + 2]  << 8 | buf[(4 * col) + 3];
-
-		for (int row = 0; row < 32; row ++)
-		{
-			if ((tmp & (1 << row)) != 0)
-			{
-			  HAL_UART_Transmit(&huart2, (uint8_t *)&full,1, 0xFFFF);
-			}
-			else
-			{
-			  HAL_UART_Transmit(&huart2, (uint8_t *)&empty,1, 0xFFFF);
-			}
-		}
-		  HAL_UART_Transmit(&huart2, (uint8_t *)nl,2, 0xFFFF);
-	}
-
-	return 0;
-}
 
 /* USER CODE END 0 */
 
@@ -162,123 +120,19 @@ int main(void)
   MX_USB_DEVICE_Init();
   MX_I2C2_Init();
   MX_TIM2_Init();
+
   /* USER CODE BEGIN 2 */
-  char uart2Data[24] = "Connected to UART Two\r\n";
-   /*
-    * Output to uart2
-    * use screen or putty or whatever terminal software
-    * 8N1 115200
-    */
-  HAL_UART_Transmit(&huart2, (uint8_t *)&uart2Data,24, 0xFFFF);
-  memset((void*)uart2Data, 0x00, (size_t)24);
-
-  snprintf(uart2Data, 24,"\r\n");
-  HAL_UART_Transmit(&huart2, (uint8_t *)&uart2Data,24, 0xFFFF);
-  memset((void*)uart2Data, 0x00, (size_t)24);
-
-  snprintf(uart2Data, 24, "Scanning I2C bus:\r\n");
-  HAL_UART_Transmit(&huart2, (uint8_t *)&uart2Data,24, 0xFFFF);
-  memset((void*)uart2Data, 0x00, (size_t)24);
-  HAL_StatusTypeDef result;
-  uint8_t i;
-  for (i=1; i<128; i++)
-  {
-    /*
-     * the HAL wants a left aligned i2c address
-     * &hi2c1 is the handle
-     * (uint16_t)(i<<1) is the i2c address left aligned
-     * retries 2
-     * timeout 2
-     */
-    result = HAL_I2C_IsDeviceReady(&hi2c2, (uint16_t)(i<<1), 2, 2);
-    if (result != HAL_OK) // HAL_ERROR or HAL_BUSY or HAL_TIMEOUT
-    {
-    	snprintf(uart2Data, 24,"."); // No ACK received at that address
-    	HAL_UART_Transmit(&huart2, (uint8_t *)&uart2Data,24, 0xFFFF);
-    	memset((void*)uart2Data, 0x00, (size_t)24);
-    }
-    if (result == HAL_OK)
-    {
-    	snprintf(uart2Data, 24,"0x%X", i); // Received an ACK at that address
-    	HAL_UART_Transmit(&huart2, (uint8_t *)&uart2Data,24, 0xFFFF);
-    	memset((void*)uart2Data, 0x00, (size_t)24);
-    }
-  }
-  memset((void*)uart2Data, 0x00, (size_t)24);
-  snprintf(uart2Data,24,"\r\n");
-  HAL_UART_Transmit(&huart2, (uint8_t *)&uart2Data,24, 0xFFFF);
-  memset((void*)uart2Data, 0x00, (size_t)24);
-
-  snprintf(uart2Data,24,"Finished !\n\n");
-  HAL_UART_Transmit(&huart2, (uint8_t *)&uart2Data,24, 0xFFFF);
-  memset((void*)uart2Data, 0x00, (size_t)24);
-
+  // Initialize peripherals
   SSD1306_Init(&hi2c2);
-  struct ScreenOrder cmd = {
-		.type = FULL,
-		.status = UNMUTE,
-		.volume = 01,
-		.icon ={
-				0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-				0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-				0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-				0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-				0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-				0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-				0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-				0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-				0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-				0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-				0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-				0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-				0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-				0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-				0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-				0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-			}
-		};
 
-	struct BufferRequest *br = draw_buffer(&cmd);
+  // Initiale finite state machine that control the whole device
+  fsm_init();
 
-
-	// Show the buffer on console
-	show_buffer(br->buffer);
-
-	memset((void*)uart2Data, 0x00, (size_t)24);
-	snprintf(uart2Data,24,"Buffer OK\n");
-	HAL_UART_Transmit(&huart2, (uint8_t *)&uart2Data,24, 0xFFFF);
-	memset((void*)uart2Data, 0x00, (size_t)24);
-
-	if (br->status == SCREEN_OK) {
-	        SSD1306_SendBuffer(&hi2c2, br->buffer);
-
-	        memset((void*)uart2Data, 0x00, (size_t)24);
-	        snprintf(uart2Data,24,"Printing...\n");
-			HAL_UART_Transmit(&huart2, (uint8_t *)&uart2Data,24, 0xFFFF);
-			memset((void*)uart2Data, 0x00, (size_t)24);
-	    }
-
-	memset((void*)uart2Data, 0x00, (size_t)24);
-	snprintf(uart2Data,24,"Update OK\n");
-	HAL_UART_Transmit(&huart2, (uint8_t *)&uart2Data,24, 0xFFFF);
-	memset((void*)uart2Data, 0x00, (size_t)24);
-
-  // here only to include the right symbols into the build system...
-  struct CMD command;
-  command.direction = RX;
-  parser(uart2Data, &command, 1);
-  builder(&command, uart2Data);
-
-  uint8_t buf[128] = { 0 };
-  parse_raw_eeprom_header(buf);
-  build_raw_eeprom_header(buf);
-
-
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
   while (1)
   {
     /* USER CODE END WHILE */
+	  HAL_Delay(500);
+	  fsm_update();
 
     /* USER CODE BEGIN 3 */
   }
