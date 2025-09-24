@@ -1,124 +1,141 @@
+/** ================================================================
+ * @file    external_drivers/ssd1306.c
+ *
+ * @brief   Source file of the SSD 1306 driver (thanks to chatGPT)
+ *
+ * @date 	24-09-2025
+ *
+ * @version 1.0.0
+ *
+ * @author  l.heywang (leonard.heywang@proton.me)
+ *
+ *  ================================================================
+ */
+/*
+ * -----------------------------------------------------------------
+ * Includes
+ * -----------------------------------------------------------------
+ */
 #include "external_drivers/ssd1306.h"
+
+// Dependencies
+#include "stm32f3xx_hal.h"
 #include <stdint.h>
 
-// Global variables
+// Global variables and buffer
 static I2C_HandleTypeDef *ssd1306_i2c;
+static uint8_t ssd1306_Buffer[SSD1306_WIDTH * SSD1306_HEIGHT / 8];
 
-// Create buffers as unions, to make it cleaner on the code
-union input_buffer {
-	uint8_t byte[(SSD1306_LOGICAL_H * SSD1306_WIDTH) / 8];
-	uint32_t word[SSD1306_WIDTH];
-} input_buffer;
-union output_buffer {
-	uint8_t byte[(SSD1306_HEIGHT / 8) * SSD1306_WIDTH];
-	uint64_t dword[SSD1306_WIDTH]; // Account for command byte
-} output_buffer;
-
-// Internal helpers
-static void ssd1306_WriteCommand(I2C_HandleTypeDef *hi2c, uint8_t cmd)
+/*
+ * -----------------------------------------------------------------
+ * Helpers
+ * -----------------------------------------------------------------
+ */
+static void __write_command(uint8_t cmd)
 {
     uint8_t d[2] = {0x00, cmd};
-    HAL_I2C_Master_Transmit(hi2c, SSD1306_I2C_ADDR, d, 2, HAL_MAX_DELAY);
+    HAL_I2C_Master_Transmit(ssd1306_i2c, SSD1306_I2C_ADDR, d, 2, HAL_MAX_DELAY);
 }
 
-// Public functions
+static void __write_data(uint8_t *data, size_t size) {
+    uint8_t buffer[size + 1];
+    buffer[0] = 0x40; // 0x40 = Co = 0, D/C# = 1
+    memcpy(&buffer[1], data, size);
+    HAL_I2C_Master_Transmit(ssd1306_i2c, SSD1306_I2C_ADDR, buffer, size + 1, HAL_MAX_DELAY);
+}
+
+/*
+ * -----------------------------------------------------------------
+ * Public API
+ * -----------------------------------------------------------------
+ */
 void SSD1306_Init(I2C_HandleTypeDef *hi2c) {
     ssd1306_i2c = hi2c;
 
     HAL_Delay(100); // power-on delay
 
-    ssd1306_WriteCommand(hi2c, 0xAE); // Display off
-    ssd1306_WriteCommand(hi2c, 0x20); ssd1306_WriteCommand(hi2c, 0x01); // Vertical addressing
-    ssd1306_WriteCommand(hi2c, 0xA1); // Segment remap 127->0
-    ssd1306_WriteCommand(hi2c, 0xC8); // COM scan direction remapped
-    ssd1306_WriteCommand(hi2c, 0x81); ssd1306_WriteCommand(hi2c, 0x7F); // contrast
-    ssd1306_WriteCommand(hi2c, 0xA6); // normal display
-    ssd1306_WriteCommand(hi2c, 0xA8); ssd1306_WriteCommand(hi2c, 0x3F); // MUX 63
-    ssd1306_WriteCommand(hi2c, 0xD3); ssd1306_WriteCommand(hi2c, 0x00); // display offset
-    ssd1306_WriteCommand(hi2c, 0xD5); ssd1306_WriteCommand(hi2c, 0x80); // display clock
-    ssd1306_WriteCommand(hi2c, 0xD9); ssd1306_WriteCommand(hi2c, 0xF1); // pre-charge
-    ssd1306_WriteCommand(hi2c, 0xDA); ssd1306_WriteCommand(hi2c, 0x12); // COM pins
-    ssd1306_WriteCommand(hi2c, 0xDB); ssd1306_WriteCommand(hi2c, 0x40); // VCOM detect
-    ssd1306_WriteCommand(hi2c, 0x8D); ssd1306_WriteCommand(hi2c, 0x14); // charge pump
-    ssd1306_WriteCommand(hi2c, 0xAF); // Display ON
+    // Init sequence
+    __write_command(0xAE); 							// Display off
+    __write_command(0x20); 							// Set Memory Addressing Mode
+    __write_command(0x00); 							// Horizontal addressing mode
+    __write_command(0xB0); 							// Page start address
+    __write_command(0xC8); 							// COM scan direction remapped
+    __write_command(0x00); 							// Low column
+    __write_command(0x10); 							// High column
+    __write_command(0x40); 							// Start line address
+    __write_command(0x81); __write_command(0x7F); 	// Contrast
+    __write_command(0xA1); 							// Segment remap
+    __write_command(0xA6); 							// Normal display
+    __write_command(0xA8); __write_command(0x3F); 	// Multiplex ratio
+    __write_command(0xA4); 							// Display follows RAM
+    __write_command(0xD3); __write_command(0x00); 	// Display offset
+    __write_command(0xD5); __write_command(0x80); 	// Clock divide
+    __write_command(0xD9); __write_command(0xF1); 	// Pre-charge
+    __write_command(0xDA); __write_command(0x12); 	// COM pins
+    __write_command(0xDB); __write_command(0x40); 	// VCOM detect
+    __write_command(0x8D); __write_command(0x14); 	// Charge pump
+    __write_command(0xAF); 							// Display ON
+
+    SSD1306_Fill(false);							// Clear memory
+    SSD1306_UpdateScreen();							// Update screen to apply the emptied buffer
+}
+
+void SSD1306_Fill(bool color) {
+    memset(ssd1306_Buffer, (color ? 0xFF : 0x00), sizeof(ssd1306_Buffer));
+}
+
+
+void SSD1306_DrawPixel(uint8_t x, uint8_t y, bool color) {
+    if (x >= SSD1306_WIDTH || y >= SSD1306_HEIGHT) return;
+
+    if (color) {
+        ssd1306_Buffer[x + (y / 8) * SSD1306_WIDTH] |= 1 << (y % 8);
+    } else {
+        ssd1306_Buffer[x + (y / 8) * SSD1306_WIDTH] &= ~(1 << (y % 8));
+    }
+}
+
+
+void SSD1306_SendBuffer(const uint8_t *buf)
+{
+	uint8_t py = 63;
+
+	for (int col = 0; col < 128; col ++)
+	{
+		// Fetch data
+		int tmp = buf[4 * col]  << 24 | buf[(4 * col) + 1]  << 16 | buf[(4 * col) + 2]  << 8 | buf[(4 * col) + 3];
+
+		for (int row = 0; row < 32; row ++)
+		{
+			// for each buffer pixel, set it's value
+			if ((tmp & (1 << row)) != 0)
+			{
+				SSD1306_DrawPixel(col, py, true);
+				py -= 2;
+			}
+			else
+			{
+				SSD1306_DrawPixel(col, py, false);
+				py -= 2;
+			}
+		}
+		// reset the py counter back
+		py = 63;
+	}
+
     return;
 }
 
 
-void SSD1306_SendBuffer(I2C_HandleTypeDef *hi2c, const uint8_t *buf)
-{
-	// empty the buffers and copy the input into the internal_buffers
-	memset(output_buffer.byte, 0x00, sizeof(output_buffer.byte));
-	memcpy((void *)input_buffer.byte, buf, sizeof(input_buffer.byte));
+// Last function, the only to make massives I2C calls.
+void SSD1306_UpdateScreen(void) {
+    for (uint8_t page = 0; page < 8; page++) {
 
-	// Transfer data from one buffer to the other, while converting bits positions :
-	// In fact, we iterate over the "columns" as the screen naming conventions, but on our case (rotated buffer + rotated screen, it look like "lines").
-	for (uint8_t line = 0; line < SSD1306_WIDTH; line++)
-	{
-		uint64_t tmp = 0;
-		// iterate over each pixels
-		for (uint8_t pixel = 0; pixel <32; pixel++)
-		{
-			// uint8_t bit = (input_buffer.word[line] & (1 << pixel)) >> pixel;
-			uint8_t bit = (pixel % 2 == 0) ? 0 : 1;
+        __write_command(0xB0 + page);
+        __write_command(0x00);
+        __write_command(0x10);
 
-			tmp |= (bit << (2 * pixel));
-			tmp |= (bit << ((2 * pixel) + 1));
-		}
-
-		/*
-		 * Finally, we need to swap the bytes order : The Page 0 is the "end" of our screen line,
-		 * where, if we send the whole buffer at once, the first byte is Page 7. This will create
-		 * issues on the buffer rendering on screen.
-		 *
-		 * Actually, we have
-		 * Byte 0	1	2	3	4	5	6	7
-		 * Page 0	1	2	3	4	5	6	7
-		 *
-		 * Thus, we need to ensure that :
-		 * Byte 0	1	2	3	4	5	6	7
-		 * Page 7	6	5	4	3	2	1	0
-		 *
-		 * Bits inside pages / bytes are not affected by this logic.
-		 */
-
-		output_buffer.dword[line] = ((tmp & 0x00000000000000FF) >> 0)  << 56 |
-									((tmp & 0x000000000000FF00) >> 8)  << 48 |
-									((tmp & 0x0000000000FF0000) >> 16) << 40 |
-									((tmp & 0x00000000FF000000) >> 24) << 32 |
-									((tmp & 0x000000FF00000000) >> 32) << 24 |
-									((tmp & 0x0000FF0000000000) >> 40) << 16 |
-									((tmp & 0x00FF000000000000) >> 48) << 8  |
-									((tmp & 0xFF00000000000000) >> 56) << 0  ;
-	}
-	// Set vertical addressing mode
-	ssd1306_WriteCommand(hi2c, 0x20);
-	ssd1306_WriteCommand(hi2c, 0x01);
-
-	// Write commands about the position and parameters of the screen
-    ssd1306_WriteCommand(hi2c, 0x21); // Column address start/end
-    ssd1306_WriteCommand(hi2c, 0x00); // start column
-    ssd1306_WriteCommand(hi2c, 0x7F); // end column 127
-
-    ssd1306_WriteCommand(hi2c, 0x22); // Page address start/end
-    ssd1306_WriteCommand(hi2c, 0x00); // start page
-    ssd1306_WriteCommand(hi2c, 0x07); // end page 7
-
-    // Send control byte first
-    uint8_t control = 0x40;
-    HAL_I2C_Master_Transmit(	hi2c,
-    							SSD1306_I2C_ADDR,
-								&control,
-								1,
-								HAL_MAX_DELAY);
-
-    // Then send the 1024 bytes to fill the memory
-    HAL_I2C_Master_Transmit(	hi2c,
-    							SSD1306_I2C_ADDR,
-								output_buffer.byte,
-								(SSD1306_HEIGHT / 8) * SSD1306_WIDTH,
-								HAL_MAX_DELAY);
-
-    return;
+        __write_data(&ssd1306_Buffer[SSD1306_WIDTH * page], SSD1306_WIDTH);
+    }
 }
 

@@ -49,11 +49,14 @@ extern "C" {
  * 	Initialize the screen for a given I2C handle. Also call configurations commands.
  */
 void SSD1306_Init(I2C_HandleTypeDef *hi2c);
+void SSD1306_Fill(bool color);
+void SSD1306_UpdateScreen(void);
+void SSD1306_DrawPixel(uint8_t x, uint8_t y, bool color);
 
 /**
  * Take a buffer for the screen helper lib, and send it to the screen.
  */
-void SSD1306_SendBuffer(I2C_HandleTypeDef *hi2c, const uint8_t *src);
+void SSD1306_SendBuffer(const uint8_t *src);
 
 
 #ifdef __cplusplus
