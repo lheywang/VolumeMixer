@@ -22,6 +22,7 @@
 #include "usbd_cdc_if.h"
 
 /* USER CODE BEGIN INCLUDE */
+#include "fsm/fsm.h"
 
 /* USER CODE END INCLUDE */
 
@@ -31,6 +32,11 @@
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
+
+extern uint8_t RxBuffer[CDC_BUFFER_SIZE];
+extern uint8_t TxBuffer[CDC_BUFFER_SIZE];
+extern volatile uint16_t rx_len;
+extern volatile bool msg_complete;
 
 /* USER CODE END PV */
 
@@ -259,6 +265,28 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
 static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 {
   /* USER CODE BEGIN 6 */
+    if(*Len + rx_len > CDC_BUFFER_SIZE)
+    {
+        // overflow, drop packet
+        *Len = 0;
+        rx_len = 0;
+        return USBD_FAIL;
+    }
+
+    memcpy(&RxBuffer[rx_len], Buf, *Len);
+    rx_len += *Len;
+
+    // Check if a command is complete, to enable parsing (will be done out of the ISR context).
+    if(rx_len >= 4 &&
+    		RxBuffer[rx_len-4] == ';' &&
+			RxBuffer[rx_len-3] == 'E' &&
+			RxBuffer[rx_len-2] == 'N' &&
+			RxBuffer[rx_len-1] == 'D')
+    {
+    	msg_complete = 1;
+    }
+
+  // Re-arm reception
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
   USBD_CDC_ReceivePacket(&hUsbDeviceFS);
   return (USBD_OK);

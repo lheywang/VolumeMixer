@@ -64,6 +64,20 @@ USBD_HandleTypeDef hUsbDeviceFS;
 void MX_USB_DEVICE_Init(void)
 {
   /* USER CODE BEGIN USB_DEVICE_Init_PreTreatment */
+    /*
+     * Force host to re-enumerate device
+     * Source : https://stm32world.com/wiki/STM32_USB_Device_Enumeration_(re-enumeration)
+     */
+    GPIO_InitTypeDef GPIO_InitStruct = { 0 };              // All zeroed out
+    GPIO_InitStruct.Pin = GPIO_PIN_12;                     // Hardcoding this - PA12 is D+
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;            // Push-pull mode
+    GPIO_InitStruct.Pull = GPIO_PULLDOWN;                  // Resetting so pull low
+    GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;               // Really shouldn't matter in this case
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);                // Initialize with above settings
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12, GPIO_PIN_RESET); // Yank low
+    HAL_Delay(50);                                         // Enough time for host to disconnect device
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12, GPIO_PIN_SET);   // Back high - so host will enumerate
+    HAL_GPIO_DeInit(GPIOA, GPIO_PIN_12);                   // Deinitialize the pin
 
   /* USER CODE END USB_DEVICE_Init_PreTreatment */
 
