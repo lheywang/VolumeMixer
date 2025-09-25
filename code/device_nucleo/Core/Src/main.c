@@ -120,18 +120,17 @@ int main(void)
   MX_USB_DEVICE_Init();
   MX_I2C2_Init();
   MX_TIM2_Init();
-
   /* USER CODE BEGIN 2 */
-  // Initialize peripherals
   SSD1306_Init(&hi2c2);
-
-  // Initiale finite state machine that control the whole device
   fsm_init();
 
+  /* USER CODE END 2 */
+
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
   while (1)
   {
     /* USER CODE END WHILE */
-	  HAL_Delay(500);
 	  fsm_update();
 
     /* USER CODE BEGIN 3 */
@@ -538,8 +537,7 @@ void Error_Handler(void)
   }
   /* USER CODE END Error_Handler_Debug */
 }
-
-#ifdef  USE_FULL_ASSERT
+#ifdef USE_FULL_ASSERT
 /**
   * @brief  Reports the name of the source file and the source line number
   *         where the assert_param error has occurred.

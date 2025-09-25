@@ -265,26 +265,34 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
 static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 {
   /* USER CODE BEGIN 6 */
-    if(*Len + rx_len > CDC_BUFFER_SIZE)
-    {
-        // overflow, drop packet
-        *Len = 0;
-        rx_len = 0;
-        return USBD_FAIL;
-    }
+  // Check if there is enough space on the RxBuffer
+  if(*Len + rx_len > CDC_BUFFER_SIZE)
+  {
+  	// overflow, drop packet
+  	*Len = 0;
+	rx_len = 0;
+	return USBD_FAIL;
+  }
 
-    memcpy(&RxBuffer[rx_len], Buf, *Len);
-    rx_len += *Len;
+  // Check if a message is pending to process (main loop)
+  if (msg_complete == 1)
+  {
+  	return USBD_FAIL;
+  }
 
-    // Check if a command is complete, to enable parsing (will be done out of the ISR context).
-    if(rx_len >= 4 &&
-    		RxBuffer[rx_len-4] == ';' &&
-			RxBuffer[rx_len-3] == 'E' &&
-			RxBuffer[rx_len-2] == 'N' &&
-			RxBuffer[rx_len-1] == 'D')
-    {
-    	msg_complete = 1;
-    }
+  // Copy the data on the buffer
+  memcpy(&RxBuffer[rx_len], Buf, *Len);
+  rx_len += *Len;
+
+  // Check if a command is complete, to enable parsing (will be done out of the ISR context).
+  if( 	  rx_len >= 4 &&
+		  RxBuffer[rx_len-4] == ';' &&
+		  RxBuffer[rx_len-3] == 'E' &&
+		  RxBuffer[rx_len-2] == 'N' &&
+		  RxBuffer[rx_len-1] == 'D')
+  {
+	msg_complete = 1;
+  }
 
   // Re-arm reception
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);

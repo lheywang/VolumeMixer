@@ -53,6 +53,7 @@ int parser(char *buf, struct CMD * command, int ParsePayload)
 
     // Create a working buffer
     uint8_t work[PARSER_BUFFER_SIZE] = {0};
+    memset((void *)work, 0x00, sizeof(work));
 
     // Search for "START;" token.
     memcpy((void *)work, (void *)buf, (size_t)6);
@@ -74,7 +75,7 @@ int parser(char *buf, struct CMD * command, int ParsePayload)
         "UICON;",
         "SLPOS;",
     };
-    uint32_t cmd_id = -1;
+    int cmd_id = -1;
     for (uint8_t k = 0; k < 7; k++)
     {
         if (strcmp((char *)work, (char *)refcmd[k]) == 0)
@@ -168,7 +169,7 @@ int parser(char *buf, struct CMD * command, int ParsePayload)
     		return PARSER_ERROR_CODE(5);
     	}
     }
-    command->crc = strtol((char *)work, NULL, 16);
+    command->crc = strtoul((char *)work, NULL, 16);
 
     // Calculate CRC for the whole received message
     uint8_t crc_buf[384] = {0}; // The longest we may use it 316 bytes payload. Add the small 16 bytes, 384 is way more than needed.
