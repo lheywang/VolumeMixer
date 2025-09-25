@@ -12,6 +12,7 @@
 import sys
 import os
 import tomllib
+import logging
 
 # ------------------------------------------------------------------------------
 # Custom imports
@@ -44,7 +45,7 @@ match (sys.platform):
 
 class AudioController:
 
-    def __init__(self):
+    def __init__(self, logger: logging.Logger):
         self.OS = OS
         self.master = AudioSource(
             name="Master",
@@ -53,6 +54,7 @@ class AudioController:
             muted=False,
             handle=None,  # This will be set based on the OS
         )
+        self.logger = logger
         # Set the channels numbers
         self.channel_number = 5
 
@@ -61,6 +63,9 @@ class AudioController:
         self.sources: list[AudioSource] = []
         # List to hold active applications with audio sources
         self.active_apps: list[AudioActiveApp] = []
+
+        # Some logs
+        self.logger.info(f"Openned an audio device for {self.OS}")
 
         # Fetch the audio sources available on the system and assign them to the sources list
         self.FetchSources()
@@ -218,10 +223,12 @@ class AudioController:
             case "linux":
                 with open("config/linux.toml", "rb") as f:
                     config = tomllib.load(f)
+                self.logger.info("Loaded config/linux.toml")
 
             case "windows":
                 with open("config/win.toml", "rb") as f:
                     config = tomllib.load(f)
+                self.logger.info("Loaded config/win.toml")
 
         # Reading base icon data
         with open("icons/speaker.bin", "rb") as f:

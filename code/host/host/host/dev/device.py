@@ -13,11 +13,13 @@
 import serial
 import serial.serialutil
 import serial.tools.list_ports
+import time
+import logging
 
 # ------------------------------------------------------------------------------
 # Local imports
 # ------------------------------------------------------------------------------
-from . import IsDeviceAvailable
+from . import IsDeviceAvailable, IsCommandValid, GetCommandStatus
 from . import CmdASYNC, CmdDCONF, CmdSLPOS, CmdUICON, CmdCONNC, CmdRESET, CmdSHUTD
 
 # ------------------------------------------------------------------------------
@@ -35,14 +37,27 @@ STOP = serial.STOPBITS_ONE
 
 
 class MixerDevice:
-    def __init__(self) -> None:
+
+    def __init__(self, logger: logging.Logger) -> None:
+        self.logger = logger
+
         # First, choose the COM port and set the launch guard to prevent any IO on unconfigured com port.
         # Todo : Uncomment this for real working !
-        # if self._SelectCOMPort() != 0:
-        #     print("No device available for now. Exiting...")
-        #     self.IsDeviceOpenned = False
-        #     return
+        if self._SelectCOMPort() != 0:
+            self.logger.error("No device available. Exiting...")
+            self.IsDeviceOpenned = False
+            return
+        self.logger.info(f"Found a VolumeMixer device on port : {self.port.port}")
         self.IsDeviceOpenned = True
+
+        # Then, we've got a device, so we try to connect to it
+        cmd = CmdCONNC()
+        self.IsDeviceConnected = self.SendCommand(cmd)
+
+        if self.IsDeviceConnected:
+            self.logger.info("Connected to device !")
+        else:
+            self.logger.error("Connected refused to device")
 
     def _SelectCOMPort(self):
         """
@@ -79,7 +94,8 @@ class MixerDevice:
                 raise Exception(f"Unhandled error : {e}")
 
             # Then, if the port was openned, wait for a read operation :
-            data = tmp.read()
+            time.sleep(0.6)
+            data = tmp.read(tmp.in_waiting).decode()
 
             # Check if the message is typical from a mixer ready to accept a connection
             if IsDeviceAvailable(data):
@@ -102,4 +118,17 @@ class MixerDevice:
             self.port.write(buf.encode())
 
             # Then read the response
-            tmp = self.port.read_until()  # wait for \n to be seen
+            tmp = self.port.read_until().decode().strip("\0")  # wait for \n to be seen
+
+            # Parse the output
+            valid = IsCommandValid(tmp)
+            if not valid:
+                return False
+
+            # Check the return value of the command
+            if type(cmd) == CmdASYNC:
+                pass
+            elif type(cmd) == CmdSLPOS:
+                pass
+            else:
+                return GetCommandStatus(tmp)

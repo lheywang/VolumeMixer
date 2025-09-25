@@ -1,4 +1,4 @@
-from .utils import IsDeviceAvailable
+from .utils import IsDeviceAvailable, IsCommandValid, GetCommandStatus
 
 from .commands import (
     CmdASYNC,
