@@ -60,6 +60,7 @@ void __fsm_handle_async();
 void __fsm_handle_uicon();
 void __fsm_handle_slpos();
 void __fsm_handle_dconf();
+void __fsm_handle_connc();
 
 /*
  * -----------------------------------------------------------------
@@ -78,6 +79,7 @@ static int pval;
 
 // FSM State
 static enum fsm_state state = BOARD_INIT;
+static bool device_connected = false;
 
 /*
  * -----------------------------------------------------------------
@@ -162,22 +164,14 @@ void fsm_update()
 			}
 			else
 			{
-				state = WAIT_FOR_COMMAND;
+				state = WAIT_FOR_RESPONSE;
 			}
 			break;
 		/*
-		 * If we're waiting for command, accept only the commands that are not CONNC.
-		 * Any CONNC command will end up being rejected.
+		 * If we're waiting for command, set us to get the response
 		 */
 		case WAIT_FOR_COMMAND:
-			if (command.type == CONNC)
-			{
-				command.result = NACK;
-			}
-			else
-			{
-				state = WAIT_FOR_RESPONSE;
-			}
+			state = WAIT_FOR_RESPONSE;
 			break;
 
 		/*
@@ -249,6 +243,9 @@ void fsm_handle_command()
 		break;
 
 	case CONNC:
+		__fsm_handle_connc();
+		break;
+
 	default:
 		break;
 	}
@@ -282,7 +279,7 @@ void fsm_handle_command()
  */
 void __fsm_handle_shutd()
 {
-
+	return;
 }
 
 /*
@@ -292,7 +289,7 @@ void __fsm_handle_shutd()
  */
 void __fsm_handle_reset()
 {
-
+	return;
 }
 
 /*
@@ -301,7 +298,7 @@ void __fsm_handle_reset()
  */
 void __fsm_handle_async()
 {
-
+	return;
 }
 
 /*
@@ -309,7 +306,7 @@ void __fsm_handle_async()
  */
 void __fsm_handle_uicon()
 {
-
+	return;
 }
 
 /*
@@ -317,7 +314,7 @@ void __fsm_handle_uicon()
  */
 void __fsm_handle_slpos()
 {
-
+	return;
 }
 
 /*
@@ -325,7 +322,33 @@ void __fsm_handle_slpos()
  */
 void __fsm_handle_dconf()
 {
+	return;
+}
 
+/*
+ * Get the status of the device
+ */
+void __fsm_handle_connc()
+{
+	/*
+	 * If the device is NOT connected : connect it, and answer OK.
+	 * If we're already connected, return NACK.
+	 *
+	 * In any cases, we update the state to indicate that the command handling is done,
+	 * and that we can send back the response.
+	 */
+	if (device_connected == false)
+	{
+		device_connected = true;
+		command.result = OK;
+		state = WAIT_FOR_COMMAND;
+	}
+	else
+	{
+		command.result = NACK;
+		state = WAIT_FOR_COMMAND;
+	}
+	return;
 }
 
 /*
