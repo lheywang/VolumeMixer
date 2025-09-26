@@ -18,7 +18,7 @@
  * Includes
  * -----------------------------------------------------------------
  */
-#include "stm32f3xx_hal.h" // change to your STM32 family HAL header
+#include "stm32f3xx_hal.h"
 #include <stdint.h>
 
 /*

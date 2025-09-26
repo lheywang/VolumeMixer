@@ -25,11 +25,13 @@
 #include <eeprom/eeprom.h>
 #include <filter/filter.h>
 #include <screen/screen.h>
+#include <maths/maths.h>
 #include <screen/data/icons.h>
 
 #include "utils/CDC_helper.h"
 
 // HAL
+#include "stm32f3xx_hal.h"
 #include "usbd_cdc_if.h"
 
 // STD
@@ -37,9 +39,48 @@
 #include <stdbool.h>
 #include <string.h>
 
+//Import externs from the HAL
+extern ADC_HandleTypeDef hadc1;
+
 // Import extern variables.
 extern struct EEPROM_Header header;
 extern struct EEPROM_hash hashs;
+
+/*
+ * -----------------------------------------------------------------
+ * Defines
+ * -----------------------------------------------------------------
+ */
+/*
+ * Configure the used ADC channels.
+ */
+#ifdef DEBUG
+#define ADC_CHANNELS_NB 5
+#define ADC_SLIDER_NB 2
+static const uint32_t channels[ADC_CHANNELS_NB] = {
+		ADC_CHANNEL_1,
+		ADC_CHANNEL_2,
+		ADC_CHANNEL_TEMPSENSOR,
+		ADC_CHANNEL_VREFINT,
+		ADC_CHANNEL_VBAT
+};
+#else
+#define ADC_CHANNELS_NB 11
+#define ADC_SLIDER_NB 5
+static const uint32_t channels[ADC_CHANNELS_NB] = {
+		ADC_CHANNEL_1,
+		ADC_CHANNEL_2,
+		ADC_CHANNEL_3,
+		ADC_CHANNEL_4,
+		ADC_CHANNEL_5,
+		ADC_CHANNEL_10,
+		ADC_CHANNEL_11,
+		ADC_CHANNEL_15,
+		ADC_CHANNEL_TEMPSENSOR,
+		ADC_CHANNEL_VREFINT,
+		ADC_CHANNEL_VBAT
+};
+#endif
 
 /*
  * -----------------------------------------------------------------
@@ -63,6 +104,11 @@ void __fsm_handle_dconf();
 void __fsm_handle_connc();
 
 /*
+ * Acquisition functions
+ */
+void __acquire_next_channel();
+
+/*
  * -----------------------------------------------------------------
  * Variables
  * -----------------------------------------------------------------
@@ -80,6 +126,11 @@ static int pval;
 // FSM State
 static enum fsm_state state = BOARD_INIT;
 static bool device_connected = false;
+
+// Channel positions
+static int slider_positions[5] = { 0 };
+static float adc_utilities[6] = { 0 };
+static uint8_t actual_slider = 0;
 
 /*
  * -----------------------------------------------------------------
@@ -202,6 +253,38 @@ void fsm_update()
 		// 500 ms of delay to not spam the host
 		HAL_Delay(500);
 	}
+
+	/*
+	 * Finally, trigger the acquisition of the sliders positions
+	 *
+	 * Note : this function require N calls to complete an aquisition, we're thus going to
+	 */
+	__acquire_next_channel();
+
+#ifdef DEBUG
+	/*
+	 * This block if code is only shown in DEBUG binaries, and use to show the different values seen on the ADC.
+	 */
+	if (actual_slider == 0)
+	{
+		snprintf(	(char*)TxBuffer,
+					sizeof(TxBuffer),
+					"Values : \n\tCH1 : %3d \n\tCH2 : %3d \n\tCH3 : %3d \n\tCH4 : %3d \n\tCH5 : %3d \n\n\tREFD : %3d\n\tREFA : %3d \n\tREFU : %3d \n\tTEMP : %3d \n\tINT : %3d \n\tBAT : %3d\n",
+					slider_positions[0], // CH1
+					slider_positions[1], // CH2
+					slider_positions[2], // CH3
+					slider_positions[3], // CH4
+					slider_positions[4], // CH5
+					(int)adc_utilities[0] * 100, // REFD
+					(int)adc_utilities[1] * 100, // REFA
+					(int)adc_utilities[2] * 100, // REFU
+					(int)adc_utilities[3] * 100, // TEMP
+					(int)adc_utilities[4] * 100, // INT
+					(int)adc_utilities[5] * 100);// BAT
+		CDC_Transmit_Long(TxBuffer,sizeof(TxBuffer));
+		HAL_Delay(500);
+	}
+#endif
 
 	return;
 }
@@ -348,6 +431,63 @@ void __fsm_handle_connc()
 		command.result = NACK;
 		state = WAIT_FOR_COMMAND;
 	}
+	return;
+}
+
+/*
+ * -----------------------------------------------------------------
+ * Utility functions
+ * -----------------------------------------------------------------
+ */
+void __acquire_next_channel()
+{
+	/*
+	 * First, read back the ADC value
+	 */
+	ADC_ChannelConfTypeDef sConfig = {0};
+	uint16_t value = 0;
+
+	// Configure the desired channel
+	sConfig.Channel      = channels[actual_slider];
+	sConfig.Rank         = ADC_REGULAR_RANK_1;
+	sConfig.SamplingTime = ADC_SAMPLETIME_19CYCLES_5;
+	HAL_ADC_ConfigChannel(&hadc1, &sConfig);
+
+	// Start conversion
+	HAL_ADC_Start(&hadc1);
+	if (HAL_ADC_PollForConversion(&hadc1, 10) == HAL_OK)
+	{
+		value = (uint16_t)HAL_ADC_GetValue(&hadc1);
+	}
+	HAL_ADC_Stop(&hadc1);
+
+	/*
+	 * Applying a low pass filter on the data.
+	 * This smooth the response to get something cleaner, and which won't move continously.
+	 *
+	 * The full step response of this filter is about 70 ms.
+	 */
+	value = filter(value, actual_slider);
+
+	/*
+	 * Then, convert the value into the position.
+	 * And, we store it into the right tab, for further usage.
+	 */
+	if (actual_slider < ADC_SLIDER_NB)
+	{
+		int position = ADC2POS(value, actual_slider);
+		slider_positions[actual_slider] = position;
+	}
+	else
+	{
+		ADC2Double((int16_t)value, &adc_utilities[actual_slider - ADC_SLIDER_NB]);
+	}
+
+	/*
+	 * Increment the actual_slider value, to sample the next channel on the next call.
+	 * If value shall overflow, reset it to 0.
+	 */
+	actual_slider = (actual_slider > (ADC_CHANNELS_NB - 1)) ? 0 : (actual_slider + 1);
 	return;
 }
 

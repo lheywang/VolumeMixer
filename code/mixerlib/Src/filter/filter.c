@@ -25,12 +25,13 @@
  * -----------------------------------------------------------------
  */
 #define __FILTER_ALPHA2 (1 - FILTER_ALPHA)
+#define __CHANNEL_COUNT 16
 
 /* -----------------------------------------------------------------
  * STATIC VARIABLES
  * -----------------------------------------------------------------
  */
-static uint16_t tmp[5] = {0};
+static uint16_t tmp[__CHANNEL_COUNT] = {0};
 
 /* -----------------------------------------------------------------
  * FUNCTIONS
@@ -39,7 +40,7 @@ static uint16_t tmp[5] = {0};
 
 uint16_t filter(uint16_t input, int channel)
 {
-	if ((0 > channel) | (channel > 5))
+	if ((0 > channel) | (channel > __CHANNEL_COUNT))
 	{
 		return -1;
 	}
