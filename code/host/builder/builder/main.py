@@ -6,7 +6,8 @@
 #   l.heywang <leonard.heywang@proton.me>
 #
 #   requirements:
-#     - cairosvg (depend on GTK runtime on Windows)
+#     - cairosvg (depend on GTK runtime on Windows) --> 
+#           https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer
 #
 # ==============================================================================
 
@@ -98,7 +99,7 @@ def main():
 
         # Save image to file
         name = f"{config[icon]}".lower()
-        with open(f"../host/icons/{name}.bin", "wb+") as f:
+        with open(f"../../host/icons/{name}.bin", "ab+") as f:
             f.write(bytes(dat))
 
 

@@ -25,7 +25,7 @@ SCALE = 34
 # ------------------------------------------------------------------------------
 # Defining utils functions
 # ------------------------------------------------------------------------------
-def GetdB(value: float) -> float:
+def GetdB(value: float, db_min : float, db_max : float) -> float:
     """
     Converts a linear amplitude value to decibels (dB).
 
@@ -40,8 +40,13 @@ def GetdB(value: float) -> float:
         - Assumes the existence of a constant SCALE for scaling the logarithmic result.
     """
     if value >= 0.01:
-        return SCALE * math.log10(value)
-    return -96.0
+        val = SCALE * math.log10(value + 0.0000000001)
+        if value < db_min:
+            return db_min
+        if value > db_max:
+            return db_max
+        return value
+    return db_min
 
 
 def GetVal(dB: float) -> float:
@@ -144,7 +149,7 @@ def GetMatchingAudioSource(
             ret.append("blank.bin")
 
     # Read the bytes
-    with open(f"icons/{ret[2]}", "rb") as f:
+    with open(f"../icons/{ret[2]}", "rb") as f:
         data = f.read()
 
     # Then build the return class

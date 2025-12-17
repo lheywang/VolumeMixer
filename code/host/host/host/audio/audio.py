@@ -70,7 +70,7 @@ class AudioController:
         # Fetch the audio sources available on the system and assign them to the sources list
         self.FetchSources()
         self.AssignShownApps()
-        self.SetSourcesVolumes([0.66, 1.0, 1.0, 1.0, 1.0])
+        self.SetSourcesVolumes([0.4, 1.0, 1.0, 1.0, 1.0])
 
     def FetchSources(self):
         """
@@ -126,8 +126,11 @@ class AudioController:
                         )
 
                 # Fetch interface
-                master = AudioUtilities.GetSpeakers()
-                interface = master.Activate(
+                enumerator = AudioUtilities.GetDeviceEnumerator()
+
+                device = enumerator.GetDefaultAudioEndpoint(0, 1)
+
+                interface = device.Activate(
                     IAudioEndpointVolume._iid_, CLSCTX_ALL, None
                 )
                 volume = interface.QueryInterface(IAudioEndpointVolume)
@@ -177,7 +180,8 @@ class AudioController:
                     case "windows":
                         # Master volume
                         if sources.id == 0:
-                            sources.handle.SetMasterVolumeLevel(GetdB(volumes[0]), None)
+                            db_min, db_max, _ = sources.handle.GetVolumeRange()
+                            sources.handle.SetMasterVolumeLevel(GetdB(volumes[0], db_min, db_max), None)
                             sources.volume = volumes[0]
 
                         # App Volume
@@ -188,7 +192,9 @@ class AudioController:
                             chan = sources.handle.channelAudioVolume().GetChannelCount()
                             for k in range(chan):
                                 sources.handle.channelAudioVolume().SetChannelVolume(
-                                    k, volumes[index], None
+                                    k, 
+                                    volumes[index], 
+                                    None,
                                 )
 
         return 0
@@ -231,7 +237,7 @@ class AudioController:
                 self.logger.info("Loaded config/win.toml")
 
         # Reading base icon data
-        with open("icons/speaker.bin", "rb") as f:
+        with open("../icons/speaker.bin", "rb") as f:
             data = f.read()
 
         # ensure the list is clean

@@ -58,6 +58,7 @@ class MixerDevice:
             self.logger.info("Connected to device !")
         else:
             self.logger.error("Connected refused to device")
+            print("Could not establish link with device !")
 
     def _SelectCOMPort(self):
         """
@@ -85,7 +86,7 @@ class MixerDevice:
                     bytesize=BYTE,
                     parity=PARITY,
                     stopbits=STOP,
-                    timeout=0.5,
+                    timeout=1.0,
                 )
             # Unable to open com port
             except serial.serialutil.SerialException:
@@ -93,15 +94,21 @@ class MixerDevice:
             except Exception as e:
                 raise Exception(f"Unhandled error : {e}")
 
-            # Then, if the port was openned, wait for a read operation :
+            # Then, if the port was openned, wait for a read operation : (message every 500 ms).
             time.sleep(0.6)
-            data = tmp.read(tmp.in_waiting).decode()
 
-            # Check if the message is typical from a mixer ready to accept a connection
-            if IsDeviceAvailable(data):
-                self.port = tmp
-                return 0
-            else:
+            try:
+                data = tmp.read(tmp.in_waiting).decode()
+
+                # Check if the message is typical from a mixer ready to accept a connection
+                if IsDeviceAvailable(data):
+                    self.port = tmp
+                    print(f"Found a device on : {self.port.port} !")
+                    return 0
+                else:
+                    continue
+            except UnicodeDecodeError as e:
+                print(f"Could not decode COM port {tmp.port} : {e}")
                 continue
 
         return -1
@@ -112,23 +119,27 @@ class MixerDevice:
     ):
         # First, get the command :
         buf = cmd.cmd()
+        print(buf)
 
         # Then, write the command on the serial port
         if self.IsDeviceOpenned:
             self.port.write(buf.encode())
 
             # Then read the response
-            tmp = self.port.read_until().decode().strip("\0")  # wait for \n to be seen
+            self.port.reset_input_buffer()
+            tmp = self.port.read_until().decode().strip().strip("\0")  # wait for \n to be seen
+            print(tmp)
 
             # Parse the output
             valid = IsCommandValid(tmp)
             if not valid:
-                return False
+                return cmd, False
 
             # Check the return value of the command
-            if type(cmd) == CmdASYNC:
-                pass
-            elif type(cmd) == CmdSLPOS:
-                pass
+            if type(cmd) == CmdASYNC or  type(cmd) == CmdSLPOS:
+                cmd.parse(tmp.split(";")[3])
+                return cmd, True
             else:
-                return GetCommandStatus(tmp)
+                return cmd, GetCommandStatus(tmp)
+            
+        return cmd, False

@@ -30,13 +30,16 @@ def IsCommandValid(buf: str):
     tmp = buf[:-12:]
 
     # Extract the CRCs
-    ccrc = zlib.crc32(tmp.encode())
-    rcrc = int(buf[-12:-4], 16)
+    try:
+        ccrc = zlib.crc32(tmp.encode())
+        rcrc = int(buf[-12:-4], 16)
 
-    # Check them
-    if rcrc == ccrc:
-        return True
-    return False
+        # Check them
+        if rcrc == ccrc:
+            return True
+        return False
+    except:
+        return False
 
 
 def GetCommandStatus(buf: str):

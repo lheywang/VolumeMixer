@@ -12,6 +12,7 @@
 # ------------------------------------------------------------------------------
 import zlib
 import json
+from audio import AudioActiveApp
 
 from dataclasses import dataclass, field
 
@@ -56,10 +57,14 @@ class CmdASYNC:
         tmp = dict()
         tmp["apps"] = dict()
         for k in range(5):
-            tmp["apps"][f"{k}"] = self.apps[k]
+            tmp["apps"][f"{k}"] = f"{self.apps[k]:08x}"
 
         # Format the command
         return FormatCommand("ASYNC", json.dumps(tmp, separators=(",", ":")))
+
+    def add_apps(self, apps : list[AudioActiveApp]):
+        for index in range(5):
+            self.apps[index] = zlib.crc32(apps[index].name.encode())
 
     def parse(self, buf):
         # Load the JSON dict
@@ -123,7 +128,7 @@ class CmdSLPOS:
         try:
             for index, elem in enumerate(tmp["sliders"]):
                 self.pos.append((int(elem[f"{index + 1}"]) / 100))
-                self.mute.append(bool(elem[f"{index + 1}M"]))
+                self.mute.append(bool(int(elem[f"{index + 1}M"])))
 
         except Exception as e:
             print(f"Invalid dict detected ! : {e}")

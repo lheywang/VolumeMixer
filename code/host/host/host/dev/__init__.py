@@ -10,5 +10,4 @@ from .commands import (
     CmdCONNC,
 )
 
-
 from .device import MixerDevice
