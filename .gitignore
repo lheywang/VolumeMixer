@@ -105,7 +105,7 @@ docs/_build/
 
 # PyBuilder
 .pybuilder/
-target/
+# target/
 
 # Jupyter Notebook
 .ipynb_checkpoints
@@ -278,3 +278,9 @@ dkms.conf
 *.hex
 *.map
 *.srec
+
+# Images built files
+*.bin
+
+# Executabkes
+code/mixerlib/Tests/*
