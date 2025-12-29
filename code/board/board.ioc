@@ -1,12 +1,8 @@
 #MicroXplorer Configuration settings - do not modify
 ADC1.Channel-0\#ChannelRegularConversion=ADC_CHANNEL_1
-<<<<<<< HEAD:code/device/device.ioc
-ADC1.IPParameters=Rank-0\#ChannelRegularConversion,Channel-0\#ChannelRegularConversion,SamplingTime-0\#ChannelRegularConversion,OffsetNumber-0\#ChannelRegularConversion,Offset-0\#ChannelRegularConversion,NbrOfConversionFlag,master,SubFamily
-=======
 ADC1.ClockPrescaler=ADC_CLOCK_SYNC_PCLK_DIV2
 ADC1.IPParameters=Rank-0\#ChannelRegularConversion,Channel-0\#ChannelRegularConversion,SamplingTime-0\#ChannelRegularConversion,OffsetNumber-0\#ChannelRegularConversion,Offset-0\#ChannelRegularConversion,NbrOfConversionFlag,master,ClockPrescaler,NbrOfConversion,SubFamily
 ADC1.NbrOfConversion=1
->>>>>>> code:code/board/board.ioc
 ADC1.NbrOfConversionFlag=1
 ADC1.Offset-0\#ChannelRegularConversion=0
 ADC1.OffsetNumber-0\#ChannelRegularConversion=ADC_OFFSET_NONE
@@ -39,31 +35,19 @@ KeepUserPlacement=false
 Mcu.CPN=STM32F302C8T6
 Mcu.Family=STM32F3
 Mcu.IP0=ADC1
-<<<<<<< HEAD:code/device/device.ioc
-Mcu.IP1=CRC
-=======
 Mcu.IP1=DMA
 Mcu.IP10=USART3
 Mcu.IP11=USB
 Mcu.IP12=USB_DEVICE
->>>>>>> code:code/board/board.ioc
 Mcu.IP2=I2C2
 Mcu.IP3=NVIC
 Mcu.IP4=RCC
 Mcu.IP5=SYS
-<<<<<<< HEAD:code/device/device.ioc
-Mcu.IP6=TSC
-Mcu.IP7=USART3
-Mcu.IP8=USB
-Mcu.IP9=USB_DEVICE
-Mcu.IPNb=10
-=======
 Mcu.IP6=TIM2
 Mcu.IP7=TIM15
 Mcu.IP8=TIM16
 Mcu.IP9=TSC
 Mcu.IPNb=13
->>>>>>> code:code/board/board.ioc
 Mcu.Name=STM32F302C(6-8)Tx
 Mcu.Package=LQFP48
 Mcu.Pin0=PC13
@@ -101,29 +85,19 @@ Mcu.Pin37=VP_SYS_VS_Systick
 Mcu.Pin38=VP_TIM2_VS_ClockSourceINT
 Mcu.Pin39=VP_TIM15_VS_ClockSourceINT
 Mcu.Pin4=PF1-OSC_OUT
-<<<<<<< HEAD:code/device/device.ioc
-Mcu.Pin40=VP_CRC_VS_CRC
-Mcu.Pin41=VP_SYS_VS_Systick
-Mcu.Pin42=VP_USB_DEVICE_VS_USB_DEVICE_CDC_FS
-=======
 Mcu.Pin40=VP_TIM16_VS_ClockSourceINT
 Mcu.Pin41=VP_USB_DEVICE_VS_USB_DEVICE_CDC_FS
->>>>>>> code:code/board/board.ioc
 Mcu.Pin5=PA0
 Mcu.Pin6=PA1
 Mcu.Pin7=PA2
 Mcu.Pin8=PA3
 Mcu.Pin9=PA4
-<<<<<<< HEAD:code/device/device.ioc
-Mcu.PinsNb=43
-=======
 Mcu.PinsNb=42
->>>>>>> code:code/board/board.ioc
 Mcu.ThirdPartyNb=0
 Mcu.UserConstants=
 Mcu.UserName=STM32F302C8Tx
-MxCube.Version=6.15.0
-MxDb.Version=DB.6.0.150
+MxCube.Version=6.16.1
+MxDb.Version=DB.6.0.161
 NVIC.BusFault_IRQn=true\:0\:0\:false\:false\:true\:false\:false\:false
 NVIC.DMA1_Channel2_IRQn=true\:2\:0\:true\:false\:true\:false\:true\:true
 NVIC.DebugMonitor_IRQn=true\:0\:0\:false\:false\:true\:false\:false\:false
@@ -135,15 +109,11 @@ NVIC.PendSV_IRQn=true\:0\:0\:false\:false\:true\:false\:false\:false
 NVIC.PriorityGroup=NVIC_PRIORITYGROUP_4
 NVIC.SVCall_IRQn=true\:0\:0\:false\:false\:true\:false\:false\:false
 NVIC.SysTick_IRQn=true\:15\:0\:false\:false\:true\:false\:true\:false
-<<<<<<< HEAD:code/device/device.ioc
-NVIC.USB_LP_CAN_RX0_IRQn=true\:0\:0\:false\:false\:true\:false\:true\:true
-=======
 NVIC.TIM1_BRK_TIM15_IRQn=true\:0\:0\:false\:false\:true\:true\:true\:true
 NVIC.TIM1_UP_TIM16_IRQn=true\:0\:0\:false\:false\:true\:true\:true\:true
 NVIC.TIM2_IRQn=true\:0\:0\:false\:false\:true\:true\:true\:true
 NVIC.USART3_IRQn=true\:2\:0\:true\:false\:true\:true\:true\:true
 NVIC.USB_LP_IRQn=true\:1\:0\:true\:false\:true\:false\:true\:true
->>>>>>> code:code/board/board.ioc
 NVIC.UsageFault_IRQn=true\:0\:0\:false\:false\:true\:false\:false\:false
 PA0.GPIOParameters=GPIO_Label
 PA0.GPIO_Label=Slider0
@@ -297,6 +267,13 @@ PC15\ -\ OSC32_OUT.GPIOParameters=GPIO_Label
 PC15\ -\ OSC32_OUT.GPIO_Label=led_blue
 PC15\ -\ OSC32_OUT.Locked=true
 PC15\ -\ OSC32_OUT.Signal=GPIO_Output
+PCC.Checker=false
+PCC.Line=STM32F302
+PCC.MCU=STM32F302C(6-8)Tx
+PCC.PartNumber=STM32F302C8Tx
+PCC.Series=STM32F3
+PCC.Temperature=25
+PCC.Vdd=3.6
 PF0-OSC_IN.Mode=HSE-External-Clock-Source
 PF0-OSC_IN.Signal=RCC_OSC_IN
 PF1-OSC_OUT.GPIOParameters=GPIO_Label
@@ -316,6 +293,7 @@ ProjectManager.DeletePrevious=true
 ProjectManager.DeviceId=STM32F302C8Tx
 ProjectManager.FirmwarePackage=STM32Cube FW_F3 V1.11.5
 ProjectManager.FreePins=false
+ProjectManager.FreePinsContext=
 ProjectManager.HalAssertFull=false
 ProjectManager.HeapSize=0x200
 ProjectManager.KeepUserCode=true
@@ -323,7 +301,7 @@ ProjectManager.LastFirmware=true
 ProjectManager.LibraryCopy=1
 ProjectManager.MainLocation=Core/Src
 ProjectManager.NoMain=false
-ProjectManager.PreviousToolchain=
+ProjectManager.PreviousToolchain=STM32CubeIDE
 ProjectManager.ProjectBuild=false
 ProjectManager.ProjectFileName=board.ioc
 ProjectManager.ProjectName=board
@@ -335,11 +313,7 @@ ProjectManager.ToolChainLocation=
 ProjectManager.UAScriptAfterPath=
 ProjectManager.UAScriptBeforePath=
 ProjectManager.UnderRoot=true
-<<<<<<< HEAD:code/device/device.ioc
-ProjectManager.functionlistsort=1-SystemClock_Config-RCC-false-HAL-false,2-MX_GPIO_Init-GPIO-false-HAL-true,3-MX_ADC1_Init-ADC1-false-HAL-true,4-MX_I2C2_Init-I2C2-false-HAL-true,5-MX_TSC_Init-TSC-false-HAL-true,6-MX_USART3_UART_Init-USART3-false-HAL-true,7-MX_USB_PCD_Init-USB-false-HAL-true
-=======
 ProjectManager.functionlistsort=1-SystemClock_Config-RCC-false-HAL-false,2-MX_GPIO_Init-GPIO-false-HAL-true,3-MX_DMA_Init-DMA-false-HAL-true,4-MX_ADC1_Init-ADC1-false-HAL-true,5-MX_I2C2_Init-I2C2-false-HAL-true,6-MX_TSC_Init-TSC-false-HAL-true,7-MX_USART3_UART_Init-USART3-false-HAL-true,8-MX_USB_DEVICE_Init-USB_DEVICE-false-HAL-false,9-MX_TIM2_Init-TIM2-false-HAL-true,10-MX_TIM15_Init-TIM15-false-HAL-true,11-MX_TIM16_Init-TIM16-false-HAL-true
->>>>>>> code:code/board/board.ioc
 RCC.ADC12outputFreq_Value=72000000
 RCC.AHBFreq_Value=72000000
 RCC.APB1CLKDivider=RCC_HCLK_DIV2
@@ -381,8 +355,6 @@ RCC.USBFreq_Value=48000000
 RCC.VCOOutput2Freq_Value=8000000
 SH.ADCx_IN10.0=ADC1_IN10,IN10-Single-Ended
 SH.ADCx_IN10.ConfNb=1
-<<<<<<< HEAD:code/device/device.ioc
-=======
 TIM15.AutoReloadPreload=TIM_AUTORELOAD_PRELOAD_ENABLE
 TIM15.ClockDivision=TIM_CLOCKDIVISION_DIV4
 TIM15.IPParameters=ClockDivision,AutoReloadPreload,Prescaler,Period
@@ -402,34 +374,11 @@ TIM2.Prescaler=5
 TIM2.TIM_MasterOutputTrigger=TIM_TRGO_UPDATE
 TSC.CTPulseHighLength=TSC_CTPH_12CYCLES
 TSC.CTPulseLowLength=TSC_CTPL_12CYCLES
->>>>>>> code:code/board/board.ioc
 TSC.ChannelIOs-G5_IO1=TSC_GROUP5_IO1
 TSC.ChannelIOs-G5_IO2=TSC_GROUP5_IO2
 TSC.ChannelIOs-G6_IO1=TSC_GROUP6_IO1
 TSC.ChannelIOs-G6_IO2=TSC_GROUP6_IO2
 TSC.ChannelIOs-G6_IO3=TSC_GROUP6_IO3
-<<<<<<< HEAD:code/device/device.ioc
-TSC.IPParameters=SamplingIOs-G5_IO3,ChannelIOs-G5_IO1,ChannelIOs-G5_IO2,SamplingIOs-G6_IO4,ChannelIOs-G6_IO3,ChannelIOs-G6_IO2,ChannelIOs-G6_IO1
-TSC.SamplingIOs-G5_IO3=TSC_GROUP5_IO3
-TSC.SamplingIOs-G6_IO4=TSC_GROUP6_IO4
-USART3.IPParameters=VirtualMode-Asynchronous
-USART3.VirtualMode-Asynchronous=VM_ASYNC
-USB_DEVICE.CLASS_NAME_FS=CDC
-USB_DEVICE.IPParameters=VirtualMode,VirtualModeFS,CLASS_NAME_FS,LANGID_STRING
-USB_DEVICE.LANGID_STRING=1036
-USB_DEVICE.VirtualMode=Cdc
-USB_DEVICE.VirtualModeFS=Cdc_FS
-VP_ADC1_TempSens_Input.Mode=IN-TempSens
-VP_ADC1_TempSens_Input.Signal=ADC1_TempSens_Input
-VP_ADC1_Vbat_Input.Mode=IN-Vbat
-VP_ADC1_Vbat_Input.Signal=ADC1_Vbat_Input
-VP_ADC1_Vref_Input.Mode=IN-Vrefint
-VP_ADC1_Vref_Input.Signal=ADC1_Vref_Input
-VP_CRC_VS_CRC.Mode=CRC_Activate
-VP_CRC_VS_CRC.Signal=CRC_VS_CRC
-VP_SYS_VS_Systick.Mode=SysTick
-VP_SYS_VS_Systick.Signal=SYS_VS_Systick
-=======
 TSC.IODefaultMode=TSC_IODEF_OUT_PP_LOW
 TSC.IPParameters=SamplingIOs-G5_IO3,ChannelIOs-G5_IO1,ChannelIOs-G5_IO2,SamplingIOs-G6_IO4,ChannelIOs-G6_IO1,ChannelIOs-G6_IO2,ChannelIOs-G6_IO3,CTPulseHighLength,CTPulseLowLength,PulseGeneratorPrescaler,IODefaultMode,SpreadSpectrum,SpreadSpectrumPrescaler,SpreadSpectrumDeviation
 TSC.PulseGeneratorPrescaler=TSC_PG_PRESC_DIV16
@@ -453,8 +402,6 @@ VP_TIM16_VS_ClockSourceINT.Mode=Enable_Timer
 VP_TIM16_VS_ClockSourceINT.Signal=TIM16_VS_ClockSourceINT
 VP_TIM2_VS_ClockSourceINT.Mode=Internal
 VP_TIM2_VS_ClockSourceINT.Signal=TIM2_VS_ClockSourceINT
->>>>>>> code:code/board/board.ioc
 VP_USB_DEVICE_VS_USB_DEVICE_CDC_FS.Mode=CDC_FS
 VP_USB_DEVICE_VS_USB_DEVICE_CDC_FS.Signal=USB_DEVICE_VS_USB_DEVICE_CDC_FS
 board=custom
-isbadioc=false

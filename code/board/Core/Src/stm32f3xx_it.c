@@ -56,14 +56,11 @@
 
 /* External variables --------------------------------------------------------*/
 extern PCD_HandleTypeDef hpcd_USB_FS;
-<<<<<<< HEAD:code/device/Core/Src/stm32f3xx_it.c
-=======
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim15;
 extern TIM_HandleTypeDef htim16;
 extern DMA_HandleTypeDef hdma_usart3_tx;
 extern UART_HandleTypeDef huart3;
->>>>>>> code:code/board/Core/Src/stm32f3xx_it.c
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -207,19 +204,6 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /**
-<<<<<<< HEAD:code/device/Core/Src/stm32f3xx_it.c
-  * @brief This function handles CAN RX0 and USB low priority interrupts.
-  */
-void USB_LP_CAN_RX0_IRQHandler(void)
-{
-  /* USER CODE BEGIN USB_LP_CAN_RX0_IRQn 0 */
-
-  /* USER CODE END USB_LP_CAN_RX0_IRQn 0 */
-  HAL_PCD_IRQHandler(&hpcd_USB_FS);
-  /* USER CODE BEGIN USB_LP_CAN_RX0_IRQn 1 */
-
-  /* USER CODE END USB_LP_CAN_RX0_IRQn 1 */
-=======
   * @brief This function handles DMA1 channel2 global interrupt.
   */
 void DMA1_Channel2_IRQHandler(void)
@@ -301,7 +285,6 @@ void USB_LP_IRQHandler(void)
   /* USER CODE BEGIN USB_LP_IRQn 1 */
 
   /* USER CODE END USB_LP_IRQn 1 */
->>>>>>> code:code/board/Core/Src/stm32f3xx_it.c
 }
 
 /* USER CODE BEGIN 1 */

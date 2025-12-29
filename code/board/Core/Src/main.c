@@ -54,8 +54,6 @@
 /* Private variables ---------------------------------------------------------*/
 ADC_HandleTypeDef hadc1;
 
-CRC_HandleTypeDef hcrc;
-
 I2C_HandleTypeDef hi2c2;
 
 TIM_HandleTypeDef htim2;
@@ -65,10 +63,7 @@ TIM_HandleTypeDef htim16;
 TSC_HandleTypeDef htsc;
 
 UART_HandleTypeDef huart3;
-<<<<<<< HEAD:code/device/Core/Src/main.c
-=======
 DMA_HandleTypeDef hdma_usart3_tx;
->>>>>>> code:code/board/Core/Src/main.c
 
 /* USER CODE BEGIN PV */
 
@@ -82,13 +77,9 @@ static void MX_ADC1_Init(void);
 static void MX_I2C2_Init(void);
 static void MX_TSC_Init(void);
 static void MX_USART3_UART_Init(void);
-<<<<<<< HEAD:code/device/Core/Src/main.c
-static void MX_CRC_Init(void);
-=======
 static void MX_TIM2_Init(void);
 static void MX_TIM15_Init(void);
 static void MX_TIM16_Init(void);
->>>>>>> code:code/board/Core/Src/main.c
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -145,15 +136,10 @@ int main(void)
   MX_I2C2_Init();
   MX_TSC_Init();
   MX_USART3_UART_Init();
-<<<<<<< HEAD:code/device/Core/Src/main.c
-  MX_CRC_Init();
-  MX_USB_DEVICE_Init();
-=======
   MX_USB_DEVICE_Init();
   MX_TIM2_Init();
   MX_TIM15_Init();
   MX_TIM16_Init();
->>>>>>> code:code/board/Core/Src/main.c
   /* USER CODE BEGIN 2 */
 
   // Init the board
@@ -282,37 +268,6 @@ static void MX_ADC1_Init(void)
   uart_log(uart_message, size);
   memset((void *)uart_message, 0x00, (size_t)sizeof(uart_message));
   /* USER CODE END ADC1_Init 2 */
-
-}
-
-/**
-  * @brief CRC Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_CRC_Init(void)
-{
-
-  /* USER CODE BEGIN CRC_Init 0 */
-
-  /* USER CODE END CRC_Init 0 */
-
-  /* USER CODE BEGIN CRC_Init 1 */
-
-  /* USER CODE END CRC_Init 1 */
-  hcrc.Instance = CRC;
-  hcrc.Init.DefaultPolynomialUse = DEFAULT_POLYNOMIAL_ENABLE;
-  hcrc.Init.DefaultInitValueUse = DEFAULT_INIT_VALUE_ENABLE;
-  hcrc.Init.InputDataInversionMode = CRC_INPUTDATA_INVERSION_NONE;
-  hcrc.Init.OutputDataInversionMode = CRC_OUTPUTDATA_INVERSION_DISABLE;
-  hcrc.InputDataFormat = CRC_INPUTDATA_FORMAT_BYTES;
-  if (HAL_CRC_Init(&hcrc) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN CRC_Init 2 */
-
-  /* USER CODE END CRC_Init 2 */
 
 }
 
@@ -596,8 +551,6 @@ static void MX_USART3_UART_Init(void)
 }
 
 /**
-<<<<<<< HEAD:code/device/Core/Src/main.c
-=======
   * Enable DMA controller clock
   */
 static void MX_DMA_Init(void)
@@ -614,7 +567,6 @@ static void MX_DMA_Init(void)
 }
 
 /**
->>>>>>> code:code/board/Core/Src/main.c
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
