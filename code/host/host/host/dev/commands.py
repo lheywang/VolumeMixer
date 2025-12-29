@@ -165,10 +165,10 @@ class CmdSHUTD:
 
 
 @dataclass
-class CmdRESET:
+class CmdRINIT:
     def cmd(self):
         # Format the command
-        return FormatCommand("RESET", None)
+        return FormatCommand("RINIT", None)
 
 
 @dataclass

@@ -20,7 +20,7 @@ import logging
 # Local imports
 # ------------------------------------------------------------------------------
 from . import IsDeviceAvailable, IsCommandValid, GetCommandStatus
-from . import CmdASYNC, CmdDCONF, CmdSLPOS, CmdUICON, CmdCONNC, CmdRESET, CmdSHUTD
+from . import CmdASYNC, CmdDCONF, CmdSLPOS, CmdUICON, CmdCONNC, CmdRINIT, CmdSHUTD
 
 # ------------------------------------------------------------------------------
 # Defining some constants

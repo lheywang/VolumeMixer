@@ -5,7 +5,7 @@ from .commands import (
     CmdDCONF,
     CmdSLPOS,
     CmdUICON,
-    CmdRESET,
+    CmdRINIT,
     CmdSHUTD,
     CmdCONNC,
 )
