@@ -127,7 +127,7 @@ class MixerDevice:
 
             # Then read the response
             self.port.reset_input_buffer()
-            tmp = self.port.read_until().decode().strip().strip("\0")  # wait for \n to be seen
+            tmp = self.port.read_until(";END").decode().strip().strip("\0")  # wait for an END tocken to be found to be seen
             print(tmp)
 
             # Parse the output
