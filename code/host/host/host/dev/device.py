@@ -119,22 +119,22 @@ class MixerDevice:
     ):
         # First, get the command :
         buf = cmd.cmd()
-        print(buf)
+        self.logger.debug(f"Sending buffer : {buf}")
 
         # Then, write the command on the serial port
         if self.IsDeviceOpenned:
             self.port.write(buf.encode())
 
-            # Then read the response
+            # Wait for an END tocken to be found to be seen.
+            # The input buffer is flushed, to ensure no error will be fetched.
             self.port.reset_input_buffer()
-            tmp = (
-                self.port.read_until(";END").decode().strip().strip("\0")
-            )  # wait for an END tocken to be found to be seen
-            print(tmp)
+            tmp = self.port.read_until(";END").decode().strip().strip("\0")
+            self.logger.debug(f"Rode from the device : {tmp}")
 
             # Parse the output
             valid = IsCommandValid(tmp)
             if not valid:
+                self.logger.warning("Invalid command was received. Ignoring it...")
                 return cmd, False
 
             # Check the return value of the command
