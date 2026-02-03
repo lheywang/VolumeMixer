@@ -16,9 +16,11 @@ from logging.handlers import RotatingFileHandler
 from . import ColorFormatter
 
 
-def setup_logger(log_file="VolumeMixer.log"):
+def setup_logger(LogLevel: bool, log_file="VolumeMixer.log"):
     logger = logging.getLogger("VolumeMixer")
-    logger.setLevel(logging.DEBUG)
+
+    level = logging.DEBUG if LogLevel else logging.INFO
+    logger.setLevel(level)
 
     # Standard format for the file (No colors here!)
     file_format = logging.Formatter(
