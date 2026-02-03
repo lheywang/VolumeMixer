@@ -123,6 +123,7 @@ int main(void)
   /* USER CODE BEGIN SysInit */
   /*
    * Call theses here, to ensure the logger will be effective immediately.
+   * After regeneration, they may be re-called, but we don't care ! We'll overwrite the same parameters.
    */
   MX_DMA_Init();
   MX_USART3_UART_Init();

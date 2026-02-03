@@ -115,7 +115,7 @@ class MixerDevice:
 
     def SendCommand(
         self,
-        cmd: CmdASYNC | CmdDCONF | CmdSLPOS | CmdUICON | CmdCONNC | CmdRESET | CmdSHUTD,
+        cmd: CmdASYNC | CmdDCONF | CmdSLPOS | CmdUICON | CmdCONNC | CmdRINIT | CmdSHUTD,
     ):
         # First, get the command :
         buf = cmd.cmd()
