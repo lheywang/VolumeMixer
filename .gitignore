@@ -283,3 +283,7 @@ dkms.conf
 
 # Executabkes
 code/mixerlib/Tests/*
+
+# STM32Ide
+*.launch
+
