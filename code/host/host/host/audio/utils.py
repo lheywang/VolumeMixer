@@ -67,7 +67,7 @@ def GetVal(dB: float) -> float:
 
 
 def GetMatchingAudioSource(
-    executables: list[AudioSource], apps: dict, pos: int
+    executables: list[AudioSource], config: dict, pos: int
 ) -> tuple:
     """
     Matches audio source executables to application definitions and retrieves associated icon data.
@@ -90,12 +90,17 @@ def GetMatchingAudioSource(
     ret = []
 
     # Fetch target apps
-    apps = apps[f"{pos}"]
+    apps = config[f"{pos}"]
 
     # First, identify the app
     for index, exe in enumerate(executables):
         for app in apps.keys():
             if app in exe.name:
+
+                # Enable to filter the excluded apps.
+                # We don't want to process it.
+                if app in config["Exclusions"]:
+                    continue
 
                 # Remove the key from the executables (prevent from doublons on different channels!)
                 tmp = []

@@ -10,7 +10,6 @@
 # Import necessary libraries
 # ------------------------------------------------------------------------------
 import sys
-import os
 import tomllib
 import logging
 
@@ -47,6 +46,11 @@ class AudioController:
 
     def __init__(self, logger: logging.Logger):
         self.OS = OS
+
+        if OS not in ["linux", "windows"]:
+            logger.error(f"Unsupported OS detected.")
+            sys.exit(-10)
+
         self.master = AudioSource(
             name="Master",
             id=0,
