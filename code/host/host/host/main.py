@@ -92,15 +92,22 @@ class Application:
         # -----------------------------------------------
         # Sending command
         sliders: CmdSLPOS = CmdSLPOS()
-        sliders = self.device.SendCommand(sliders)
+        sliders, status = self.device.SendCommand(sliders)
 
         # Handling mute :
-        for index, _ in enumerate(sliders.pos):
-            if sliders.mute[index] == True:
-                sliders.pos = 0
+        if status == True:
+            for index, _ in enumerate(sliders.pos):
+                if sliders.mute[index] == True:
+                    sliders.pos[index] = 0
 
-        # Updating volumes
-        self.apps.SetSourcesVolumes(sliders.pos)
+                self.logger.debug(
+                    f"Slider {index + 1} : {sliders.pos[index]:3.2f}. Muted : {sliders.mute[index]}."
+                )
+
+            # Updating volumes
+            self.apps.SetSourcesVolumes(sliders.pos)
+        else:
+            self.logger.warning("Previous command returned an error.")
 
         # -----------------------------------------------
         # Third, fetch the displayed apps, and ensure
@@ -109,13 +116,22 @@ class Application:
         # -----------------------------------------------
         # Sending command
         req_apps: CmdASYNC = CmdASYNC()
-        CmdASYNC.add_apps(self.apps.active_apps)
-        req_apps = self.device.SendCommand(req_apps)
+        req_apps.add_apps(self.apps.active_apps)
+        req_apps, status = self.device.SendCommand(req_apps)
 
         # Handling asynchronized apps :
-        for index, sync in enumerate(req_apps.sync):
-            if sync == False:
-                self.logger.info(f"Apps {index + 1} not up to date. Updating it...")
+        if status == True:
+            for index, sync in enumerate(req_apps.sync):
+                if sync == False:
+                    self.logger.info(
+                        f"Apps {index + 1} (ID = {req_apps.apps[index]}) not up to date. Updating it..."
+                    )
+                else:
+                    self.logger.debug(
+                        f"Apps {index + 1} (ID = {req_apps.apps[index]}) is up to date."
+                    )
+        else:
+            self.logger.warning("Previous command returned an error.")
 
         # Function exit
         return
@@ -176,15 +192,15 @@ if __name__ == "__main__":
     REFRESH_FREQ = 10
 
     # Initializing the device
-    app = Application()
+    app = Application(args.debug)
 
     # Giving some infos
-    app.logger.debug(f"Getting calibration : {args.cal}")
-    app.logger.debug(f"Getting debug : {args.debug}")
+    app.logger.info(f"Getting calibration : {args.cal}")
+    app.logger.info(f"Getting debug : {args.debug}")
 
     if args.cal:
         try:
-            app.calibrate
+            app.calibrate()
 
         except:
             app.reset(f"Done calibration. Exiting ...")
