@@ -137,7 +137,54 @@ class Application:
         return
 
     def calibrate() -> None:
-        pass
+        """
+        Calibrate the device to account for the analog dispersion of the sliders.
+        This procedure is automatic, but need to be started by the user.
+
+        The method used : 
+        STAGE I : Global calibration
+            1) Reset the conf to factory default (OFFSET(s) = 0, GAIN(s) = 1.00). This ensure a standard starting point.
+            2) Ask the user to place all sliders to the highest position (near the screens) -> Read the values, compute mean.
+            3) Ask the user to place all sliders to the lowest position (near touch sensing pads) -> Read the values, compute a mean.
+            4) Compute the median offset of the device (median lowest).
+            5) Compute the median gain of the device (1 - median highest) + 1.
+            5) Apply theses settings.
+
+        STAGE II : Per slider calibration
+            For each slider : 
+                1) Ask the user to place it on the highest position (near the screen).
+                2) Read it's value (must be arround 1.00). Compute it's own gain (1 -  value) + 1.
+                3) Ask the user to place it on the lowest position (near touch sensing pads).
+                4) Read it's value (must be arround 0.00). Compute it's own offset (- value).
+            
+            Finally, apply the settings.
+
+        STAGE III : Validation.
+            1) Ask the user to play with the slider, and verify that they correctly range from 0 to 100 for all of them.
+        """
+
+        # First, create variables : 
+        adc_gain = 1.00
+        adc_offset = 0.00
+
+        slider_gain = [1.00, 1.00, 1.00, 1.00, 1.00]
+        slider_offset = [0.00, 0.00, 0.00, 0.00, 0.00]
+
+        # -------------------------------
+        # STAGE 1 :  Global calibration
+        # -------------------------------
+
+        
+        # -------------------------------
+        # STAGE 2 : Per slider calibration
+        # -------------------------------
+
+        
+        # -------------------------------
+        # STAGE 3 : Validation.
+        # -------------------------------
+
+        return
 
     def stop(self, reason: str) -> None:
         """
