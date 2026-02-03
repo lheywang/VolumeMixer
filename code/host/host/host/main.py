@@ -11,6 +11,8 @@
 # ------------------------------------------------------------------------------
 import logging
 import sys
+import time
+import argparse
 
 from dev import (
     IsDeviceAvailable,
@@ -37,49 +39,176 @@ from audio import (
 from logger import setup_logger
 
 
-def init() -> tuple[logging.Logger, MixerDevice, AudioController]:
-    # Creating the logger device
-    logger = setup_logger()
-    logger.info("Created the logger, will now defer them.")
+class Application:
+    """
+    Define a new class, that contain the base application logic.
+    Enable the internalization of some variables, to retains states from
+    one execution to the next.
+    """
 
-    # Openning the devices
-    apps = AudioController(logger)
-    device = MixerDevice(logger)
+    def __init__(self, LogLevel: bool = False) -> None:
+        """
+        Open a new instance of the app.
 
-    return logger, device, apps
+        Will trigger the openning of the COM port, and all the subsequent
+        device initialization and software fetching.
+        """
+        # Creating the logger device
+        self.logger = setup_logger(LogLevel)
+        self.logger.info("Created the logger, will now defer them.")
 
+        # Openning the devices
+        self.apps = AudioController(self.logger)
+        self.device = MixerDevice(self.logger)
 
-def loop(logger: logging.Logger, device: MixerDevice, apps: AudioController) -> None:
-    pass
+        # If device isn't openned, exit without returning.
+        # Logs where already defered within the class init.
+        if self.device.IsDeviceOpenned == False:
+            sys.exit(-2)
 
+        return
 
-def deinit(logger: logging.Logger, reason: str) -> None:
-    logger.info("Performing a clean and exit ...")
-    logger.info(f"    Reason is : {reason}")
+    def loop(self) -> None:
+        """
+        Contain the base application logic, executed repetely.
+
+        Each call will try to :
+
+        - Fetch the slider position
+            -> Update theses into the OS agnostic module
+
+        - Fetch the applications displayed
+            -> Compare them to the actual apps on the host OS.
+                -> If an unmatch exist, update it (read blob, send it).
+        """
+
+        # -----------------------------------------------
+        # First, update our apps bank :
+        # -----------------------------------------------
+        self.apps.Update()
+
+        # -----------------------------------------------
+        # Then, we need to fetch the slider position :
+        # -----------------------------------------------
+        # Sending command
+        sliders: CmdSLPOS = CmdSLPOS()
+        sliders = self.device.SendCommand(sliders)
+
+        # Handling mute :
+        for index, _ in enumerate(sliders.pos):
+            if sliders.mute[index] == True:
+                sliders.pos = 0
+
+        # Updating volumes
+        self.apps.SetSourcesVolumes(sliders.pos)
+
+        # -----------------------------------------------
+        # Third, fetch the displayed apps, and ensure
+        # they're matching the needed ones. For the ones
+        # that do not match, we update them :
+        # -----------------------------------------------
+        # Sending command
+        req_apps: CmdASYNC = CmdASYNC()
+        CmdASYNC.add_apps(self.apps.active_apps)
+        req_apps = self.device.SendCommand(req_apps)
+
+        # Handling asynchronized apps :
+        for index, sync in enumerate(req_apps.sync):
+            if sync == False:
+                self.logger.info(f"Apps {index + 1} not up to date. Updating it...")
+
+        # Function exit
+        return
+
+    def calibrate() -> None:
+        pass
+
+    def stop(self, reason: str) -> None:
+        """
+        Will perform a device stop (SHUTD) --> Won't respond after. Need to reset (manually).
+
+        Typically called after a SIGTERM signal (since app is launched as a deamon / service)
+        --> SIGTERM = shutdown.
+        """
+        self.logger.info("Performing a clean and exit ...")
+        self.logger.info(f"    Reason is : {reason}")
+
+        shutdown = CmdSHUTD()
+        shutdown = self.device.SendCommand(shutdown)
+
+    def reset(self, reason: str) -> None:
+        """
+        Will perform a device reset (RINIT). Usefull to recover from errors...
+
+        Typically called after an error, to leave the device into a open state,
+        waiting for new connections.
+        """
+        self.logger.error("Performing a reset of the device ...")
+        self.logger.error(f"    Reason is : {reason}")
+
+        rst = CmdRINIT()
+        rst = self.device.SendCommand(rst)
 
 
 if __name__ == "__main__":
 
+    # -----------------------------------------------
+    # First, look in which mode we're launched ?
+    # -----------------------------------------------
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-c",
+        "--calibration",
+        help="Place the code in a calibration mode",
+        dest="cal",
+        action="store_true",
+    )
+    parser.add_argument(
+        "-d",
+        "--debug",
+        help="Configure the logs to be more verbose",
+        dest="debug",
+        action="store_true",
+    )
+    args = parser.parse_args()
+
+    # Defining some parameters
+    REFRESH_FREQ = 10
+
     # Initializing the device
-    logger, dev, apps = init()
+    app = Application()
 
-    # Running the loop, until somehow something exit
-    try:
-        while True:
-            loop(logger, dev, apps)
+    # Giving some infos
+    app.logger.debug(f"Getting calibration : {args.cal}")
+    app.logger.debug(f"Getting debug : {args.debug}")
 
-    except KeyboardInterrupt:
-        deinit(logger, "KeyboardInterrupt")
-        sys.exit(0)
+    if args.cal:
+        try:
+            app.calibrate
 
-    except SystemExit:
-        deinit(logger, "SystemExit")
-        sys.exit(0)
+        except:
+            app.reset(f"Done calibration. Exiting ...")
+            sys.exit(0)
 
-    except SystemError:
-        deinit(logger, "SystemError")
-        sys.exit(0)
+    else:
+        # Running the loop, until somehow something exit
+        try:
+            while True:
+                app.loop()
+                time.sleep(1 / REFRESH_FREQ)
 
-    except Exception as e:
-        logger.error(f"Unhandled exception : {e}")
-        sys.exit(-1)
+        except KeyboardInterrupt:
+            app.reset("KeyboardInterrupt")
+            sys.exit(0)
+
+        except SystemExit:
+            app.stop("SystemExit")
+            sys.exit(0)
+
+        except SystemError:
+            app.stop("SystemError")
+            sys.exit(0)
+
+        except Exception as e:
+            app.reset(f"Unhandled exception : {e}")
+            sys.exit(-1)
