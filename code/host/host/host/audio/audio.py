@@ -160,7 +160,7 @@ class AudioController:
         """
         if len(volumes) != self.channel_number:
             return -1
-        
+
         self.logger.info("Setting default volumes to all the apps...")
 
         # Ensure all volumes are on the same maximal level
@@ -189,7 +189,9 @@ class AudioController:
                         # Master volume
                         if sources.id == 0:
                             db_min, db_max, _ = sources.handle.GetVolumeRange()
-                            sources.handle.SetMasterVolumeLevel(GetdB(volumes[0], db_min, db_max), None)
+                            sources.handle.SetMasterVolumeLevel(
+                                GetdB(volumes[0], db_min, db_max), None
+                            )
                             sources.volume = volumes[0]
 
                         # App Volume
@@ -200,8 +202,8 @@ class AudioController:
                             chan = sources.handle.channelAudioVolume().GetChannelCount()
                             for k in range(chan):
                                 sources.handle.channelAudioVolume().SetChannelVolume(
-                                    k, 
-                                    volumes[index], 
+                                    k,
+                                    volumes[index],
                                     None,
                                 )
 
@@ -258,3 +260,15 @@ class AudioController:
         for k in range(self.channel_number - 1):
             self.sources, tmp = GetMatchingAudioSource(self.sources, config, (k + 1))
             self.active_apps.append(tmp)
+
+    def Update(self):
+        """
+        Updates the apps list on the host system.
+        This function agglomerate different subcalls, which are all needed.
+
+        Targetted to be called from within the loop function.
+        """
+        self.FetchSources()
+        self.AssignShownApps()
+
+        return

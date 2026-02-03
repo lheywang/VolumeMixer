@@ -25,7 +25,7 @@ SCALE = 34
 # ------------------------------------------------------------------------------
 # Defining utils functions
 # ------------------------------------------------------------------------------
-def GetdB(value: float, db_min : float, db_max : float) -> float:
+def GetdB(value: float, db_min: float, db_max: float) -> float:
     """
     Converts a linear amplitude value to decibels (dB).
 
