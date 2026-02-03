@@ -99,7 +99,7 @@ int builder(struct CMD * const command, char *buf)
 		 */
 		case ASYNC:
 			strcpy(tmp, "START;ASYNC;000;");
-			int len = 181;
+			int len = 183;
 
 			// Add the payload to tmp
 			if (build_async_payload(&command->ASYNC_RX, &tmp[16], &len) != 0)

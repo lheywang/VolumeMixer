@@ -189,7 +189,7 @@ int build_async_payload(const struct CMD_ASYNC_RX * const cmd, char *buf, int * 
 
 	*len = snprintf(buf,
 			180,
-			"{\"match\":%1d,\"apps\":[{\"0\":\"%08lx\",\"match\":\"%1lu\"},{\"1\":\"%08lx\",\"match\":\"%1lu\"},{\"2\":\"%08lx\",\"match\":\"%1lu\"},{\"3\":\"%08lx\",\"match\":\"%1lu\"},{\"4\":\"%08lx\",\"match\":\"%1lu\"}]}",
+			"{\"match\":\"%1d\",\"apps\":[{\"0\":\"%08lx\",\"match\":\"%1lu\"},{\"1\":\"%08lx\",\"match\":\"%1lu\"},{\"2\":\"%08lx\",\"match\":\"%1lu\"},{\"3\":\"%08lx\",\"match\":\"%1lu\"},{\"4\":\"%08lx\",\"match\":\"%1lu\"}]}",
 			cmd->sync,
 			cmd->sliders[0].appSlider,
 			cmd->sliders[0].appMatch,
