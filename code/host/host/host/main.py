@@ -10,6 +10,7 @@
 # Importing modules
 # ------------------------------------------------------------------------------
 import logging
+import sys
 
 from dev import (
     IsDeviceAvailable,
@@ -33,31 +34,50 @@ from audio import (
     AudioController,
 )
 
+from logger import setup_logger
+
 def init() -> None:
+    # Creating the logger device
+    logger = setup_logger()
+    logger.info("Created the logger, will now defer them.")
+
+    # Openning the devices
+    apps = AudioController(logger)
+    device = MixerDevice(logger)
+
+    return logger, device, apps
+
+def loop(logger : logging.Logger, device: MixerDevice, apps: AudioController) -> None:
     pass
 
-def loop() -> None:
-    pass
-
-def deinit() -> None:
-    print("Performing a clean and exit ...")
+def deinit(logger : logging.Logger, reason : str) -> None:
+    logger.info("Performing a clean and exit ...")
+    logger.info(f"    Reason is : {reason}")
 
 if __name__ == "__main__":
-    init()
 
+    # Initializing the device
+    logger, dev, apps = init()
+
+    # Running the loop, until somehow something exit
     try:
         while True:
-            loop()
+            loop(logger, dev, apps)
+
     except KeyboardInterrupt:
-        deinit()
+        deinit(logger, "KeyboardInterrupt")
+        sys.exit(0)
 
     except SystemExit:
-        deinit()
+        deinit(logger, "SystemExit")
+        sys.exit(0)
 
     except SystemError:
-        deinit()
+        deinit(logger, "SystemError")
+        sys.exit(0)
 
     except Exception as e:
-        print(f"Unhandled exception : {e}")
+        logger.error(f"Unhandled exception : {e}")
+        sys.exit(-1)
 
 

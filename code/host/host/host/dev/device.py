@@ -58,7 +58,6 @@ class MixerDevice:
             self.logger.info("Connected to device !")
         else:
             self.logger.error("Connected refused to device")
-            print("Could not establish link with device !")
 
     def _SelectCOMPort(self):
         """
@@ -80,6 +79,7 @@ class MixerDevice:
 
         for port in ports:
             try:
+                self.logger.info(f"Trying port {port.name} ...")
                 tmp = serial.Serial(
                     port.name,
                     baudrate=BAUD,
@@ -103,12 +103,12 @@ class MixerDevice:
                 # Check if the message is typical from a mixer ready to accept a connection
                 if IsDeviceAvailable(data):
                     self.port = tmp
-                    print(f"Found a device on : {self.port.port} !")
+                    self.logger.info(f"Found a device on : {self.port.port} !")
                     return 0
                 else:
                     continue
             except UnicodeDecodeError as e:
-                print(f"Could not decode COM port {tmp.port} : {e}")
+                self.logger.info(f"Could not decode COM port {tmp.port} : {e}")
                 continue
 
         return -1

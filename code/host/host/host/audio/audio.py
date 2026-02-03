@@ -76,6 +76,9 @@ class AudioController:
         """
         Fetch the audio sources available on the system
         """
+
+        self.logger.info(f"Fetching audio sources...")
+
         match (self.OS):
             case "linux":
                 with pulsectl.Pulse() as pulse:
@@ -140,6 +143,9 @@ class AudioController:
                 self.master.muted = volume.GetMute()
                 self.master.handle = volume
 
+        for source in self.sources:
+            self.logger.info(f"Found a source : {source.name}")
+
         return 0
 
     def SetSourcesVolumes(self, volumes: list[float]) -> int:
@@ -154,6 +160,8 @@ class AudioController:
         """
         if len(volumes) != self.channel_number:
             return -1
+        
+        self.logger.info("Setting default volumes to all the apps...")
 
         # Ensure all volumes are on the same maximal level
         for index, vol in enumerate(volumes):
