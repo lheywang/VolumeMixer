@@ -36,7 +36,8 @@ from audio import (
 
 from logger import setup_logger
 
-def init() -> None:
+
+def init() -> tuple[logging.Logger, MixerDevice, AudioController]:
     # Creating the logger device
     logger = setup_logger()
     logger.info("Created the logger, will now defer them.")
@@ -47,12 +48,15 @@ def init() -> None:
 
     return logger, device, apps
 
-def loop(logger : logging.Logger, device: MixerDevice, apps: AudioController) -> None:
+
+def loop(logger: logging.Logger, device: MixerDevice, apps: AudioController) -> None:
     pass
 
-def deinit(logger : logging.Logger, reason : str) -> None:
+
+def deinit(logger: logging.Logger, reason: str) -> None:
     logger.info("Performing a clean and exit ...")
     logger.info(f"    Reason is : {reason}")
+
 
 if __name__ == "__main__":
 
@@ -79,5 +83,3 @@ if __name__ == "__main__":
     except Exception as e:
         logger.error(f"Unhandled exception : {e}")
         sys.exit(-1)
-
-

@@ -15,20 +15,21 @@ from logging.handlers import RotatingFileHandler
 
 from . import ColorFormatter
 
+
 def setup_logger(log_file="VolumeMixer.log"):
     logger = logging.getLogger("VolumeMixer")
     logger.setLevel(logging.DEBUG)
 
     # Standard format for the file (No colors here!)
     file_format = logging.Formatter(
-        '[%(asctime)s] [%(levelname)8s] --- (%(filename)12s:%(lineno)3d) : %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S'
+        "[%(asctime)s] [%(levelname)8s] --- (%(filename)12s:%(lineno)3d) : %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
     )
 
     # 1. Rotating File Handler
     # maxBytes: 5MB per file | backupCount: Keep 3 old log files before overwriting
     file_handler = RotatingFileHandler(
-        log_file, maxBytes=5*1024*1024, backupCount=3
+        log_file, maxBytes=5 * 1024 * 1024, backupCount=3
     )
     file_handler.setFormatter(file_format)
     logger.addHandler(file_handler)
