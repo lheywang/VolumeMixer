@@ -62,7 +62,7 @@ class CmdASYNC:
         # Format the command
         return FormatCommand("ASYNC", json.dumps(tmp, separators=(",", ":")))
 
-    def add_apps(self, apps : list[AudioActiveApp]):
+    def add_apps(self, apps: list[AudioActiveApp]):
         for index in range(5):
             self.apps[index] = zlib.crc32(apps[index].name.encode())
 

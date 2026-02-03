@@ -127,7 +127,9 @@ class MixerDevice:
 
             # Then read the response
             self.port.reset_input_buffer()
-            tmp = self.port.read_until(";END").decode().strip().strip("\0")  # wait for an END tocken to be found to be seen
+            tmp = (
+                self.port.read_until(";END").decode().strip().strip("\0")
+            )  # wait for an END tocken to be found to be seen
             print(tmp)
 
             # Parse the output
@@ -136,10 +138,10 @@ class MixerDevice:
                 return cmd, False
 
             # Check the return value of the command
-            if type(cmd) == CmdASYNC or  type(cmd) == CmdSLPOS:
+            if type(cmd) == CmdASYNC or type(cmd) == CmdSLPOS:
                 cmd.parse(tmp.split(";")[3])
                 return cmd, True
             else:
                 return cmd, GetCommandStatus(tmp)
-            
+
         return cmd, False
