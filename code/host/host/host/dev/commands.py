@@ -76,10 +76,10 @@ class CmdASYNC:
 
         # Copy values
         try:
-            self.res = tmp["match"]
+            self.res = int(tmp["match"])
             for index, elem in enumerate(tmp["apps"]):
-                self.apps.append(elem[f"{index + 1}"])
-                self.sync.append(bool(elem["match"]))
+                self.apps.append(elem[f"{index}"])
+                self.sync.append(True if elem["match"] == "1" else False)
 
         except Exception as e:
             print(f"Invalid dict detected ! : {e}")

@@ -125,6 +125,11 @@ class MixerDevice:
         if self.IsDeviceOpenned:
             self.port.write(buf.encode())
 
+            # Immediately return, True, because theses commands will
+            # trigger the target in mode where it CAN'T respond...
+            if type(cmd) == CmdRINIT or type(cmd) == CmdSHUTD:
+                return cmd, True
+
             # Wait for an END tocken to be found to be seen.
             # The input buffer is flushed, to ensure no error will be fetched.
             self.port.reset_input_buffer()
@@ -134,7 +139,9 @@ class MixerDevice:
             # Parse the output
             valid = IsCommandValid(tmp)
             if not valid:
-                self.logger.warning("Invalid command was received. Ignoring it...")
+                self.logger.warning(
+                    f"Invalid command was received (False CRC). Ignoring it... : {tmp}"
+                )
                 return cmd, False
 
             # Check the return value of the command
