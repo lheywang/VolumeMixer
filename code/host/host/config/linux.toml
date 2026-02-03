@@ -57,3 +57,6 @@ googlemeet = "googlemeet.bin"
 googlechat = "googlechat.bin"
 icq = "icq.bin"
 aim = "aim.bin"
+
+[Exclusions]
+exclude = [""]

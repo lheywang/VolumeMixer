@@ -42,3 +42,6 @@ netflix = "netflix.bin"
 obs = "obs.bin"
 shadow = "shadow.bin" 
 any = "" # The "any" key to exist enable any unknown app to be registered as games
+
+[Exclusions]
+exclude = ["taskhostw.exe"]
