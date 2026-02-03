@@ -74,6 +74,8 @@ class AudioController:
         # Fetch the audio sources available on the system and assign them to the sources list
         self.FetchSources()
         self.AssignShownApps()
+
+        self.logger.info("Setting default volumes to all the apps...")
         self.SetSourcesVolumes([0.4, 1.0, 1.0, 1.0, 1.0])
 
     def FetchSources(self):
@@ -164,8 +166,6 @@ class AudioController:
         """
         if len(volumes) != self.channel_number:
             return -1
-
-        self.logger.info("Setting default volumes to all the apps...")
 
         # Ensure all volumes are on the same maximal level
         for index, vol in enumerate(volumes):
