@@ -9,10 +9,12 @@
 # ------------------------------------------------------------------------------
 # Importing modules
 # ------------------------------------------------------------------------------
-import logging
+import statistics
 import sys
 import time
 import argparse
+from datetime import datetime
+import random
 
 from dev import (
     IsDeviceAvailable,
@@ -136,12 +138,12 @@ class Application:
         # Function exit
         return
 
-    def calibrate() -> None:
+    def calibrate(self) -> None:
         """
         Calibrate the device to account for the analog dispersion of the sliders.
         This procedure is automatic, but need to be started by the user.
 
-        The method used : 
+        The method used :
         STAGE I : Global calibration
             1) Reset the conf to factory default (OFFSET(s) = 0, GAIN(s) = 1.00). This ensure a standard starting point.
             2) Ask the user to place all sliders to the highest position (near the screens) -> Read the values, compute mean.
@@ -151,38 +153,150 @@ class Application:
             5) Apply theses settings.
 
         STAGE II : Per slider calibration
-            For each slider : 
+            For each slider :
                 1) Ask the user to place it on the highest position (near the screen).
                 2) Read it's value (must be arround 1.00). Compute it's own gain (1 -  value) + 1.
                 3) Ask the user to place it on the lowest position (near touch sensing pads).
                 4) Read it's value (must be arround 0.00). Compute it's own offset (- value).
-            
+
             Finally, apply the settings.
 
         STAGE III : Validation.
             1) Ask the user to play with the slider, and verify that they correctly range from 0 to 100 for all of them.
         """
 
-        # First, create variables : 
+        # Define a utility function to read the values more easily :
+
+        # -----------------------------------------------------------------------------------------------------------------
+        def get_values() -> list[int]:
+            """
+            Small utility function, used to fetch the slider positions without needing to define functions, and so on...
+            """
+            # Sending command
+            sliders: CmdSLPOS = CmdSLPOS()
+            sliders, status = self.device.SendCommand(sliders)
+
+            # Fetching values
+            if status == True:
+                # Updating volumes
+                return list(map(lambda x: x * 100, sliders.pos))
+            else:
+                self.logger.warning("Previous command returned an error.")
+                return [0, 0, 0, 0, 0]
+
+        # -----------------------------------------------------------------------------------------------------------------
+        def apply_settings(
+            adc_gain: float,
+            adc_offset: float,
+            slider_gain: list[float],
+            slider_offset: list[float],
+            dev_name: str,
+        ) -> None:
+            """
+            Small utility function to apply settings to the device, before getting the next calibration steps.
+            """
+            # Creating command
+            dconf = CmdDCONF()
+
+            dconf.offset = adc_offset
+            dconf.gain = adc_gain
+
+            dconf.potOff = slider_offset
+            dconf.potGain = slider_gain
+
+            dconf.device = dev_name
+
+            # Send command
+            dconf, status = self.device.SendCommand(dconf)
+
+            # Fetching values
+            if status == True:
+                # Updating volumes
+                self.logger.info("Sucessfully updated device config !")
+                return
+            else:
+                self.logger.warning("Previous command returned an error.")
+                return
+
+        # -----------------------------------------------------------------------------------------------------------------
+
+        self.logger.info("---------------------------------------")
+        self.logger.info("  Welcome to the calibration menu.")
+        self.logger.info("  You'll be guided over the steps")
+        self.logger.info("---------------------------------------")
+
+        # First, create variables :
         adc_gain = 1.00
         adc_offset = 0.00
 
         slider_gain = [1.00, 1.00, 1.00, 1.00, 1.00]
         slider_offset = [0.00, 0.00, 0.00, 0.00, 0.00]
 
+        time = datetime.now()
+        name = f"{time.year}{time.month}{time.day}HAD{(random.randint(0, 0xFFFFFFFF) % 10):1d}"
+        self.logger.info(f"Generated device name : {name}")
+
         # -------------------------------
         # STAGE 1 :  Global calibration
         # -------------------------------
+        # Messages
+        self.logger.info("---------------------------------------")
+        self.logger.info("  STEP 1 : ADC CALIBRATION")
+        self.logger.info("---------------------------------------")
 
-        
+        # Ask user to place the sliders on the lowest position :
+        input(
+            "Place all the sliders on the lowest position (near the touch sensing pads). Then, hit enter : "
+        )
+
+        # Compute the ADC offset :
+        minimals = get_values()
+        adc_offset = statistics.mean(minimals) / 50.0
+
+        self.logger.debug(f"Got theses values {minimals}")
+        self.logger.debug(f"Computed this offset {adc_offset}")
+
+        # Then, apply theses values :
+        apply_settings(adc_gain, adc_offset, slider_gain, slider_offset, name)
+
+        # Ask the user to place the slider on the highest position :
+        input(
+            "Place all the sliders on the highest position (near the screens). Then, hit enter : "
+        )
+
+        maximals = get_values()
+        adc_gain = round((1 + ((100 - statistics.mean(maximals)) / 100)) * 50)
+
+        self.logger.debug(f"Got theses values {maximals}")
+        self.logger.debug(f"Computed this gain {adc_gain}")
+
         # -------------------------------
         # STAGE 2 : Per slider calibration
         # -------------------------------
+        self.logger.info("---------------------------------------")
+        self.logger.info("  STEP 2 : SLIDERS CALIBRATION")
+        self.logger.info("---------------------------------------")
 
-        
+        for index in range(5):
+            self.logger.info(f"  SLIDER {index + 1}")
+
         # -------------------------------
         # STAGE 3 : Validation.
         # -------------------------------
+        input(
+            "You can now verify the calibration. If everything look fine, you can exit, and launch the program in normal mode. \nOtherwise, you shall relaunch the process another time !"
+        )
+
+        # -------------------------------
+        # STAGE 4 : End.
+        # -------------------------------
+        self.logger.info("---------------------------------------")
+        self.logger.info("  FINISHED")
+        self.logger.info("  Device will now reset, and program will exit.")
+        self.logger.info("---------------------------------------")
+
+        self.reset()
+        sys.exit(0)
 
         return
 
