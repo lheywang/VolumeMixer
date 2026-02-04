@@ -104,7 +104,7 @@ There is about 63 possibles icons on the EEPROM, but only 15 are used, leaving 7
 \* The serial number is expressed as the following form, on 8 bytes : YYMDHXDY
 With :
 
-- YY the year (20 and 24)
+- YY the year(only last two digits)
 - M the month (0-12)
 - D the day (0-31)
 - H is constant to 'H'
