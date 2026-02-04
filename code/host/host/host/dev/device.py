@@ -140,7 +140,7 @@ class MixerDevice:
             valid = IsCommandValid(tmp)
             if not valid:
                 self.logger.warning(
-                    f"Invalid command was received (False CRC). Ignoring it... : {tmp}"
+                    f"Invalid command was received (False CRC). Ignoring it..."
                 )
                 return cmd, False
 
