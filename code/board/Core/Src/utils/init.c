@@ -119,29 +119,35 @@ int board_init(void)
 
 overwrite:
 
+		/*
+		 * We define the default header to that value.
+		 * This header must be configured to enable the correct analog performances.
+		 *
+		 * Otherwise, large offsets nor elements can be wrong.
+		 */
 		header.SN[0] = 20;
-		header.SN[1] = 25;
-		header.SN[2] = 11;
-		header.SN[3] = 19;
+		header.SN[1] = 26;
+		header.SN[2] = 01;
+		header.SN[3] = 01;
 		header.SN[4] = 'H';
 		header.SN[5] = 'A';
 		header.SN[6] = 'D';
 		header.SN[7] = 0;
 
-		header.offset = 0.350f;
-		header.gain = (uint8_t)46;
+		header.offset = 0.000f;
+		header.gain = (uint8_t)50;
 
-		header.chan_gain[0] = 1.008f;
-		header.chan_gain[1] = 1.010f;
-		header.chan_gain[2] = 0.875f;
-		header.chan_gain[3] = 1.010f;
-		header.chan_gain[4] = 1.030f;
+		header.chan_gain[0] = 1.000f;
+		header.chan_gain[1] = 1.000f;
+		header.chan_gain[2] = 1.000f;
+		header.chan_gain[3] = 1.000f;
+		header.chan_gain[4] = 1.000f;
 
-		header.chan_offsets[0] =0.000f;
-		header.chan_offsets[1] =0.000f;
-		header.chan_offsets[2] =-0.350f;
-		header.chan_offsets[3] =0.000f;
-		header.chan_offsets[4] =0.050f;
+		header.chan_offsets[0] = 0.000f;
+		header.chan_offsets[1] = 0.000f;
+		header.chan_offsets[2] = 0.000f;
+		header.chan_offsets[3] = 0.000f;
+		header.chan_offsets[4] = 0.000f;
 
 		build_raw_eeprom_header(buf);
 		eeprom_write(HEADER_ADDR, buf, HEADER_LEN, HAL_MAX_DELAY);

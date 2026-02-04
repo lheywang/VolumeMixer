@@ -131,6 +131,9 @@ uint32_t active_apps[5] = { 0 };
 struct ScreenOrder screen_cmd = { 0 };
 struct BufferRequest *br = (void *)0; // This pointer will be filled by after
 
+// Array to store the actually displayed images :
+uint8_t images[5][128] = { 0 };
+
 /*
  * -----------------------------------------------------------------
  * Public Functions
@@ -159,6 +162,7 @@ void fsm_init()
 	memset((void *)output_volumes, 0x00, (size_t)sizeof(output_volumes));
 	memset((void *)output_status, 0x00, (size_t)sizeof(output_status));
 	memset((void *)active_apps, 0x00, (size_t)sizeof(active_apps));
+	memset((void *)images, 0x00, (size_t)sizeof(images));
 
 	// Initialize the screencmd struct
 	memset((void *)&screen_cmd, 0x00, (size_t)sizeof(screen_cmd));
