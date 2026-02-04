@@ -30,9 +30,7 @@ def setup_logger(LogLevel: bool, log_file="VolumeMixer.log"):
 
     # 1. Rotating File Handler
     # maxBytes: 5MB per file | backupCount: Keep 3 old log files before overwriting
-    file_handler = RotatingFileHandler(
-        log_file, maxBytes=5 * 1024 * 1024, backupCount=3
-    )
+    file_handler = RotatingFileHandler(log_file, maxBytes=524288, backupCount=3)
     file_handler.setFormatter(file_format)
     logger.addHandler(file_handler)
 

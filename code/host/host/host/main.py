@@ -226,7 +226,7 @@ class Application:
         self.logger.info("---------------------------------------")
 
         # First, create variables :
-        adc_gain = 1.00
+        adc_gain = 40.00
         adc_offset = 0.00
 
         slider_gain = [1.00, 1.00, 1.00, 1.00, 1.00]
@@ -254,21 +254,26 @@ class Application:
         adc_offset = statistics.mean(minimals) / 50.0
 
         self.logger.debug(f"Got theses values {minimals}")
-        self.logger.debug(f"Computed this offset {adc_offset}")
+        self.logger.debug(f"Computed the offset to {adc_offset}")
 
         # Then, apply theses values :
         apply_settings(adc_gain, adc_offset, slider_gain, slider_offset, name)
 
-        # Ask the user to place the slider on the highest position :
+        # Ask the user to place the slider on the middle position.
+        # This ensure we won't overflow to 100 (otherwise gain = perfect !!).
+        #
         input(
-            "Place all the sliders on the highest position (near the screens). Then, hit enter : "
+            "Place all the sliders on the middle position (there's metal marker on the side). Then, hit enter : "
         )
 
         maximals = get_values()
-        adc_gain = round((1 + ((100 - statistics.mean(maximals)) / 100)) * 50)
+        adc_gain = round((1 + ((50 - statistics.mean(maximals)) / 50)) * adc_gain)
 
         self.logger.debug(f"Got theses values {maximals}")
-        self.logger.debug(f"Computed this gain {adc_gain}")
+        self.logger.debug(f"Computed the gain to {adc_gain}")
+
+        # Then, apply theses values :
+        apply_settings(adc_gain, adc_offset, slider_gain, slider_offset, name)
 
         # -------------------------------
         # STAGE 2 : Per slider calibration
@@ -357,12 +362,9 @@ if __name__ == "__main__":
     app.logger.info(f"Getting debug : {args.debug}")
 
     if args.cal:
-        try:
-            app.calibrate()
-
-        except:
-            app.reset(f"Done calibration. Exiting ...")
-            sys.exit(0)
+        app.calibrate()
+        app.reset(f"Done calibration. Exiting ...")
+        sys.exit(0)
 
     else:
         # Running the loop, until somehow something exit
