@@ -249,7 +249,7 @@ int show_loaded_header(void)
 	memset((void *)uart_message, 0x00, (size_t)sizeof(uart_message));
 
 	// Serial number
-	size = snprintf((char *)uart_message, (size_t)sizeof(uart_message), "           SN :       %2d%2d %2d %2d %c%c %c%1d \n\r",
+	size = snprintf((char *)uart_message, (size_t)sizeof(uart_message), "           SN :       %c%c %c %c %c%c %c%c \n\r",
 			header.SN[0],
 			header.SN[1],
 			header.SN[2],

@@ -30,6 +30,14 @@
 #include <errno.h>
 #include <ctype.h>
 
+#include "utils/logger.h"
+#include <stdio.h>
+#include "handlers/timers.h"
+
+// UART logs
+extern uint8_t isr_message[ISR_MESSAGE_SIZE];
+extern uint8_t msg_available;
+
 /* -----------------------------------------------------------------
  * DEFINES
  * -----------------------------------------------------------------
@@ -105,7 +113,7 @@ int parse_dconf_payload(const char * buf, const int len, struct CMD_DCONF_TX * c
     {
     	// Clear and copy the next sub element
     	memset((void *)work, 0x00, (size_t)DCONF_PARSER_BUFFER);
-    	memcpy((void *)work, (void *)&buf[(30* k) + 8], (size_t)29);
+    	memcpy((void *)work, (void *)&buf[(31* k) + 8], (size_t)30);
 
     	// Perform data extract and replacement :
     	uint8_t channel[4] = {0};
@@ -119,12 +127,13 @@ int parse_dconf_payload(const char * buf, const int len, struct CMD_DCONF_TX * c
 
     	work[2] = '%';
     	work[18] = '%';
+    	work[30] = '%';
     	char tmp[] = "%%%%%%";
     	memcpy((void *)&work[9], (void *)tmp, (size_t)6);
-    	memcpy((void *)&work[23], (void *)tmp, (size_t)4);
+    	memcpy((void *)&work[23], (void *)tmp, (size_t)5);
 
     	// Compare the new work buffer to check the syntax
-    	char ref2[] = "{\"%OFF\":\"%%%%%%\",\"%G\":\"%%%%\"}\0\0";
+    	char ref2[] = "{\"%OFF\":\"%%%%%%\",\"%G\":\"%%%%%\"}%\0";
         if (strcmp((char *)work, (char *)ref2) != 0)
         {
             return DCONF_ERROR_CODE(1); // JSON Channel data invalid.
@@ -171,7 +180,7 @@ int parse_dconf_payload(const char * buf, const int len, struct CMD_DCONF_TX * c
 
 	// Clear and copy the next sub element
 	memset((void *)work, 0x00, (size_t)DCONF_PARSER_BUFFER);
-	memcpy((void *)work, (void *)&buf[156], (size_t)11);
+	memcpy((void *)work, (void *)&buf[161], (size_t)11);
     char ref3[] = "}],\"gain\":\"";
     if (strcmp((char *)work, (char *)ref3) != 0)
 	{
@@ -179,7 +188,7 @@ int parse_dconf_payload(const char * buf, const int len, struct CMD_DCONF_TX * c
 	}
 
     memset((void *)work, 0x00, (size_t)DCONF_PARSER_BUFFER);
-    memcpy((void *)work, (void *)&buf[167], (size_t)4);
+    memcpy((void *)work, (void *)&buf[172], (size_t)4);
     char *cmp;
     cmd->adcGain = lstrtof((char *)work, &cmp);
     if (cmp < (char *)&work[3])
@@ -189,7 +198,7 @@ int parse_dconf_payload(const char * buf, const int len, struct CMD_DCONF_TX * c
 
 	// Clear and copy the next sub element
 	memset((void *)work, 0x00, (size_t)DCONF_PARSER_BUFFER);
-	memcpy((void *)work, (void *)&buf[171], (size_t)12);
+	memcpy((void *)work, (void *)&buf[177], (size_t)12);
 	char ref4[] = "\",\"offset\":\"";
 	if (strcmp((char *)work, (char *)ref4) != 0)
 	{
@@ -197,8 +206,9 @@ int parse_dconf_payload(const char * buf, const int len, struct CMD_DCONF_TX * c
 	}
 
 	memset((void *)work, 0x00, (size_t)DCONF_PARSER_BUFFER);
-	memcpy((void *)work, (void *)&buf[183], (size_t)6);
+	memcpy((void *)work, (void *)&buf[188], (size_t)6);
 	cmd->adcOffset = lstrtof((char *)work, &cmp);
+
 	if (cmp < (char *)&work[5])
 	{
 		/*
@@ -210,18 +220,19 @@ int parse_dconf_payload(const char * buf, const int len, struct CMD_DCONF_TX * c
 
 	// Clear and copy the next sub element
 	memset((void *)work, 0x00, (size_t)DCONF_PARSER_BUFFER);
-	memcpy((void *)work, (void *)&buf[189], (size_t)12);
+	memcpy((void *)work, (void *)&buf[195], (size_t)12);
 	char ref5[] = "\",\"device\":\"";
+
 	if (strcmp((char *)work, (char *)ref5) != 0)
 	{
 		return DCONF_ERROR_CODE(11); // JSON Device invalid
 	}
 
 	// Copy the ID
-	memcpy((void *)cmd->SN, (void *)&buf[201], (size_t)8);
+	memcpy((void *)cmd->SN, (void *)&buf[207], (size_t)8);
 
 	// Final checks
-	if ((buf[209] != '"') | (buf[210] != '}'))
+	if ((buf[215] != '"') | (buf[216] != '}'))
 	{
 		return DCONF_ERROR_CODE(12); // Invalid END JSON
 	}
