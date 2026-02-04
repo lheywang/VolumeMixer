@@ -233,7 +233,7 @@ class Application:
         slider_offset = [0.00, 0.00, 0.00, 0.00, 0.00]
 
         time = datetime.now()
-        name = f"{time.year}{time.month}{time.day}HAD{(random.randint(0, 0xFFFFFFFF) % 10):1d}"
+        name = f"{time.year % 100}{time.month}{time.day}HAD{(random.randint(0, 0xFFFFFFFF) % 10):1d}"
         self.logger.info(f"Generated device name : {name}")
 
         # -------------------------------
@@ -294,9 +294,6 @@ class Application:
         self.logger.info("  FINISHED")
         self.logger.info("  Device will now reset, and program will exit.")
         self.logger.info("---------------------------------------")
-
-        self.reset()
-        sys.exit(0)
 
         return
 
