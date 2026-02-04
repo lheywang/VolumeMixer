@@ -135,7 +135,7 @@ overwrite:
 		header.SN[7] = 0;
 
 		header.offset = 0.000f;
-		header.gain = (uint8_t)50;
+		header.gain = (uint8_t)40;
 
 		header.chan_gain[0] = 1.000f;
 		header.chan_gain[1] = 1.000f;

@@ -198,7 +198,7 @@ int parse_dconf_payload(const char * buf, const int len, struct CMD_DCONF_TX * c
 
 	// Clear and copy the next sub element
 	memset((void *)work, 0x00, (size_t)DCONF_PARSER_BUFFER);
-	memcpy((void *)work, (void *)&buf[177], (size_t)12);
+	memcpy((void *)work, (void *)&buf[178], (size_t)12);
 	char ref4[] = "\",\"offset\":\"";
 	if (strcmp((char *)work, (char *)ref4) != 0)
 	{
@@ -220,7 +220,7 @@ int parse_dconf_payload(const char * buf, const int len, struct CMD_DCONF_TX * c
 
 	// Clear and copy the next sub element
 	memset((void *)work, 0x00, (size_t)DCONF_PARSER_BUFFER);
-	memcpy((void *)work, (void *)&buf[195], (size_t)12);
+	memcpy((void *)work, (void *)&buf[196], (size_t)12);
 	char ref5[] = "\",\"device\":\"";
 
 	if (strcmp((char *)work, (char *)ref5) != 0)
@@ -229,10 +229,10 @@ int parse_dconf_payload(const char * buf, const int len, struct CMD_DCONF_TX * c
 	}
 
 	// Copy the ID
-	memcpy((void *)cmd->SN, (void *)&buf[207], (size_t)8);
+	memcpy((void *)cmd->SN, (void *)&buf[208], (size_t)8);
 
 	// Final checks
-	if ((buf[215] != '"') | (buf[216] != '}'))
+	if ((buf[216] != '"') | (buf[217] != '}'))
 	{
 		return DCONF_ERROR_CODE(12); // Invalid END JSON
 	}
