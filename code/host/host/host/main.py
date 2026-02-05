@@ -144,25 +144,11 @@ class Application:
         This procedure is automatic, but need to be started by the user.
 
         The method used :
-        STAGE I : Global calibration
-            1) Reset the conf to factory default (OFFSET(s) = 0, GAIN(s) = 1.00). This ensure a standard starting point.
-            2) Ask the user to place all sliders to the highest position (near the screens) -> Read the values, compute mean.
-            3) Ask the user to place all sliders to the lowest position (near touch sensing pads) -> Read the values, compute a mean.
-            4) Compute the median offset of the device (median lowest).
-            5) Compute the median gain of the device (1 - median highest) + 1.
-            5) Apply theses settings.
-
-        STAGE II : Per slider calibration
-            For each slider :
-                1) Ask the user to place it on the highest position (near the screen).
-                2) Read it's value (must be arround 1.00). Compute it's own gain (1 -  value) + 1.
-                3) Ask the user to place it on the lowest position (near touch sensing pads).
-                4) Read it's value (must be arround 0.00). Compute it's own offset (- value).
-
-            Finally, apply the settings.
-
-        STAGE III : Validation.
-            1) Ask the user to play with the slider, and verify that they correctly range from 0 to 100 for all of them.
+            - Set gain and parameters to a safe value. (Mostly 0.000 and 1.000), except the global gain to 25.
+            - Ask the user to place slider in different positions, to fetch data.
+            - Use maths to compute the different elements.
+            - Apply
+            
         """
 
         # Define a utility function to read the values more easily :
@@ -225,8 +211,11 @@ class Application:
         self.logger.info("  You'll be guided over the steps")
         self.logger.info("---------------------------------------")
 
+        # Configure some fixed settings
+        MARGIN = 1 # 1% of the full range
+
         # First, create variables :
-        adc_gain = 40.00
+        adc_gain = 25.00
         adc_offset = 0.00
 
         slider_gain = [1.00, 1.00, 1.00, 1.00, 1.00]
@@ -236,14 +225,12 @@ class Application:
         name = f"{time.year % 100}{time.month}{time.day}HAD{(random.randint(0, 0xFFFFFFFF) % 10):1d}"
         self.logger.info(f"Generated device name : {name}")
 
+        # Erase the previous settings, to ensure a correct base.
+        apply_settings(adc_gain, adc_offset, slider_gain, slider_offset, name)
+
         # -------------------------------
         # STAGE 1 :  Global calibration
         # -------------------------------
-        # Messages
-        self.logger.info("---------------------------------------")
-        self.logger.info("  STEP 1 : ADC CALIBRATION")
-        self.logger.info("---------------------------------------")
-
         # Ask user to place the sliders on the lowest position :
         input(
             "Place all the sliders on the lowest position (near the touch sensing pads). Then, hit enter : "
@@ -251,49 +238,56 @@ class Application:
 
         # Compute the ADC offset :
         minimals = get_values()
-        adc_offset = statistics.mean(minimals) / 50.0
-
-        self.logger.debug(f"Got theses values {minimals}")
-        self.logger.debug(f"Computed the offset to {adc_offset}")
-
-        # Then, apply theses values :
-        apply_settings(adc_gain, adc_offset, slider_gain, slider_offset, name)
 
         # Ask the user to place the slider on the middle position.
         # This ensure we won't overflow to 100 (otherwise gain = perfect !!).
         #
         input(
-            "Place all the sliders on the middle position (there's metal marker on the side). Then, hit enter : "
+            "Place all the sliders on the highest position (near the screens). Then, hit enter : "
         )
 
         maximals = get_values()
-        adc_gain = round((1 + ((50 - statistics.mean(maximals)) / 50)) * adc_gain)
 
-        self.logger.debug(f"Got theses values {maximals}")
-        self.logger.debug(f"Computed the gain to {adc_gain}")
+        """
+        This second part of the code is quite heavy on the math, but enable a smooth user experience ...
+
+        First, we compute the gains, an integer : 
+        We're using the smallest range for all of them, to remove errors, and remove stress on the final stages.
+        Then, we compute the individual gains, by dividing their gain by the target one.
+        
+        Finally, we compute the offsets, in a very similar method
+        """
+
+        # --- OFFSET ----
+        adc_offset = round((statistics.mean([minimal + MARGIN for minimal in minimals]) / adc_gain), 2)
+
+        # Get the remaining minimals
+        minimals2 = [minimal + MARGIN - (adc_offset * adc_gain) for minimal in minimals]
+        slider_offset = [round(minimal2 / adc_gain, 3) for minimal2 in minimals2]
+
+        # --- GAINS ----
+        # First, compute the deltas, and the ideal gains.
+        deltas = [maximals[i] - minimals[i] for i in range(len(maximals))]
+        gains = [adc_gain * (100 / delta) for delta in deltas]
+
+        # Then, compute the gains values
+        adc_gain = round(adc_gain * (100 / statistics.mean(deltas)), 0)
+        slider_gain = [round(gain / adc_gain, 3) for gain in gains]
+
+        # Debug prints
+        self.logger.info(f"Got theses values : ")
+        self.logger.info(f"    - ADC_GAIN :       {adc_gain}")
+        self.logger.info(f"    - SLIDER_GAINS :   {slider_gain}")
+        self.logger.info(f"    - ADC_OFFSET :     {adc_offset}")
+        self.logger.info(f"    - SLIDER_OFFSETS : {slider_offset}")
+        self.logger.info("     ")
+        self.logger.info("Now applying them to the device ...")
 
         # Then, apply theses values :
         apply_settings(adc_gain, adc_offset, slider_gain, slider_offset, name)
 
         # -------------------------------
-        # STAGE 2 : Per slider calibration
-        # -------------------------------
-        self.logger.info("---------------------------------------")
-        self.logger.info("  STEP 2 : SLIDERS CALIBRATION")
-        self.logger.info("---------------------------------------")
-
-        for index in range(5):
-            self.logger.info(f"  SLIDER {index + 1}")
-
-        # -------------------------------
-        # STAGE 3 : Validation.
-        # -------------------------------
-        input(
-            "You can now verify the calibration. If everything look fine, you can exit, and launch the program in normal mode. \nOtherwise, you shall relaunch the process another time !"
-        )
-
-        # -------------------------------
-        # STAGE 4 : End.
+        # STAGE 2 : End.
         # -------------------------------
         self.logger.info("---------------------------------------")
         self.logger.info("  FINISHED")
