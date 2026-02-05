@@ -287,3 +287,7 @@ code/mixerlib/Tests/*
 # STM32Ide
 *.launch
 
+# Logs files
+*.log
+*.[1-9]
+
