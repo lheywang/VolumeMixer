@@ -149,7 +149,7 @@ class CmdDCONF:
         for k in range(5):
             tmp["cal"][k][f"{k + 1}OFF"] = "{:+0.3f}".format(self.potOff[k])
             tmp["cal"][k][f"{k + 1}G"] = "{:0.3f}".format(self.potGain[k])
-        tmp["gain"] = "{:0.3f}".format(self.gain)
+        tmp["gain"] = "{:06.3f}".format(self.gain)
         tmp["offset"] = "{:+0.3f}".format(self.offset)
         tmp["device"] = self.device
 
