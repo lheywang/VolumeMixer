@@ -54,7 +54,8 @@ int ADC2POS(uint16_t value, int slider)
 	}
 
 	// Then, combine
-	val -= (offset + header.offset);
+	val -= offset;
+	val -= header.offset;
 	val *= gain;
 	val *= (uint8_t)header.gain;
 
