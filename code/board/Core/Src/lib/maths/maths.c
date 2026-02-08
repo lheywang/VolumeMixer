@@ -51,7 +51,7 @@ inline int Double2ADC(float val, uint16_t *code)
  */
 inline int S162Double(int8_t code, float *val)
 {
-	*val = code / 64.0;
+	*val = (float)code / 64.0;
 	return 0;
 }
 

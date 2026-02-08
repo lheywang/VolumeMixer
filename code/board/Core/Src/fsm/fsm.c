@@ -645,6 +645,11 @@ static void __fsm_handle_dconf()
 		uint8_t buf[128] = { 0 };
 		build_raw_eeprom_header(buf);
 		eeprom_write(HEADER_ADDR, buf, HEADER_LEN, HAL_MAX_DELAY);
+
+		/*
+		 * Add some delay to ensure the operation finish
+		 */
+		HAL_Delay(10);
 	}
 	else
 	{

@@ -206,15 +206,12 @@ int parse_dconf_payload(const char * buf, const int len, struct CMD_DCONF_TX * c
 	}
 
 	memset((void *)work, 0x00, (size_t)DCONF_PARSER_BUFFER);
-	memcpy((void *)work, (void *)&buf[188], (size_t)6);
+	memcpy((void *)work, (void *)&buf[190], (size_t)6);
 	cmd->adcOffset = lstrtof((char *)work, &cmp);
 
 	if (cmp < (char *)&work[5])
 	{
-		/*
-		 * Unused, since the new function trigger less errors than strtof.
-		 */
-		// return DCONF_ERROR_CODE(10); // Error while casting offset to double
+		return DCONF_ERROR_CODE(10); // Error while casting offset to double
 	}
 
 
