@@ -98,7 +98,7 @@ class CmdUICON:
         tmp["icon"] = dict()
         tmp["icon"]["slider"] = self.slider
         tmp["icon"]["app"] = self.app
-        tmp["icon"]["icon"] = self.icon.decode("utf-8")
+        tmp["icon"]["icon"] = "".join("{:02x}".format(x) for x in self.icon)
         tmp["icon"]["store"] = self.store
 
         # Format the command

@@ -14,28 +14,18 @@ import time
 import argparse
 from datetime import datetime
 import random
+import zlib
 
 from dev import (
-    IsDeviceAvailable,
-    IsCommandValid,
-    GetCommandStatus,
     CmdASYNC,
     CmdDCONF,
     CmdSLPOS,
     CmdUICON,
     CmdRINIT,
     CmdSHUTD,
-    CmdCONNC,
     MixerDevice,
 )
-from audio import (
-    AudioSource,
-    AudioActiveApp,
-    GetdB,
-    GetVal,
-    GetMatchingAudioSource,
-    AudioController,
-)
+from audio import AudioController
 
 from logger import setup_logger
 
@@ -101,14 +91,10 @@ class Application:
                 if sliders.mute[index] == True:
                     sliders.pos[index] = 0
 
-                self.logger.debug(
-                    f"Slider {index + 1} : {sliders.pos[index]:3.2f}. Muted : {sliders.mute[index]}."
-                )
-
             # Updating volumes
             self.apps.SetSourcesVolumes(sliders.pos)
         else:
-            self.logger.warning("Previous command returned an error.")
+            self.logger.warning("Failed to fetch the slider positions.")
 
         # -----------------------------------------------
         # Third, fetch the displayed apps, and ensure
@@ -127,12 +113,21 @@ class Application:
                     self.logger.info(
                         f"Apps {index + 1} (ID = {req_apps.apps[index]}) not up to date. Updating it..."
                     )
-                else:
-                    self.logger.debug(
-                        f"Apps {index + 1} (ID = {req_apps.apps[index]}) is up to date."
-                    )
+
+                    # Create the UICON command :
+                    icon_update = CmdUICON()
+
+                    app = self.apps.active_apps[index]
+                    icon_update.slider = app.position
+                    icon_update.app = zlib.crc32(app.name.encode())
+                    icon_update.icon = app.icon
+
+                    icon_update, status_uicon = self.device.SendCommand(icon_update)
+
+                    if status_uicon == False:
+                        self.logger.warning("Failed to set an icon on the device.")
         else:
-            self.logger.warning("Previous command returned an error.")
+            self.logger.warning("Failed to synchronize the app on the device.")
 
         # Function exit
         return
