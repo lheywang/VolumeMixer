@@ -152,3 +152,62 @@ class MixerDevice:
                 return cmd, GetCommandStatus(tmp)
 
         return cmd, False
+
+    def ComputeCalibrationCoefficients(self, min_vals, max_vals) -> CmdDCONF:
+        # Constants
+        SAFE_GAIN = 25.0
+        TARGET_OUTPUT = 100.0
+        SAFETY_MARGIN = 0.02  # 2% of margin.
+        GAIN_MARGIN = 1.02  # 2% of more gain (ensure we reach 100%)
+
+        # --- PHASE 1: NORMALIZE MEASUREMENTS ---
+        norm_mins = [m / SAFE_GAIN for m in min_vals]
+        norm_maxs = [m / SAFE_GAIN for m in max_vals]
+
+        # --- PHASE 2: CALCULATE TOTAL REQUIREMENTS ---
+        req_total_gains = []
+        req_total_offsets = []
+
+        for i in range(5):
+            n_range = norm_maxs[i] - norm_mins[i]
+
+            t_gain = TARGET_OUTPUT / n_range
+            req_total_gains.append(t_gain * GAIN_MARGIN)
+
+            t_offset = norm_mins[i] + SAFETY_MARGIN
+            req_total_offsets.append(t_offset)
+
+        # --- PHASE 3: DISTRIBUTE GLOBAL VS LOCAL ---
+        avg_gain = sum(req_total_gains) / len(req_total_gains)
+        global_gain_int = round(avg_gain * GAIN_MARGIN, 1)
+
+        avg_offset = min(req_total_offsets)
+        global_offset_float = avg_offset
+
+        # --- PHASE 4: CALCULATE FINE TUNING & BUILD COMMAND ---
+        cmd = CmdDCONF()
+
+        cmd.gain = round(global_gain_int, 1)
+        cmd.offset = round(global_offset_float, 3)
+
+        cmd.potGain = [
+            round(req_total_gain / global_gain_int, 3)
+            for req_total_gain in req_total_gains
+        ]
+        cmd.potOff = [
+            round(req_total_offset - global_offset_float, 3)
+            for req_total_offset in req_total_offsets
+        ]
+
+        # --- PHASE 5: SHOW THE USER NEW COEFFICIENTS ---
+        self.logger.info(
+            f"""
+New coefficients are : 
+    - ADC GAIN :        {cmd.gain}
+    - ADC OFFSET :      {cmd.offset}
+    - POTS GAIN :       {cmd.potGain}
+    - POTS OFFSET :     {cmd.potOff}
+"""
+        )
+
+        return cmd

@@ -9,7 +9,6 @@
 # ------------------------------------------------------------------------------
 # Importing modules
 # ------------------------------------------------------------------------------
-import statistics
 import sys
 import time
 import argparse
@@ -148,7 +147,7 @@ class Application:
             - Ask the user to place slider in different positions, to fetch data.
             - Use maths to compute the different elements.
             - Apply
-            
+
         """
 
         # Define a utility function to read the values more easily :
@@ -212,7 +211,7 @@ class Application:
         self.logger.info("---------------------------------------")
 
         # Configure some fixed settings
-        MARGIN = 1 # 1% of the full range
+        MARGIN = 1  # 1% of the full range
 
         # First, create variables :
         adc_gain = 25.00
@@ -221,8 +220,8 @@ class Application:
         slider_gain = [1.00, 1.00, 1.00, 1.00, 1.00]
         slider_offset = [0.00, 0.00, 0.00, 0.00, 0.00]
 
-        time = datetime.now()
-        name = f"{time.year % 100}{time.month}{time.day}HAD{(random.randint(0, 0xFFFFFFFF) % 10):1d}"
+        date = datetime.now()
+        name = f"{date.year % 100}{date.month}{date.day}HAD{(random.randint(0, 0xFFFFFFFF) % 10):1d}"
         self.logger.info(f"Generated device name : {name}")
 
         # Erase the previous settings, to ensure a correct base.
@@ -248,43 +247,11 @@ class Application:
 
         maximals = get_values()
 
-        """
-        This second part of the code is quite heavy on the math, but enable a smooth user experience ...
-
-        First, we compute the gains, an integer : 
-        We're using the smallest range for all of them, to remove errors, and remove stress on the final stages.
-        Then, we compute the individual gains, by dividing their gain by the target one.
-        
-        Finally, we compute the offsets, in a very similar method
-        """
-
-        # --- OFFSET ----
-        adc_offset = round((statistics.mean([minimal + MARGIN for minimal in minimals]) / adc_gain), 2)
-
-        # Get the remaining minimals
-        minimals2 = [minimal + MARGIN - (adc_offset * adc_gain) for minimal in minimals]
-        slider_offset = [round(minimal2 / adc_gain, 3) for minimal2 in minimals2]
-
-        # --- GAINS ----
-        # First, compute the deltas, and the ideal gains.
-        deltas = [maximals[i] - minimals[i] for i in range(len(maximals))]
-        gains = [adc_gain * (100 / delta) for delta in deltas]
-
-        # Then, compute the gains values
-        adc_gain = round(adc_gain * (100 / statistics.mean(deltas)), 0)
-        slider_gain = [round(gain / adc_gain, 3) for gain in gains]
-
-        # Debug prints
-        self.logger.info(f"Got theses values : ")
-        self.logger.info(f"    - ADC_GAIN :       {adc_gain}")
-        self.logger.info(f"    - SLIDER_GAINS :   {slider_gain}")
-        self.logger.info(f"    - ADC_OFFSET :     {adc_offset}")
-        self.logger.info(f"    - SLIDER_OFFSETS : {slider_offset}")
-        self.logger.info("     ")
-        self.logger.info("Now applying them to the device ...")
+        # Call the build-in class function to compute the coefficients that need to be applied :
+        data = self.device.ComputeCalibrationCoefficients(minimals, maximals)
 
         # Then, apply theses values :
-        apply_settings(adc_gain, adc_offset, slider_gain, slider_offset, name)
+        apply_settings(data.gain, data.offset, data.potGain, data.potOff, name)
 
         # -------------------------------
         # STAGE 2 : End.
@@ -293,6 +260,9 @@ class Application:
         self.logger.info("  FINISHED")
         self.logger.info("  Device will now reset, and program will exit.")
         self.logger.info("---------------------------------------")
+
+        # Add some delay, just to ensure the device will successfully write data
+        time.sleep(0.5)
 
         return
 
