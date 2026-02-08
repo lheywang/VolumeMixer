@@ -88,7 +88,7 @@ class CmdASYNC:
 @dataclass
 class CmdUICON:
     slider: int = 0
-    app: str = "Master"
+    app: int = 0
     icon: bytes = b"x" * 128
     store: bool = True
 
@@ -97,9 +97,9 @@ class CmdUICON:
         tmp = dict()
         tmp["icon"] = dict()
         tmp["icon"]["slider"] = self.slider
-        tmp["icon"]["app"] = self.app
+        tmp["icon"]["app"] = f"{self.app:02x}"
         tmp["icon"]["icon"] = "".join("{:02x}".format(x) for x in self.icon)
-        tmp["icon"]["store"] = self.store
+        tmp["icon"]["store"] = 1 if self.store == True else 0
 
         # Format the command
         return FormatCommand("UICON", json.dumps(tmp, separators=(",", ":")))

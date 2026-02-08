@@ -258,11 +258,11 @@ class AudioController:
         self.active_apps.clear()
 
         # Append the base handle, for the master volume
-        self.active_apps.append(AudioActiveApp([self.master], "master", 0, data))
+        self.active_apps.append(AudioActiveApp([self.master], "master", 1, data))
 
         # Adding audio sources
-        for k in range(self.channel_number - 1):
-            self.sources, tmp = GetMatchingAudioSource(self.sources, config, (k + 1))
+        for k in [1, 2, 3, 4]:
+            self.sources, tmp = GetMatchingAudioSource(self.sources, config, (k))
             self.active_apps.append(tmp)
 
     def Update(self):
