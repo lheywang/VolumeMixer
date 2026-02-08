@@ -30,14 +30,6 @@
 #include <errno.h>
 #include <ctype.h>
 
-#include "utils/logger.h"
-#include <stdio.h>
-#include "handlers/timers.h"
-
-// UART logs
-extern uint8_t isr_message[ISR_MESSAGE_SIZE];
-extern uint8_t msg_available;
-
 /* -----------------------------------------------------------------
  * DEFINES
  * -----------------------------------------------------------------

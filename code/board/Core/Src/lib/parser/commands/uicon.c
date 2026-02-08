@@ -62,7 +62,7 @@ int parse_uicon_payload(const char * buf, const int len, struct CMD_UICON_TX * c
 	{
 		return -1; // Invalid pointers
 	}
-	if (len < 315)
+	if (len < 314)
 	{
 		return -2; // Not enough characters to parse.
 	}
@@ -72,8 +72,9 @@ int parse_uicon_payload(const char * buf, const int len, struct CMD_UICON_TX * c
     uint8_t work[UICON_PARSER_BUFFER] = {0};
 
 	// Search for "{"icon":{"slider":"" token.
-    memcpy((void *)work, (void *)buf, (size_t)19);
-    char *ref = "{\"icon\":{\"slider\":\"";
+    memcpy((void *)work, (void *)buf, (size_t)18);
+    char *ref = "{\"icon\":{\"slider\":";
+
     if (strcmp((char *)work, (char *)ref) != 0)
     {
         return UICON_ERROR_CODE(0); // JSON Header not found
@@ -81,7 +82,7 @@ int parse_uicon_payload(const char * buf, const int len, struct CMD_UICON_TX * c
 
 	// Fetch the following target slider
 	memset((void*)work, 0x00, UICON_PARSER_BUFFER);
-	memcpy((void*)work, (void*)&buf[19], (size_t)1);
+	memcpy((void*)work, (void*)&buf[18], (size_t)1);
 
     // Attempt a conversion
 	if (!isdigit(work[0]))
@@ -96,8 +97,8 @@ int parse_uicon_payload(const char * buf, const int len, struct CMD_UICON_TX * c
 
 	// Fetch the following target app hash
 	memset((void *)work, 0x00, UICON_PARSER_BUFFER);
-	memcpy((void *)work, (void *)&buf[20], (size_t)9);
-	char *ref2 = "\",\"app\":\"";
+	memcpy((void *)work, (void *)&buf[19], (size_t)7);
+	char *ref2 = ",\"app\":";
 	if (strcmp((char *)work, (char *)ref2) != 0)
 	{
 		return UICON_ERROR_CODE(3); // App Name not found
@@ -105,8 +106,7 @@ int parse_uicon_payload(const char * buf, const int len, struct CMD_UICON_TX * c
 
 	// Fetch the following target slider
 	memset((void *)work, 0x00, UICON_PARSER_BUFFER);
-	memcpy((void *)work, (void *)&buf[29], (size_t)8);
-
+	memcpy((void *)work, (void *)&buf[27], (size_t)8);
 	// Attempt a conversion and check for the errno
 	for (int k = 0; k < 8; k++)
 	{
@@ -120,8 +120,9 @@ int parse_uicon_payload(const char * buf, const int len, struct CMD_UICON_TX * c
 
 	// Fetch the following target app hash
 	memset((void *)work, 0x00, UICON_PARSER_BUFFER);
-	memcpy((void *)work, (void *)&buf[37], (size_t)10);
-	char *ref3 = "\",\"icon\":\"";
+	memcpy((void *)work, (void *)&buf[36], (size_t)9);
+	char *ref3 = ",\"icon\":\"";
+
 	if (strcmp((char *)work, (char *)ref3) != 0)
 	{
 		return UICON_ERROR_CODE(5); // Icon not found
@@ -129,7 +130,7 @@ int parse_uicon_payload(const char * buf, const int len, struct CMD_UICON_TX * c
 
 	// Fetch the following icon data
 	memset((void *)work, 0x00, UICON_PARSER_BUFFER);
-	memcpy((void *)work, (void *)&buf[47], (size_t)256);
+	memcpy((void *)work, (void *)&buf[45], (size_t)256);
 
 	memset((void *)cmd->icon, 0x00, 128);
 
@@ -159,8 +160,9 @@ int parse_uicon_payload(const char * buf, const int len, struct CMD_UICON_TX * c
 
 	// Fetch the following target store argument
 	memset((void *)work, 0x00, UICON_PARSER_BUFFER);
-	memcpy((void *)work, (void *)&buf[303], (size_t)10);
+	memcpy((void *)work, (void *)&buf[301], (size_t)10);
 	char *ref4 = "\",\"store\":";
+
 	if (strcmp((char *)work, (char *)ref4) != 0)
 	{
 		return UICON_ERROR_CODE(7); // Store not found
@@ -168,7 +170,7 @@ int parse_uicon_payload(const char * buf, const int len, struct CMD_UICON_TX * c
 
 	// Fetch the following target store argument
 	memset((void *)work, 0x00, UICON_PARSER_BUFFER);
-	memcpy((void *)work, (void *)&buf[313], (size_t)1);
+	memcpy((void *)work, (void *)&buf[311], (size_t)1);
 
     // Attempt a conversion and check for the errno
 	if (!isdigit(work[0]))
