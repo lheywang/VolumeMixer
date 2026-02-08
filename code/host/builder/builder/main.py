@@ -6,7 +6,7 @@
 #   l.heywang <leonard.heywang@proton.me>
 #
 #   requirements:
-#     - cairosvg (depend on GTK runtime on Windows) --> 
+#     - cairosvg (depend on GTK runtime on Windows) -->
 #           https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer
 #
 # ==============================================================================
@@ -64,20 +64,12 @@ def convert_PIL_to_bytes(image):
     """
 
     # Getting the raw bytes from the image
-    # The first 76 bytes are the header, and the last 3 bytes are the footer (C formated string)
-    raw_bytes = image.tobitmap()[76:-3]
+    raw_data = image.tobytes()
 
-    # Convert the raw bytes to a string, then to a list of integers
-    # Each byte is represented as a hexadecimal string, separated by commas
-    tmp = raw_bytes.decode("utf-8")
-    tmp = tmp.replace("\n", "")
-    tmp = tmp.split(",")
+    if len(raw_data) != 128:
+        print(f"Warning: Image size is {len(raw_data)} bytes, expected 128!")
 
-    data = []
-    for byte in tmp:
-        data.append(int(byte, 16))
-
-    return data
+    return list(raw_data)
 
 
 def main():
