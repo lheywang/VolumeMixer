@@ -30,6 +30,11 @@ All of this done is to ensure the smallest differences between channels of the d
 
 ## Icons
 
+> [!IMPORTANT]
+> Icons aren't anymore stored on the EEPROM, but rather loaded by the host OS, on demand.
+> This prevent for overusing the EEPROM, saving bits, and gaining little to no benefits.
+> Thus, this following part became irrelevant.
+
 Each icon is 30 x 30 px, which means 900 bits of data (screens are black and white). Each of them is
 stored on four consecutive pages.
 

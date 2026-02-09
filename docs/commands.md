@@ -30,7 +30,8 @@ With :
 - CRC32 : Checksum of the whole message up to now (CRC32 and END excluded).
 
 The command is borned with START and END tokens to clearly identify the
-start and end of a said command.
+start and end of a said command. Theses are used to identify by both end over the serial bus to 
+trigger the processing of the next one.
 
 The DATA is generally encoded as JSON data, which will be detailled in the few next paragraphs.
 
@@ -193,4 +194,4 @@ It take some data in input :
 }
 ```
 
-The device respond with an OOK or NOK.
+The device respond with an ACK or NACK.
