@@ -39,14 +39,21 @@ def GetdB(value: float, db_min: float, db_max: float) -> float:
         - Uses a logarithmic scale for conversion.
         - Assumes the existence of a constant SCALE for scaling the logarithmic result.
     """
-    if value >= 0.01:
-        val = SCALE * math.log10(value + 0.0000000001)
-        if value < db_min:
-            return db_min
-        if value > db_max:
-            return db_max
-        return value
-    return db_min
+    # Exit if too small.
+    if value < 0.001:
+        return db_min
+    
+    # Get the db value
+    val = SCALE * math.log10(value)
+
+    # Return the correct one, on some cases
+    if val < db_min:
+        return db_min
+    if val > db_max:
+        return db_max
+    
+    return value
+    
 
 
 def GetVal(dB: float) -> float:

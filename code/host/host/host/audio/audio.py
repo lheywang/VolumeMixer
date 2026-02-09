@@ -192,24 +192,16 @@ class AudioController:
                     case "windows":
                         # Master volume
                         if sources.id == 0:
-                            db_min, db_max, _ = sources.handle.GetVolumeRange()
-                            sources.handle.SetMasterVolumeLevel(
-                                GetdB(volumes[0], db_min, db_max), None
+                            sources.handle.SetMasterVolumeLevelScalar(
+                                volumes[0], None
                             )
-                            sources.volume = volumes[0]
+                            sources.volume = max(0,0, min(volumes[0], 1.0))
 
                         # App Volume
                         else:
-                            sources.volume = volumes[index]
+                            sources.volume = max(0,0, min(volumes[index], 1.0))
 
-                            # iterate over the channels
-                            chan = sources.handle.channelAudioVolume().GetChannelCount()
-                            for k in range(chan):
-                                sources.handle.channelAudioVolume().SetChannelVolume(
-                                    k,
-                                    volumes[index],
-                                    None,
-                                )
+                            sources.handle.SimpleAudioVolume.SetMasterVolume(sources.volume, None)
 
         return 0
 

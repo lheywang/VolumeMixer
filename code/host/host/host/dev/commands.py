@@ -37,7 +37,7 @@ def FormatCommand(cmd, buf):
     crc = zlib.crc32(tmp)
 
     # Format the return value
-    tmp = f"{tmp.decode("utf-8")}{crc:04X};{END}"
+    tmp = f"{tmp.decode("utf-8")}{crc:08X};{END}"
 
     # Exit
     return tmp

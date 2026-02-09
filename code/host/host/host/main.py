@@ -89,7 +89,7 @@ class Application:
         # Handling mute :
         if status == True:
             for index, _ in enumerate(sliders.pos):
-                if sliders.mute[index] == True:
+                if sliders.mute[index] == False:
                     sliders.pos[index] = 0
 
             # Updating volumes
@@ -312,7 +312,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Defining some parameters
-    REFRESH_FREQ = 10
+    REFRESH_FREQ = 30
 
     # Initializing the device
     app = Application(args.debug)
