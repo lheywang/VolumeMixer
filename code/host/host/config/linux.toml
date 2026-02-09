@@ -1,4 +1,6 @@
-[1] # General-purpose web sources
+# 1 is reserved as the master volume
+
+[2] # General-purpose web sources
 reddit = "reddit.bin"
 youtube = "youtube.bin"
 twitch = "twitch.bin"
@@ -10,7 +12,7 @@ netflix = "netflix.bin"
 primevideo = "primevideo.bin"
 disneyplus = "disneyplus.bin"
 
-[2] # General-purpose web sources (continued)
+[3] # General-purpose web sources (continued)
 imdb = "imdb.bin"
 metacafe = "metacafe.bin"
 stackoverflow = "stackoverflow.bin"
@@ -18,7 +20,7 @@ github = "github.bin"
 google = "google.bin"
 w3 = "w3.bin"
 
-[3] # Music (apps and webplayers)
+[4] # Music (apps and webplayers)
 spotify = "spotify.bin"
 deezer = "deezer.bin"
 tidal = "tidal.bin"
@@ -39,7 +41,7 @@ pocketcasts = "pocketcasts.bin"
 googlepodcasts = "googlepodcasts.bin"
 applepodcasts = "applepodcasts.bin"
 
-[4] # VoIP services
+[5] # VoIP services
 discord = "discord.bin"
 skype = "skype.bin"
 slack = "slack.bin"
