@@ -578,9 +578,16 @@ static void __fsm_handle_uicon()
 	memcpy((void *)images[command.UICON_TX.posSlider - 1], (void *)command.UICON_TX.icon, (size_t)sizeof(images[0]));
 
 	/*
-	 * Set a global variable to a value to trigger the refresh of this screen.
+	 * Store the application as active, to prevent from another reload the next time :
 	 */
-	uicon_elapsed = 1 << (0x04 - command.UICON_TX.posSlider);
+	active_apps[command.UICON_TX.posSlider - 1] = command.UICON_TX.appSlider;
+
+	/*
+	 * Force the refresh of the concerned screen, since the image isn't anymore relevant.
+	 *
+	 */
+	__fsm_refresh_screen(0xFFFFFFFF);
+
 
 	/*
 	 * Set the response bit

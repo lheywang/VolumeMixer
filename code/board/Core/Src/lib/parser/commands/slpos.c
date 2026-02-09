@@ -84,15 +84,15 @@ int build_slpos_payload(const struct CMD_SLPOS_RX * const cmd, char *buf, int * 
 	*len = snprintf(buf,
 			120,
 			"{\"sliders\":[{\"1\":\"%03ld\",\"1M\":\"%1ld\"},{\"2\":\"%03ld\",\"2M\":\"%1ld\"},{\"3\":\"%03ld\",\"3M\":\"%1ld\"},{\"4\":\"%03ld\",\"4M\":\"%1ld\"},{\"5\":\"%03ld\",\"5M\":\"%1ld\"}]}",
-			cmd->sliders[0].Pos,
+			(cmd->sliders[0].Pos > 0 ? cmd->sliders[0].Pos : 0),
 			cmd->sliders[0].Mute,
-			cmd->sliders[1].Pos,
+			(cmd->sliders[1].Pos > 0 ? cmd->sliders[1].Pos : 0),
 			cmd->sliders[1].Mute,
-			cmd->sliders[2].Pos,
+			(cmd->sliders[2].Pos > 0 ? cmd->sliders[2].Pos : 0),
 			cmd->sliders[2].Mute,
-			cmd->sliders[3].Pos,
+			(cmd->sliders[3].Pos > 0 ? cmd->sliders[3].Pos : 0),
 			cmd->sliders[3].Mute,
-			cmd->sliders[4].Pos,
+			(cmd->sliders[4].Pos > 0 ? cmd->sliders[4].Pos : 0),
 			cmd->sliders[4].Mute
 			);
 	return 0;

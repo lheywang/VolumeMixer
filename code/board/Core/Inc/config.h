@@ -44,13 +44,13 @@
 #define LOG_RESET
 #define LOG_DCONF
 #define LOG_CONNC
-#define LOG_UICON
 
 /*
  * Commands that produce a lot of logs :
  */
 // #define LOG_ASYNC
 // #define LOG_SLPOS
+// #define LOG_UICON
 
 
 
