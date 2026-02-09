@@ -47,6 +47,10 @@ int _draw_volume(struct BufferRequest* const cmd)
 	}
 	else
 	{
+		// Ensure we don't copy crap data.
+		if (cmd->command.volume < 0)
+			cmd->command.volume = 0;
+
 		// First, fetch the caracters
 		uint8_t ids[2][32] = { 0 };
 		memcpy((void *)&ids[0], (void *)&decimals[cmd->command.volume / 10], (size_t)32);

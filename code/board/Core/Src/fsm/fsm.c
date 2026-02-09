@@ -575,7 +575,7 @@ static void __fsm_handle_uicon()
 	 * Since a changes in the process, images aren't anymore stored elsewhere than in the RAM.
 	 * Thus, hash and store became irrelevant, but are still present in the structures.
 	 */
-	memcpy((void *)images[command.UICON_TX.posSlider], (void *)command.UICON_TX.icon, (size_t)sizeof(images[0]));
+	memcpy((void *)images[command.UICON_TX.posSlider - 1], (void *)command.UICON_TX.icon, (size_t)sizeof(images[0]));
 
 	/*
 	 * Set a global variable to a value to trigger the refresh of this screen.
