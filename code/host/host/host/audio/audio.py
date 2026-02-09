@@ -261,7 +261,7 @@ class AudioController:
         self.active_apps.append(AudioActiveApp([self.master], "master", 1, data))
 
         # Adding audio sources
-        for k in [1, 2, 3, 4]:
+        for k in [2, 3, 4, 5]:
             self.sources, tmp = GetMatchingAudioSource(self.sources, config, (k))
             self.active_apps.append(tmp)
 

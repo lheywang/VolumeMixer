@@ -10,6 +10,7 @@
 # Importing modules
 # ------------------------------------------------------------------------------
 import sys
+import traceback
 import time
 import argparse
 from datetime import datetime
@@ -345,5 +346,5 @@ if __name__ == "__main__":
             sys.exit(0)
 
         except Exception as e:
-            app.reset(f"Unhandled exception : {e}")
+            app.reset(f"Unhandled exception : {e}\n{traceback.format_exc()}")
             sys.exit(-1)
