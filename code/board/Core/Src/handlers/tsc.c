@@ -28,7 +28,7 @@
  * -----------------------------------------------------------------
  */
 // Public
-int tsc_status = 0; // Store the ON/OFF states
+int tsc_status = 0x1F; // Store the ON/OFF states
 
 // Privates
 static int tsc_ack = 0; // Store the buttons that already updated the states.
@@ -201,6 +201,7 @@ void HAL_TSC_ConvCpltCallback(TSC_HandleTypeDef *htsc)
 	tsc_configure_next_channel();
 	return;
 }
+
 
 
 

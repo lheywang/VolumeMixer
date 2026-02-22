@@ -1,176 +1,100 @@
 # ==============================================================================
-#   host/main.py :          Implement the whole logic of the app.
-#
-#   03/02/2026
-#   l.heywang <leonard.heywang@proton.me>
-#
+#   host/main.py : Smooth Windows volume control (Win11) + Calibration
 # ==============================================================================
 
-# ------------------------------------------------------------------------------
-# Importing modules
-# ------------------------------------------------------------------------------
-import statistics
 import sys
+import traceback
 import time
 import argparse
-from datetime import datetime
+import zlib
 import random
+import statistics
+from datetime import datetime
 
-from dev import (
-    IsDeviceAvailable,
-    IsCommandValid,
-    GetCommandStatus,
+from .dev import (
     CmdASYNC,
-    CmdDCONF,
     CmdSLPOS,
     CmdUICON,
+    CmdDCONF,
     CmdRINIT,
     CmdSHUTD,
-    CmdCONNC,
     MixerDevice,
 )
-from audio import (
-    AudioSource,
-    AudioActiveApp,
-    GetdB,
-    GetVal,
-    GetMatchingAudioSource,
-    AudioController,
-)
-
-from logger import setup_logger
+from .audio import AudioController
+from .logger import setup_logger
 
 
 class Application:
-    """
-    Define a new class, that contain the base application logic.
-    Enable the internalization of some variables, to retains states from
-    one execution to the next.
-    """
+    def __init__(self, debug: bool = False, timing: bool = False) -> None:
+        self.logger = setup_logger(debug)
+        self.logger.info("Host starting...")
 
-    def __init__(self, LogLevel: bool = False) -> None:
-        """
-        Open a new instance of the app.
-
-        Will trigger the openning of the COM port, and all the subsequent
-        device initialization and software fetching.
-        """
-        # Creating the logger device
-        self.logger = setup_logger(LogLevel)
-        self.logger.info("Created the logger, will now defer them.")
-
-        # Openning the devices
         self.apps = AudioController(self.logger)
-        self.device = MixerDevice(self.logger)
+        self.device = MixerDevice(self.logger, timing=timing)
 
-        # If device isn't openned, exit without returning.
-        # Logs where already defered within the class init.
-        if self.device.IsDeviceOpenned == False:
+        if not getattr(self.device, "IsDeviceOpenned", False):
+            self.logger.error("Device not opened. Exiting.")
             sys.exit(-2)
 
-        return
+        # ---- smoothing state (5 sliders)
+        self._ema = [0.0] * 5
+        self._last_sent = [None] * 5
+        self._ema_init = False
 
-    def loop(self) -> None:
-        """
-        Contain the base application logic, executed repetely.
+        # Tunables (feel)
+        self.deadband = 0.01   # try 0.005 for more sensitivity
+        self.alpha = 0.35      # 0.25 smoother, 0.45 more direct
 
-        Each call will try to :
+    def reset(self, reason: str = "Unknown") -> None:
+        self.logger.warning(f"Resetting the device. Reason: {reason}")
+        try:
+            self.device.SendCommand(CmdRINIT())
+        except Exception:
+            pass
+        try:
+            self.device.Close()
+        except Exception:
+            pass
 
-        - Fetch the slider position
-            -> Update theses into the OS agnostic module
+    def stop(self, reason: str = "Unknown") -> None:
+        self.logger.warning(f"Shutdown requested. Reason: {reason}")
+        try:
+            self.device.SendCommand(CmdSHUTD())
+        except Exception:
+            pass
+        try:
+            self.device.Close()
+        except Exception:
+            pass
 
-        - Fetch the applications displayed
-            -> Compare them to the actual apps on the host OS.
-                -> If an unmatch exist, update it (read blob, send it).
-        """
-
-        # -----------------------------------------------
-        # First, update our apps bank :
-        # -----------------------------------------------
-        self.apps.Update()
-
-        # -----------------------------------------------
-        # Then, we need to fetch the slider position :
-        # -----------------------------------------------
-        # Sending command
-        sliders: CmdSLPOS = CmdSLPOS()
-        sliders, status = self.device.SendCommand(sliders)
-
-        # Handling mute :
-        if status == True:
-            for index, _ in enumerate(sliders.pos):
-                if sliders.mute[index] == True:
-                    sliders.pos[index] = 0
-
-                self.logger.debug(
-                    f"Slider {index + 1} : {sliders.pos[index]:3.2f}. Muted : {sliders.mute[index]}."
-                )
-
-            # Updating volumes
-            self.apps.SetSourcesVolumes(sliders.pos)
-        else:
-            self.logger.warning("Previous command returned an error.")
-
-        # -----------------------------------------------
-        # Third, fetch the displayed apps, and ensure
-        # they're matching the needed ones. For the ones
-        # that do not match, we update them :
-        # -----------------------------------------------
-        # Sending command
-        req_apps: CmdASYNC = CmdASYNC()
-        req_apps.add_apps(self.apps.active_apps)
-        req_apps, status = self.device.SendCommand(req_apps)
-
-        # Handling asynchronized apps :
-        if status == True:
-            for index, sync in enumerate(req_apps.sync):
-                if sync == False:
-                    self.logger.info(
-                        f"Apps {index + 1} (ID = {req_apps.apps[index]}) not up to date. Updating it..."
-                    )
-                else:
-                    self.logger.debug(
-                        f"Apps {index + 1} (ID = {req_apps.apps[index]}) is up to date."
-                    )
-        else:
-            self.logger.warning("Previous command returned an error.")
-
-        # Function exit
-        return
-
+    # ==============================================================================
+    # Calibration (your function reintegrated)
+    # ==============================================================================
     def calibrate(self) -> None:
         """
         Calibrate the device to account for the analog dispersion of the sliders.
-        This procedure is automatic, but need to be started by the user.
 
-        The method used :
-            - Set gain and parameters to a safe value. (Mostly 0.000 and 1.000), except the global gain to 25.
-            - Ask the user to place slider in different positions, to fetch data.
-            - Use maths to compute the different elements.
-            - Apply
-            
+        Steps:
+          - Apply safe base settings
+          - Ask user min/max
+          - Compute adc_gain/offset + per-slider gain/offset
+          - Apply DCONF
+          - Reset + exit
         """
 
-        # Define a utility function to read the values more easily :
-
-        # -----------------------------------------------------------------------------------------------------------------
+        # ---------------- utility: read slider values as 0..100 integers
         def get_values() -> list[int]:
-            """
-            Small utility function, used to fetch the slider positions without needing to define functions, and so on...
-            """
-            # Sending command
             sliders: CmdSLPOS = CmdSLPOS()
             sliders, status = self.device.SendCommand(sliders)
 
-            # Fetching values
-            if status == True:
-                # Updating volumes
-                return list(map(lambda x: x * 100, sliders.pos))
+            if status is True:
+                # sliders.pos is 0..1 floats -> convert to 0..100 ints
+                return [int(round(x * 100)) for x in sliders.pos]
             else:
-                self.logger.warning("Previous command returned an error.")
+                self.logger.warning("SLPOS returned an error during calibration.")
                 return [0, 0, 0, 0, 0]
 
-        # -----------------------------------------------------------------------------------------------------------------
+        # ---------------- utility: apply DCONF
         def apply_settings(
             adc_gain: float,
             adc_offset: float,
@@ -178,33 +102,18 @@ class Application:
             slider_offset: list[float],
             dev_name: str,
         ) -> None:
-            """
-            Small utility function to apply settings to the device, before getting the next calibration steps.
-            """
-            # Creating command
             dconf = CmdDCONF()
+            dconf.offset = float(adc_offset)
+            dconf.gain = float(adc_gain)
+            dconf.potOff = [float(x) for x in slider_offset]
+            dconf.potGain = [float(x) for x in slider_gain]
+            dconf.device = str(dev_name)
 
-            dconf.offset = adc_offset
-            dconf.gain = adc_gain
-
-            dconf.potOff = slider_offset
-            dconf.potGain = slider_gain
-
-            dconf.device = dev_name
-
-            # Send command
-            dconf, status = self.device.SendCommand(dconf)
-
-            # Fetching values
-            if status == True:
-                # Updating volumes
-                self.logger.info("Sucessfully updated device config !")
-                return
+            _, status = self.device.SendCommand(dconf)
+            if status is True:
+                self.logger.info("Successfully updated device config (DCONF)!")
             else:
-                self.logger.warning("Previous command returned an error.")
-                return
-
-        # -----------------------------------------------------------------------------------------------------------------
+                self.logger.warning("DCONF returned an error during calibration.")
 
         self.logger.info("---------------------------------------")
         self.logger.info("  Welcome to the calibration menu.")
@@ -212,7 +121,8 @@ class Application:
         self.logger.info("---------------------------------------")
 
         # Configure some fixed settings
-        MARGIN = 1 # 1% of the full range
+        MARGIN = 1  # 1% of the full range 
+        GAIN_MARGIN = 1.05
 
         # First, create variables :
         adc_gain = 25.00
@@ -221,69 +131,58 @@ class Application:
         slider_gain = [1.00, 1.00, 1.00, 1.00, 1.00]
         slider_offset = [0.00, 0.00, 0.00, 0.00, 0.00]
 
-        time = datetime.now()
-        name = f"{time.year % 100}{time.month}{time.day}HAD{(random.randint(0, 0xFFFFFFFF) % 10):1d}"
+        # This will be a bit imprecise, but anyway, we still shall be unique
+        t = datetime.now()
+        name = f"{t.year % 100}{t.month % 10}{t.day % 10}HAD{(random.randint(0, 0xFFFFFFFF) % 10):1d}"
         self.logger.info(f"Generated device name : {name}")
 
         # Erase the previous settings, to ensure a correct base.
         apply_settings(adc_gain, adc_offset, slider_gain, slider_offset, name)
 
         # -------------------------------
-        # STAGE 1 :  Global calibration
+        # STAGE 1 : Global calibration
         # -------------------------------
-        # Ask user to place the sliders on the lowest position :
         input(
-            "Place all the sliders on the lowest position (near the touch sensing pads). Then, hit enter : "
+            "Place all the sliders on the LOWEST position (near touch pads). Then press ENTER: "
         )
-
-        # Compute the ADC offset :
         minimals = get_values()
 
-        # Ask the user to place the slider on the middle position.
-        # This ensure we won't overflow to 100 (otherwise gain = perfect !!).
-        #
         input(
-            "Place all the sliders on the highest position (near the screens). Then, hit enter : "
+            "Place all the sliders on the HIGHEST position (near screens). Then press ENTER: "
         )
-
         maximals = get_values()
 
-        """
-        This second part of the code is quite heavy on the math, but enable a smooth user experience ...
-
-        First, we compute the gains, an integer : 
-        We're using the smallest range for all of them, to remove errors, and remove stress on the final stages.
-        Then, we compute the individual gains, by dividing their gain by the target one.
-        
-        Finally, we compute the offsets, in a very similar method
-        """
+        # Protect against division by zero (if a slider didn't move / faulty read)
+        deltas = [maximals[i] - minimals[i] for i in range(5)]
+        if any(d <= 0 for d in deltas):
+            self.logger.error(f"Invalid deltas detected: {deltas}")
+            self.logger.error("Calibration aborted. Check sliders movement and retry.")
+            return
 
         # --- OFFSET ----
-        adc_offset = round((statistics.mean([minimal + MARGIN for minimal in minimals]) / adc_gain), 2)
+        adc_offset = round((statistics.mean([m + MARGIN for m in minimals]) / adc_gain), 2)
 
-        # Get the remaining minimals
-        minimals2 = [minimal + MARGIN - (adc_offset * adc_gain) for minimal in minimals]
-        slider_offset = [round(minimal2 / adc_gain, 3) for minimal2 in minimals2]
+        minimals2 = [m + MARGIN - (adc_offset * adc_gain) for m in minimals]
+        slider_offset = [round(m2 / adc_gain, 3) for m2 in minimals2]
 
         # --- GAINS ----
-        # First, compute the deltas, and the ideal gains.
-        deltas = [maximals[i] - minimals[i] for i in range(len(maximals))]
         gains = [adc_gain * (100 / delta) for delta in deltas]
 
-        # Then, compute the gains values
-        adc_gain = round(adc_gain * (100 / statistics.mean(deltas)), 0)
-        slider_gain = [round(gain / adc_gain, 3) for gain in gains]
+        adc_gain = round(adc_gain * (100 / statistics.mean(deltas)) , 0)
+        if adc_gain == 0:
+            self.logger.error("adc_gain computed as 0. Calibration aborted.")
+            return
 
-        # Debug prints
-        self.logger.info(f"Got theses values : ")
+        slider_gain = [round(g / adc_gain, 3) for g in gains]
+        adc_gain = round(adc_gain * GAIN_MARGIN, 0)
+
+        self.logger.info("Got these values:")
         self.logger.info(f"    - ADC_GAIN :       {adc_gain}")
         self.logger.info(f"    - SLIDER_GAINS :   {slider_gain}")
         self.logger.info(f"    - ADC_OFFSET :     {adc_offset}")
         self.logger.info(f"    - SLIDER_OFFSETS : {slider_offset}")
-        self.logger.info("     ")
         self.logger.info("Now applying them to the device ...")
 
-        # Then, apply theses values :
         apply_settings(adc_gain, adc_offset, slider_gain, slider_offset, name)
 
         # -------------------------------
@@ -294,91 +193,147 @@ class Application:
         self.logger.info("  Device will now reset, and program will exit.")
         self.logger.info("---------------------------------------")
 
-        return
+        # Reset device and exit host cleanly
+        self.reset("Done calibration. Exiting ...")
+        raise SystemExit(0)
 
-    def stop(self, reason: str) -> None:
-        """
-        Will perform a device stop (SHUTD) --> Won't respond after. Need to reset (manually).
+    # ==============================================================================
+    # Runtime loop helpers
+    # ==============================================================================
+    def _smooth(self, raw: list[float], mute: list[bool]) -> list[float]:
+        vals = raw[:]
 
-        Typically called after a SIGTERM signal (since app is launched as a deamon / service)
-        --> SIGTERM = shutdown.
-        """
-        self.logger.info("Performing a clean and exit ...")
-        self.logger.info(f"    Reason is : {reason}")
+        # Keep your project’s mute logic as-is
+        for i in range(5):
+            if mute[i] is False:
+                vals[i] = 0.0
 
-        shutdown = CmdSHUTD()
-        shutdown = self.device.SendCommand(shutdown)
+        if not self._ema_init:
+            self._ema = vals[:]
+            self._ema_init = True
+        else:
+            for i in range(5):
+                self._ema[i] = (self.alpha * vals[i]) + ((1.0 - self.alpha) * self._ema[i])
 
-    def reset(self, reason: str) -> None:
-        """
-        Will perform a device reset (RINIT). Usefull to recover from errors...
+        for i in range(5):
+            self._ema[i] = max(0.0, min(1.0, self._ema[i]))
 
-        Typically called after an error, to leave the device into a open state,
-        waiting for new connections.
-        """
-        self.logger.error("Performing a reset of the device ...")
-        self.logger.error(f"    Reason is : {reason}")
+        return self._ema
 
-        rst = CmdRINIT()
-        rst = self.device.SendCommand(rst)
+    def read_sliders(self) -> tuple[bool, list[float], list[bool]]:
+        sliders, ok = self.device.SendCommand(CmdSLPOS())
+        if not ok:
+            return False, [], []
+        return True, sliders.pos, sliders.mute
+
+    def apply_volumes_if_needed(self, smoothed: list[float]) -> None:
+        to_send = smoothed[:]
+        changed = False
+
+        for i in range(5):
+            last = self._last_sent[i]
+            cur = to_send[i]
+            if last is None or abs(cur - last) >= self.deadband:
+                changed = True
+            else:
+                to_send[i] = last
+
+        if not changed:
+            return
+
+        self.apps.SetSourcesVolumes(to_send)
+        for i in range(5):
+            self._last_sent[i] = to_send[i]
+
+    def loop_slow(self) -> None:
+        self.apps.Update()
+
+        req_apps = CmdASYNC()
+        req_apps.add_apps(self.apps.active_apps)
+
+        req_apps, ok = self.device.SendCommand(req_apps)
+        if not ok:
+            return
+
+        try:
+            for index, sync in enumerate(req_apps.sync):
+                if sync is False:
+                    self.logger.info(
+                        f"Slot {index + 1} not up-to-date (ID={req_apps.apps[index]}). Updating icon..."
+                    )
+                    icon_update = CmdUICON()
+                    app = self.apps.active_apps[index]
+                    icon_update.slider = app.position
+                    icon_update.app = zlib.crc32(app.name.encode())
+                    icon_update.icon = app.icon
+
+                    _, ok_uicon = self.device.SendCommand(icon_update)
+                    if not ok_uicon:
+                        self.logger.warning("Failed to set an icon on the device.")
+        except Exception as e:
+            self.logger.debug(f"loop_slow exception: {e}")
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="VolumeMixer Host Application")
+    parser.add_argument("--debug", action="store_true", help="Enable debug logs.")
+    parser.add_argument("--timing", action="store_true", help="Print serial latency in ms.")
+    parser.add_argument("--cal", action="store_true", help="Run calibration then exit.")
+    args = parser.parse_args()
+
+    app = Application(debug=args.debug, timing=args.timing)
+
+    # If user requested calibration
+    if args.cal:
+        app.calibrate()
+        return 0
+
+    # --- Rates
+    READ_HZ = 100
+    APPLY_HZ = 60
+    APPS_REFRESH_S = 3.0  # reduce CoreAudio rescans
+
+    read_period = 1.0 / READ_HZ
+    apply_period = 1.0 / APPLY_HZ
+
+    last_apps = 0.0
+    last_apply = 0.0
+
+    latest_raw = [0.0] * 5
+    latest_mute = [False] * 5
+    ok_last = False
+
+    try:
+        while True:
+            now = time.time()
+
+            if (now - last_apps) >= APPS_REFRESH_S:
+                app.loop_slow()
+                last_apps = now
+
+            ok, raw, mute = app.read_sliders()
+            if ok:
+                latest_raw = raw
+                latest_mute = mute
+                ok_last = True
+
+            if ok_last and (now - last_apply) >= apply_period:
+                smoothed = app._smooth(latest_raw, latest_mute)
+                app.apply_volumes_if_needed(smoothed)
+                last_apply = now
+
+            time.sleep(read_period)
+
+    except KeyboardInterrupt:
+        app.reset("KeyboardInterrupt")
+        return 0
+    except SystemExit:
+        app.stop("SystemExit")
+        return 0
+    except Exception as e:
+        app.reset(f"Unhandled exception: {e}\n{traceback.format_exc()}")
+        return -1
 
 
 if __name__ == "__main__":
-
-    # -----------------------------------------------
-    # First, look in which mode we're launched ?
-    # -----------------------------------------------
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "-c",
-        "--calibration",
-        help="Place the code in a calibration mode",
-        dest="cal",
-        action="store_true",
-    )
-    parser.add_argument(
-        "-d",
-        "--debug",
-        help="Configure the logs to be more verbose",
-        dest="debug",
-        action="store_true",
-    )
-    args = parser.parse_args()
-
-    # Defining some parameters
-    REFRESH_FREQ = 10
-
-    # Initializing the device
-    app = Application(args.debug)
-
-    # Giving some infos
-    app.logger.info(f"Getting calibration : {args.cal}")
-    app.logger.info(f"Getting debug : {args.debug}")
-
-    if args.cal:
-        app.calibrate()
-        app.reset(f"Done calibration. Exiting ...")
-        sys.exit(0)
-
-    else:
-        # Running the loop, until somehow something exit
-        try:
-            while True:
-                app.loop()
-                time.sleep(1 / REFRESH_FREQ)
-
-        except KeyboardInterrupt:
-            app.reset("KeyboardInterrupt")
-            sys.exit(0)
-
-        except SystemExit:
-            app.stop("SystemExit")
-            sys.exit(0)
-
-        except SystemError:
-            app.stop("SystemError")
-            sys.exit(0)
-
-        except Exception as e:
-            app.reset(f"Unhandled exception : {e}")
-            sys.exit(-1)
+    raise SystemExit(main())

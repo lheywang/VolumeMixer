@@ -133,6 +133,7 @@ struct BufferRequest *br = (void *)0; // This pointer will be filled by after
 
 // Array to store the actually displayed images :
 uint8_t images[5][128] = { 0 };
+int uicon_elapsed = 0;
 
 /*
  * -----------------------------------------------------------------
@@ -568,6 +569,30 @@ static void __fsm_handle_async()
  */
 static void __fsm_handle_uicon()
 {
+	/*
+	 * First, copy the binary data from the command to their dedicated area :
+	 *
+	 * Since a changes in the process, images aren't anymore stored elsewhere than in the RAM.
+	 * Thus, hash and store became irrelevant, but are still present in the structures.
+	 */
+	memcpy((void *)images[command.UICON_TX.posSlider - 1], (void *)command.UICON_TX.icon, (size_t)sizeof(images[0]));
+
+	/*
+	 * Store the application as active, to prevent from another reload the next time :
+	 */
+	active_apps[command.UICON_TX.posSlider - 1] = command.UICON_TX.appSlider;
+
+	/*
+	 * Force the refresh of the concerned screen, since the image isn't anymore relevant.
+	 *
+	 */
+	__fsm_refresh_screen(0xFFFFFFFF);
+
+
+	/*
+	 * Set the response bit
+	 */
+	command.result = OK;
 
 	/*
 	 * Send a message to log the received command to the serial port.
@@ -645,6 +670,11 @@ static void __fsm_handle_dconf()
 		uint8_t buf[128] = { 0 };
 		build_raw_eeprom_header(buf);
 		eeprom_write(HEADER_ADDR, buf, HEADER_LEN, HAL_MAX_DELAY);
+
+		/*
+		 * Add some delay to ensure the operation finish
+		 */
+		HAL_Delay(10);
 	}
 	else
 	{
@@ -737,9 +767,9 @@ static uint32_t fsm_refresh_needed(void)
 	}
 
 	/*
-	 * Use logic to return a 32 bit word that contain the data of which screen shall be refresh
+	 * Use logic to return a 32 bit word that contain the data of which screen shall be refresh.
 	 */
-	return (uint32_t)((refresh_vol << 8) | (refresh_sta << 16));
+	return (uint32_t)((refresh_vol << 8) | (refresh_sta << 16)) | (uicon_elapsed << 24);
 }
 
 static void __fsm_refresh_screen(uint32_t refresh)
@@ -749,6 +779,7 @@ static void __fsm_refresh_screen(uint32_t refresh)
 	 */
 	uint8_t vols = (refresh >> 8) & 0xFF;
 	uint8_t stat = (refresh >> 16) & 0xFF;
+	uint8_t imag = (refresh >> 24) & 0xFF;
 
 	/*
 	 * Then, apply the refresh as needed
@@ -756,11 +787,13 @@ static void __fsm_refresh_screen(uint32_t refresh)
 	uint8_t mask = 1 << 5;
 	uint8_t vol_needed = 0;
 	uint8_t sta_needed = 0;
+	uint8_t ima_needed = 0;
 
 	for (int k = 0; k < 5; k++)
 	{
 		vol_needed = vols & mask;
 		sta_needed = stat & mask;
+		ima_needed = imag & mask;
 
 		// Update the mask
 		mask = mask >> 1;
@@ -768,13 +801,14 @@ static void __fsm_refresh_screen(uint32_t refresh)
 		/*
 		 * Now, update the screens, if required (We do this to prevent for overutilizing the I2C bus)
 		 */
-		if ((vol_needed != 0) | (sta_needed != 0))
+		if ((vol_needed != 0) | (sta_needed != 0) | (ima_needed != 0))
 		{
 			memset((void*)&screen_cmd, 0x00, (size_t)sizeof(screen_cmd));
 
-			screen_cmd.type = VOLSTAT;
+			screen_cmd.type = FULL;
 			screen_cmd.volume = output_volumes[k];
 			screen_cmd.status = (output_status[k] == 0) ? MUTE : UNMUTE;
+			memcpy((void *)&screen_cmd.icon, (void *)images[k], (size_t)sizeof(images[0]));
 
 			// Fill the buffer
 			br = draw_buffer(&screen_cmd);
